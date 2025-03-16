@@ -23,7 +23,7 @@ fun App() {
 
         if(path != null) {
             val root = File(System.getProperty("compose.application.resources.dir")).parentFile.parentFile.parentFile
-            val command = root.absolutePath + "/bin/core"
+            val command = root.absolutePath + "/bin/edconv"
             executeCommand(listOf(command, "-ffmpeg", "${root.absolutePath}/bin/ffmpeg", "-input", path, "-output", "/home/edney/teste.aac", "-format", "aac", "-channels", "62"), output)
         }
     }

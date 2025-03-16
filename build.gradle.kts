@@ -9,7 +9,7 @@ plugins {
 val binDir = File(project.rootDir, "bin")
 val appName = "Edconv"
 val appVersion = "1.0.0"
-val core = "core"
+val core = "edconv"
 val ffmpeg = "ffmpeg"
 val ffprobe = "ffprobe"
 
