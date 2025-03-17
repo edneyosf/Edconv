@@ -74,14 +74,22 @@ class Edconv(private val scope: CoroutineScope) {
                     line = errReader.readLine() ?: break
                     notify(line, onStderr)
                 }
+
+                notify(STATUS_COMPLETE, onStdout)
             }
             catch (e: Exception) {
                 notify(e.message, onStderr)
+                notify(STATUS_ERROR, onStdout)
             }
         }
     }
 
     private suspend fun notify(content: String?, onStd: (String) -> Unit) = content?.let {
         withContext(context = Dispatchers.Main) { onStd(it) }
+    }
+
+    companion object {
+        const val STATUS_COMPLETE = "status=Complete"
+        const val STATUS_ERROR = "status=Error"
     }
 }
