@@ -1,34 +1,67 @@
 package core.edconv
 
+import core.aac.AACBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 
 class Edconv(private val scope: CoroutineScope) {
 
-    private fun toAV1() {
+    private val core: String
+    private val ffmpeg: String
+    private val ffprobe: String
+
+    init {
+        val root = File(System.getProperty("compose.application.resources.dir")).parentFile.parentFile.parentFile
+        val binDir = root.absolutePath + "/bin/"
+
+        core = binDir + "edconv"
+        ffmpeg = binDir + "ffmpeg"
+        ffprobe = binDir + "ffprobe"
+    }
+
+    fun toAV1(onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
         //TODO
     }
 
-    private fun toH265() {
+    fun toH265(onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
         //TODO
     }
 
-    private fun toEAC3() {
+    fun toEAC3(onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
         //TODO
     }
 
-    private fun toAAC() {
-        //TODO
+    fun toAAC(
+        inputFile: String, outputFile: String, channels: String, kbps: String? = null, vbr: String? = null,
+        sampleRate: String? = null, onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+
+        val cmd = AACBuilder(
+            inputFile = inputFile,
+            outputFile = outputFile,
+            channels = channels,
+            kbps = kbps,
+            vbr = vbr,
+            sampleRate = sampleRate
+        ).build()
+
+        run(command = cmd, onStdout = onStdout, onStderr = onStderr)
     }
 
-    fun run(command: List<String>, onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+    private fun run(command: List<String>, onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+        val cmd = mutableListOf(core, EdconvArgs.FFMPEG, ffmpeg, EdconvArgs.FFPROBE, ffprobe)
+
+        cmd.addAll(command)
+
+        println(cmd)
+
         scope.launch(context = Dispatchers.IO) {
             try {
-                val process = ProcessBuilder(command).start()
+                val process = ProcessBuilder(cmd).start()
                 val outReader = BufferedReader(InputStreamReader(process.inputStream))
                 val errReader = BufferedReader(InputStreamReader(process.errorStream))
                 var line: String?
