@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
 }
@@ -26,7 +27,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.swing)
-    implementation(libs.gson)
+    implementation(libs.serialization.json)
 }
 
 compose.desktop {

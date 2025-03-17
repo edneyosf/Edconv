@@ -1,8 +1,8 @@
 [versions]
 coroutines = "1.7.3"
-gson = "2.12.1"
+serialization-json = "1.6.0"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson"}
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization-json" }
