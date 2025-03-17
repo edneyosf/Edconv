@@ -12,10 +12,8 @@ fun String.getProgressJson() = this.substringAfter(PROGRESS)
 
 infix fun String.calculateProgress(duration: String): Float {
     val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS")
-
     val totalTime = LocalTime.parse(this, formatter)
     val currentTime = LocalTime.parse(duration, formatter)
-
     val totalSeconds = Duration.between(LocalTime.MIN, totalTime).seconds.toFloat()
     val currentSeconds = Duration.between(LocalTime.MIN, currentTime).seconds.toFloat()
 
