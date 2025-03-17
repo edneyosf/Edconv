@@ -26,6 +26,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.swing)
+    implementation(libs.gson)
 }
 
 compose.desktop {
