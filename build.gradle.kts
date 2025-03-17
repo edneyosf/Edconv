@@ -24,6 +24,8 @@ repositories {
 
 dependencies {
     implementation(compose.desktop.currentOs)
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.swing)
 }
 
 compose.desktop {
