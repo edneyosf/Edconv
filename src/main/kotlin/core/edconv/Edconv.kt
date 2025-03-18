@@ -1,6 +1,8 @@
 package core.edconv
 
 import core.aac.AACBuilder
+import core.av1.AV1Builder
+import core.eac3.EAC3Builder
 import core.edconv.EdconvArgs.FFMPEG_PATH
 import core.edconv.EdconvArgs.FFPROBE_PATH
 import core.edconv.EdconvConfigs.CORE
@@ -8,6 +10,8 @@ import core.edconv.EdconvConfigs.FFMPEG
 import core.edconv.EdconvConfigs.FFPROBE
 import core.edconv.EdconvConfigs.STATUS_COMPLETE
 import core.edconv.EdconvConfigs.STATUS_ERROR
+import core.edconv.common.Resolutions
+import core.h265.H265Builder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,18 +36,6 @@ class Edconv(
         ffprobe = binDir + FFPROBE
     }
 
-    fun toAV1() {
-        //TODO
-    }
-
-    fun toH265() {
-        //TODO
-    }
-
-    fun toEAC3() {
-        //TODO
-    }
-
     fun toAAC(
         inputFile: String, outputFile: String, channels: String, kbps: String? = null, vbr: String? = null,
         sampleRate: String? = null) {
@@ -55,6 +47,54 @@ class Edconv(
             kbps = kbps,
             vbr = vbr,
             sampleRate = sampleRate
+        )
+
+        run(command = cmd.build())
+    }
+
+    fun toEAC3(inputFile: String, outputFile: String, channels: String, kbps: String? = null,
+               sampleRate: String? = null) {
+
+        val cmd = EAC3Builder(
+            inputFile = inputFile,
+            outputFile = outputFile,
+            channels = channels,
+            kbps = kbps,
+            sampleRate = sampleRate
+        )
+
+        run(command = cmd.build())
+    }
+
+    fun toH265(
+        inputFile: String, outputFile: String, preset: String, crf: String, resolution: Resolutions,
+        noAudio: Boolean = false, bit: String? = null) {
+
+        val cmd = H265Builder(
+            inputFile = inputFile,
+            outputFile = outputFile,
+            preset = preset,
+            crf = crf,
+            resolution = resolution,
+            bit = bit,
+            noAudio = noAudio
+        )
+
+        run(command = cmd.build())
+    }
+
+    fun toAV1(
+        inputFile: String, outputFile: String, preset: String, crf: String, resolution: Resolutions,
+        noAudio: Boolean = false, bit: String? = null) {
+
+        val cmd = AV1Builder(
+            inputFile = inputFile,
+            outputFile = outputFile,
+            preset = preset,
+            crf = crf,
+            resolution = resolution,
+            bit = bit,
+            noAudio = noAudio
         )
 
         run(command = cmd.build())
