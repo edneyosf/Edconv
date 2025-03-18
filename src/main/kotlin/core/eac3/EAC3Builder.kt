@@ -1,14 +1,13 @@
-package core.aac
+package core.eac3
 
 import core.edconv.EdconvArgs
 import core.edconv.args.Formats
 
-data class AACBuilder(
+data class EAC3Builder(
     private val inputFile: String,
     private val outputFile: String,
     private val channels: String? = null,
     private val kbps: String? = null,
-    private val vbr: String? = null,
     private val sampleRate: String? = null
 ) {
     fun build(): List<String> {
@@ -18,7 +17,7 @@ data class AACBuilder(
         cmd.add(inputFile)
 
         cmd.add(EdconvArgs.FORMAT)
-        cmd.add(Formats.AAC)
+        cmd.add(Formats.EAC3)
 
         if(!channels.isNullOrBlank()) {
             cmd.add(EdconvArgs.CHANNELS)
@@ -27,10 +26,6 @@ data class AACBuilder(
         if(!kbps.isNullOrBlank()) {
             cmd.add(EdconvArgs.KBPS)
             cmd.add(kbps)
-        }
-        if(!vbr.isNullOrBlank()) {
-            cmd.add(EdconvArgs.VBR)
-            cmd.add(vbr)
         }
         if(!sampleRate.isNullOrBlank()) {
             cmd.add(EdconvArgs.SAMPLE_RATE)
