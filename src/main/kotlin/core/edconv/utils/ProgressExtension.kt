@@ -8,7 +8,7 @@ private const val PROGRESS = "progress="
 
 fun String.isProgress() = this.contains(PROGRESS)
 
-fun String.getProgressJson() = this.substringAfter(PROGRESS)
+fun String.retrieveProgressJson() = this.substringAfter(PROGRESS)
 
 infix fun String.calculateProgress(duration: String): Float {
     val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS")
