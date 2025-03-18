@@ -52,7 +52,7 @@ class Edconv(
         run(command = cmd.build())
     }
 
-    fun toEAC3(inputFile: String, outputFile: String, channels: String, kbps: String? = null,
+    fun toEAC3(inputFile: String, outputFile: String, channels: String, kbps: String,
                sampleRate: String? = null) {
 
         val cmd = EAC3Builder(
