@@ -9,7 +9,7 @@ data class H265Builder(
     override val inputFile: String,
     override val outputFile: String,
     private val bit: String? = null,
-    private val crf: String,
+    private val crf: Int,
     private val noAudio: Boolean = false,
     private val preset: String,
     private val resolution: Resolutions
@@ -20,7 +20,7 @@ data class H265Builder(
         cmd.add(MediaFormat.H265.codec)
 
         cmd.add(EdconvArgs.CRF)
-        cmd.add(crf)
+        cmd.add(crf.toString())
 
         cmd.add(EdconvArgs.PRESET)
         cmd.add(preset)
