@@ -1,4 +1,4 @@
-package core.edconv
+package core.edconv.args
 
 object VBRs {
     const val Q1 = "1"

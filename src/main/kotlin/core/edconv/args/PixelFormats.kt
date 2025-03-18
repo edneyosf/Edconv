@@ -1,4 +1,4 @@
-package core.edconv
+package core.edconv.args
 
 object PixelFormats {
     const val bit8 = "8"

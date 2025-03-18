@@ -1,7 +1,7 @@
 package core.aac
 
 import core.edconv.EdconvArgs
-import core.edconv.Formats
+import core.edconv.args.Formats
 
 data class AACBuilder(
     private val inputFile: String,

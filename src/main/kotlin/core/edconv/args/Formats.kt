@@ -1,4 +1,4 @@
-package core.edconv
+package core.edconv.args
 
 object Formats {
     const val AV1 = "av1"
