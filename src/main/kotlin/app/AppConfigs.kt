@@ -1,5 +1,5 @@
 package app
 
-object Configs {
+object AppConfigs {
     const val TITLE = "Edconv"
 }

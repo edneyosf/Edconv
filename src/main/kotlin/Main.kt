@@ -1,11 +1,11 @@
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import app.App
-import app.Configs
+import app.AppConfigs
 
 fun main() = application {
     Window(
-        title = Configs.TITLE,
+        title = AppConfigs.TITLE,
         onCloseRequest = ::exitApplication) {
         App()
     }
