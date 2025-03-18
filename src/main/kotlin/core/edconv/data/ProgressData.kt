@@ -11,6 +11,6 @@ data class ProgressData(
     val speed: String
 ) {
     companion object {
-        fun fromString(json: String): ProgressData = Json.decodeFromString(json)
+        fun fromJsonString(json: String): ProgressData = Json.decodeFromString(json)
     }
 }
