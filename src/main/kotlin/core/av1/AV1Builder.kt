@@ -1,24 +1,21 @@
 package core.av1
 
+import core.common.MediaBuilder
 import core.edconv.EdconvArgs
 import core.edconv.common.Formats
 import core.edconv.common.Resolutions
 
 data class AV1Builder(
-    private val inputFile: String,
-    private val outputFile: String,
+    override val inputFile: String,
+    override val outputFile: String,
     private val bit: String? = null,
     private val crf: String,
     private val noAudio: Boolean = false,
     private val preset: String,
     private val resolution: Resolutions
-) {
-    fun build(): List<String> {
-        val cmd = mutableListOf<String>()
+): MediaBuilder(inputFile, outputFile) {
 
-        cmd.add(EdconvArgs.INPUT)
-        cmd.add(inputFile)
-
+    init {
         cmd.add(EdconvArgs.FORMAT)
         cmd.add(Formats.AV1)
 
@@ -35,11 +32,7 @@ data class AV1Builder(
             cmd.add(EdconvArgs.BIT)
             cmd.add(bit)
         }
+
         if(noAudio) cmd.add(EdconvArgs.NO_AUDIO)
-
-        cmd.add(EdconvArgs.OUTPUT)
-        cmd.add(outputFile)
-
-        return cmd
     }
 }
