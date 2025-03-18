@@ -1,6 +1,11 @@
 package core.edconv
 
 import core.aac.AACBuilder
+import core.edconv.EdconvArgs.FFMPEG_PATH
+import core.edconv.EdconvArgs.FFPROBE_PATH
+import core.edconv.EdconvConfigs.CORE
+import core.edconv.EdconvConfigs.FFMPEG
+import core.edconv.EdconvConfigs.FFPROBE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -9,7 +14,8 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class Edconv(private val scope: CoroutineScope) {
+class Edconv(
+    private val scope: CoroutineScope, private val onStdout: (String) -> Unit, private val onStderr: (String) -> Unit) {
 
     private val core: String
     private val ffmpeg: String
@@ -19,26 +25,26 @@ class Edconv(private val scope: CoroutineScope) {
         val root = File(System.getProperty("compose.application.resources.dir")).parentFile.parentFile.parentFile
         val binDir = root.absolutePath + "/bin/"
 
-        core = binDir + "edconv"
-        ffmpeg = binDir + "ffmpeg"
-        ffprobe = binDir + "ffprobe"
+        core = binDir + CORE
+        ffmpeg = binDir + FFMPEG
+        ffprobe = binDir + FFPROBE
     }
 
-    fun toAV1(onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+    fun toAV1() {
         //TODO
     }
 
-    fun toH265(onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+    fun toH265() {
         //TODO
     }
 
-    fun toEAC3(onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+    fun toEAC3() {
         //TODO
     }
 
     fun toAAC(
         inputFile: String, outputFile: String, channels: String, kbps: String? = null, vbr: String? = null,
-        sampleRate: String? = null, onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
+        sampleRate: String? = null) {
 
         val cmd = AACBuilder(
             inputFile = inputFile,
@@ -49,11 +55,11 @@ class Edconv(private val scope: CoroutineScope) {
             sampleRate = sampleRate
         ).build()
 
-        run(command = cmd, onStdout = onStdout, onStderr = onStderr)
+        run(command = cmd)
     }
 
-    private fun run(command: List<String>, onStdout: (String) -> Unit, onStderr: (String) -> Unit) {
-        val cmd = mutableListOf(core, EdconvArgs.FFMPEG, ffmpeg, EdconvArgs.FFPROBE, ffprobe)
+    private fun run(command: List<String>) {
+        val cmd = mutableListOf(core, FFMPEG_PATH, ffmpeg, FFPROBE_PATH, ffprobe)
 
         cmd.addAll(command)
 

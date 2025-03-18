@@ -1,8 +1,8 @@
 package core.edconv
 
 object EdconvArgs {
-    const val FFMPEG = "-ffmpeg"
-    const val FFPROBE = "-ffprobe"
+    const val FFMPEG_PATH = "-ffmpeg"
+    const val FFPROBE_PATH = "-ffprobe"
     const val INPUT = "-input"
     const val FORMAT = "-format"
     const val BIT = "-bit"
