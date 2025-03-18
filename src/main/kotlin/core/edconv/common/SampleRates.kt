@@ -1,4 +1,4 @@
-package core.edconv.args
+package core.edconv.common
 
 object SampleRates {
     const val hz44100 = "44100"

@@ -1,4 +1,4 @@
-package core.edconv.args
+package core.edconv.common
 
 object Kbps {
     const val K32 = "32"

@@ -1,4 +1,4 @@
-package core.edconv.args
+package core.edconv.common
 
 enum class Resolutions(val width: Int, val height: Int) {
     P720(width = 1280, height = 720),

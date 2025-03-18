@@ -1,7 +1,7 @@
 package core.eac3
 
 import core.edconv.EdconvArgs
-import core.edconv.args.Formats
+import core.edconv.common.Formats
 
 data class EAC3Builder(
     private val inputFile: String,

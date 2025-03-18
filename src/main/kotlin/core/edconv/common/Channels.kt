@@ -1,4 +1,4 @@
-package core.edconv.args
+package core.edconv.common
 
 object Channels {
     const val STEREO = "2"

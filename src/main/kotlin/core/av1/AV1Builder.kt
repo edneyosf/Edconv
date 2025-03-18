@@ -1,8 +1,8 @@
 package core.av1
 
 import core.edconv.EdconvArgs
-import core.edconv.args.Formats
-import core.edconv.args.Resolutions
+import core.edconv.common.Formats
+import core.edconv.common.Resolutions
 
 data class AV1Builder(
     private val inputFile: String,
