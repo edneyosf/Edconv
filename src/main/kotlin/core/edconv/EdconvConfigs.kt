@@ -1,0 +1,7 @@
+package core.edconv
+
+object EdconvConfigs {
+    const val PROGRESS = "progress="
+    const val MEDIA_INFO = "mediaInfo="
+    const val TIME_PATTERN = "HH:mm:ss.SS"
+}
