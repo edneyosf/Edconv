@@ -1,4 +1,4 @@
-package core.edconv.args
+package core.av1
 
 object AV1Preset {
     const val P0 = "0"

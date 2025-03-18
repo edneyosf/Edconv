@@ -1,4 +1,4 @@
-package core.edconv.args
+package core.h265
 
 object H265Preset {
     const val ULTRAFAST = "ultrafast"
