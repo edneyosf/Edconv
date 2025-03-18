@@ -1,4 +1,4 @@
-package features.screens
+package features.home.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,8 +10,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import core.edconv.common.MediaFormat
-import features.states.HomeUiState
-import features.vms.HomeViewModel
+import features.home.states.HomeUiState
+import features.home.vms.HomeViewModel
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
@@ -24,9 +24,9 @@ fun HomeScreen() {
 
     LaunchedEffect(selectedFile) {
         val path = selectedFile?.absolutePath
-        val out = "/home/edney/teste.mkv"
+        viewModel.setOutputFile("/home/edney/teste.aac")
 
-        if(path != null) { viewModel.convert(inputFile = path, outputFile = out, format = MediaFormat.AV1) }
+        if(path != null) { viewModel.convert(inputFile = path, format = MediaFormat.AAC) }
     }
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -40,7 +40,7 @@ fun HomeScreen() {
         selectedFile?.let {
             Text("Arquivo Selecionado: ${it.absolutePath}")
         }
-        Text(viewModel.data.value)
+        Text(viewModel.logs.value)
 
         val state = viewModel.uiState.value
 
