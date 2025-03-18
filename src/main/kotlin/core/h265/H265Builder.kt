@@ -2,7 +2,7 @@ package core.h265
 
 import core.common.MediaBuilder
 import core.edconv.EdconvArgs
-import core.edconv.common.Formats
+import core.edconv.common.MediaFormat
 import core.edconv.common.Resolutions
 
 data class H265Builder(
@@ -17,7 +17,7 @@ data class H265Builder(
 
     init {
         cmd.add(EdconvArgs.FORMAT)
-        cmd.add(Formats.H265)
+        cmd.add(MediaFormat.H265.codec)
 
         cmd.add(EdconvArgs.CRF)
         cmd.add(crf)

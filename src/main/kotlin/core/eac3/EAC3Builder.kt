@@ -2,7 +2,7 @@ package core.eac3
 
 import core.common.MediaBuilder
 import core.edconv.EdconvArgs
-import core.edconv.common.Formats
+import core.edconv.common.MediaFormat
 
 data class EAC3Builder(
     override val inputFile: String,
@@ -14,7 +14,7 @@ data class EAC3Builder(
 
     init {
         cmd.add(EdconvArgs.FORMAT)
-        cmd.add(Formats.EAC3)
+        cmd.add(MediaFormat.EAC3.codec)
 
         if(!channels.isNullOrBlank()) {
             cmd.add(EdconvArgs.CHANNELS)

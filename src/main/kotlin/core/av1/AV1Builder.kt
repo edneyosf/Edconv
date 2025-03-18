@@ -2,7 +2,7 @@ package core.av1
 
 import core.common.MediaBuilder
 import core.edconv.EdconvArgs
-import core.edconv.common.Formats
+import core.edconv.common.MediaFormat
 import core.edconv.common.Resolutions
 
 data class AV1Builder(
@@ -17,7 +17,7 @@ data class AV1Builder(
 
     init {
         cmd.add(EdconvArgs.FORMAT)
-        cmd.add(Formats.AV1)
+        cmd.add(MediaFormat.AV1.codec)
 
         cmd.add(EdconvArgs.CRF)
         cmd.add(crf)

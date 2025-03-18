@@ -2,7 +2,7 @@ package core.aac
 
 import core.common.MediaBuilder
 import core.edconv.EdconvArgs
-import core.edconv.common.Formats
+import core.edconv.common.MediaFormat
 
 data class AACBuilder(
     override val inputFile: String,
@@ -15,7 +15,7 @@ data class AACBuilder(
 
     init {
         cmd.add(EdconvArgs.FORMAT)
-        cmd.add(Formats.AAC)
+        cmd.add(MediaFormat.AAC.codec)
 
         if(!channels.isNullOrBlank()) {
             cmd.add(EdconvArgs.CHANNELS)
