@@ -10,7 +10,7 @@ import core.h265.H265Preset
 
 object AppConfigs {
     const val TITLE = "Edconv"
-    const val OUTPUT_FILE_DEFAULT = ""
+    const val OUTPUT_FILE_DEFAULT = "/home/edney/Edconv" //TODO alterar
     const val CHANNELS_DEFAULT = Channels.STEREO
     const val VBR_DEFAULT = AACVBRs.Q5
     const val KBPS_DEFAULT = Kbps.K192
