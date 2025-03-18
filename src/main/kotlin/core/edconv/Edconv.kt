@@ -6,6 +6,8 @@ import core.edconv.EdconvArgs.FFPROBE_PATH
 import core.edconv.EdconvConfigs.CORE
 import core.edconv.EdconvConfigs.FFMPEG
 import core.edconv.EdconvConfigs.FFPROBE
+import core.edconv.EdconvConfigs.STATUS_COMPLETE
+import core.edconv.EdconvConfigs.STATUS_ERROR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,17 +55,14 @@ class Edconv(
             kbps = kbps,
             vbr = vbr,
             sampleRate = sampleRate
-        ).build()
+        )
 
-        run(command = cmd)
+        run(command = cmd.build())
     }
 
     private fun run(command: List<String>) {
         val cmd = mutableListOf(core, FFMPEG_PATH, ffmpeg, FFPROBE_PATH, ffprobe)
-
-        cmd.addAll(command)
-
-        println(cmd)
+            .apply { addAll(command) }
 
         scope.launch(context = Dispatchers.IO) {
             try {
@@ -76,6 +75,7 @@ class Edconv(
                     line = outReader.readLine() ?: break
                     notify(line, onStdout)
                 }
+
                 while (true) {
                     line = errReader.readLine() ?: break
                     notify(line, onStderr)
@@ -92,10 +92,5 @@ class Edconv(
 
     private suspend fun notify(content: String?, onStd: (String) -> Unit) = content?.let {
         withContext(context = Dispatchers.Main) { onStd(it) }
-    }
-
-    companion object {
-        const val STATUS_COMPLETE = "status=Complete"
-        const val STATUS_ERROR = "status=Error"
     }
 }
