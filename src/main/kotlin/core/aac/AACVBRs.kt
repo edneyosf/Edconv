@@ -1,6 +1,6 @@
-package core.edconv.args
+package core.aac
 
-object VBRs {
+object AACVBRs {
     const val Q1 = "1"
     const val Q2 = "2"
     const val Q3 = "3"
