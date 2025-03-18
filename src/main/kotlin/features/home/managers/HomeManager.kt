@@ -1,4 +1,4 @@
-package features.home.vms
+package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -13,18 +13,18 @@ import app.AppConfigs.OUTPUT_FILE_DEFAULT
 import app.AppConfigs.RESOLUTION_DEFAULT
 import app.AppConfigs.VBR_DEFAULT
 import core.edconv.Edconv
-import core.common.ViewModel
+import core.common.Manager
 import core.edconv.common.*
 import core.edconv.data.MediaInfoData
 import core.edconv.data.ProgressData
 import core.edconv.utils.*
-import features.home.states.HomeUiState
+import features.home.states.HomeState
 import kotlinx.coroutines.CoroutineScope
 
-class HomeViewModel(override val scope: CoroutineScope) : ViewModel(scope) {
+class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
-    private val _uiState = mutableStateOf<HomeUiState>(HomeUiState.Initial)
-    val uiState: State<HomeUiState> = _uiState
+    private val _uiState = mutableStateOf<HomeState>(HomeState.Initial)
+    val uiState: State<HomeState> = _uiState
 
     private val _logs = mutableStateOf("")
     val logs: State<String> = _logs
@@ -123,7 +123,7 @@ class HomeViewModel(override val scope: CoroutineScope) : ViewModel(scope) {
     }
 
     private fun prepareConversion() {
-        _uiState.value = HomeUiState.Loading
+        _uiState.value = HomeState.Loading
         _logs.value = ""
         mediaInfo = null
     }
@@ -150,7 +150,7 @@ class HomeViewModel(override val scope: CoroutineScope) : ViewModel(scope) {
             val currentDuration = progress.time
             val percentage = duration calculateProgress currentDuration
 
-            _uiState.value = HomeUiState.Progress(percentage)
+            _uiState.value = HomeState.Progress(percentage)
         }
     }
 
@@ -158,8 +158,8 @@ class HomeViewModel(override val scope: CoroutineScope) : ViewModel(scope) {
         val isComplete = it.isStatusComplete()
         val isError = it.isStatusError()
 
-        if(isComplete) _uiState.value = HomeUiState.Complete
-        else if(isError) _uiState.value = HomeUiState.Error()
+        if(isComplete) _uiState.value = HomeState.Complete
+        else if(isError) _uiState.value = HomeState.Error()
     }
 
     fun setOutputFile(value: String) { _outputFile.value = value }
