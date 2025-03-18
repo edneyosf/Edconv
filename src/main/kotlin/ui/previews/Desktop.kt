@@ -1,4 +1,4 @@
-package ui
+package ui.previews
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
