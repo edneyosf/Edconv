@@ -10,10 +10,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import core.edconv.common.Resolutions
+import features.home.events.HomeEvent
 import features.home.states.HomeState
 import features.home.values.HomeTexts
 import features.home.values.HomeTexts.Companion.SELECT_FILE_TEXT
@@ -22,7 +21,7 @@ import ui.previews.Desktop
 @Composable
 fun HomeView(
     state: HomeState,
-    inputFile: String,
+    /*inputFile: String,
     outputFile: MutableState<String>,
     format: MutableState<String>,
     channels: MutableState<String>,
@@ -33,8 +32,10 @@ fun HomeView(
     crf: MutableState<Int?>,
     resolution: MutableState<Resolutions>,
     bit: MutableState<String?>,
-    noAudio: MutableState<Boolean>,
-    onSelectedFile: () -> Unit, onStart: () -> Unit) {
+    noAudio: MutableState<Boolean>,*/
+    setState: (inputFile: String? = null, outputFile: String, String, String, String, String, String?, String?, Int, Resolutions, String, Boolean) -> Unit,
+    onEvent: (HomeEvent) -> Unit,
+    onSelectedFile: () -> Unit) {
 
     val texts = HomeTexts()
     val scrollState = rememberScrollState()
@@ -46,7 +47,7 @@ fun HomeView(
             }) {
                 Text(texts.retrieve(SELECT_FILE_TEXT))
             }
-            IconButton(onClick = { onStart() }){
+            IconButton(onClick = { onEvent(HomeEvent.OnStart) }){
                 Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
             }
         }
@@ -54,9 +55,9 @@ fun HomeView(
             Column {
                 Text("Fonte: " + inputFile)
                 TextField(
-                    outputFile.value,
+                    state.outputFile,
                     modifier = Modifier,
-                    onValueChange = { outputFile.value = it },
+                    onValueChange = { setState() },
                     label = { Text("Saida") }
                 )
             }
@@ -138,8 +139,8 @@ fun HomeView(
 @Composable
 private fun Default() = Desktop {
     HomeView(
-        state = HomeState.Initial,
-        inputFile = "",
+        state = HomeStatus.Initial,
+        /*inputFile = "",
         outputFile = mutableStateOf(""),
         format = mutableStateOf(""),
         channels = mutableStateOf(""),
@@ -150,8 +151,8 @@ private fun Default() = Desktop {
         crf = mutableStateOf(0),
         resolution = mutableStateOf(Resolutions.P1080),
         bit = mutableStateOf(""),
-        noAudio = mutableStateOf(false),
+        noAudio = mutableStateOf(false),*/
         onSelectedFile = {},
-        onStart = {}
+        //onStart = {}
     )
 }

@@ -1,6 +1,7 @@
 package features.home.screens
 
 import androidx.compose.runtime.*
+import features.home.events.HomeEvent
 import features.home.managers.HomeManager
 import features.home.values.HomeTexts
 import features.home.values.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
@@ -18,11 +19,15 @@ fun HomeScreen() {
     var selectedFile by remember { mutableStateOf<File?>(null) }
 
     LaunchedEffect(selectedFile) {
+        val path = selectedFile?.absolutePath
+        if(path != null) {
+
+        }
         manager.outputFile.value = "/home/edney/teste.eac3"
     }
 
     HomeView(state,
-        inputFile = selectedFile?.absolutePath ?: "",
+        /*inputFile = selectedFile?.absolutePath ?: "",
         outputFile = manager.outputFile,
         format = manager.format,
         channels = manager.channels,
@@ -33,16 +38,18 @@ fun HomeScreen() {
         crf = manager.crf,
         resolution = manager.resolution,
         bit = manager.bit,
-        noAudio = manager.noAudio,
+        noAudio = manager.noAudio,*/
+        setState = manager::setState,
+        onEvent = manager::onEvent,
         onSelectedFile = {
             selectedFile = pickFile(title = texts.retrieve(TITLE_PICK_FILE_TEXT))
         },
-        onStart = {
+        /*onStart = {
         val path = selectedFile?.absolutePath
         if(path != null) {
-            manager.convert(inputFile = path)
+            manager.onEvent(HomeEvent.OnStart(path))
         }
-    })
+    }*/)
 }
 
 private fun pickFile(title: String): File? {

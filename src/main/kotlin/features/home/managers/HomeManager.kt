@@ -18,32 +18,58 @@ import core.edconv.common.*
 import core.edconv.data.MediaInfoData
 import core.edconv.data.ProgressData
 import core.edconv.utils.*
+import features.home.events.HomeEvent
 import features.home.states.HomeState
+import features.home.states.status.HomeStatus
 import kotlinx.coroutines.CoroutineScope
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
-    private val _state = mutableStateOf<HomeState>(HomeState.Initial)
+    private val _state = mutableStateOf(defaultState())
     val state: State<HomeState> = _state
     private val _logs = mutableStateOf("")
     val logs: State<String> = _logs
 
-    val outputFile = mutableStateOf(OUTPUT_FILE_DEFAULT)
-    val format = mutableStateOf("")
-    val channels = mutableStateOf(CHANNELS_DEFAULT)
-    val vbr = mutableStateOf(VBR_DEFAULT)
-    val kbps = mutableStateOf(KBPS_DEFAULT)
-    val sampleRate = mutableStateOf<String?>(null)
-    val preset = mutableStateOf<String?>(null)
-    val crf = mutableStateOf<Int?>(null)
-    val resolution = mutableStateOf(RESOLUTION_DEFAULT)
-    val bit = mutableStateOf<String?>(null)
-    val noAudio = mutableStateOf(NO_AUDIO_DEFAULT)
-
     private val converter = Edconv(scope = scope, onStdout = ::onStdout, onStderr = ::onStderr)
     private var mediaInfo: MediaInfoData? = null
 
-    fun convert(inputFile: String) {
+    fun onEvent(it: HomeEvent) {
+        when(it) {
+            is HomeEvent.OnStart -> convert(it.inputFile)
+        }
+    }
+
+    fun setState(
+        inputFile: String? = _state.value.inputFile,
+        outputFile: String = _state.value.outputFile,
+        format: String = _state.value.format,
+        channels: String = _state.value.channels,
+        vbr: String = _state.value.vbr,
+        kbps: String = _state.value.kbps,
+        sampleRate: String? = _state.value.sampleRate,
+        preset: String? = _state.value.preset,
+        crf: Int = _state.value.crf,
+        resolution: Resolutions = _state.value.resolution,
+        bit: String = _state.value.bit,
+        noAudio: Boolean = _state.value.noAudio,
+    ) {
+        _state.value = _state.value.copy(
+            inputFile = inputFile,
+            outputFile = outputFile,
+            format = format,
+            channels = channels,
+            vbr = vbr,
+            kbps = kbps,
+            sampleRate = sampleRate,
+            preset = preset,
+            crf = crf,
+            resolution = resolution,
+            bit = bit,
+            noAudio = noAudio
+        )
+    }
+
+    private fun convert(inputFile: String) {
         val mediaFormat = MediaFormat.fromString(format.value)
 
         prepareConversion()
@@ -155,4 +181,20 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         if(isComplete) _state.value = HomeState.Complete
         else if(isError) _state.value = HomeState.Error()
     }
+
+    private fun defaultState() = HomeState(
+        status = HomeStatus.Initial,
+        inputFile = null,
+        outputFile = OUTPUT_FILE_DEFAULT,
+        format = MediaFormat.AAC.codec,
+        channels = CHANNELS_DEFAULT,
+        vbr = VBR_DEFAULT,
+        kbps = KBPS_DEFAULT,
+        sampleRate = null,
+        preset = null,
+        crf = 0,
+        resolution = RESOLUTION_DEFAULT,
+        bit = PixelFormats.bit8,
+        noAudio = NO_AUDIO_DEFAULT
+    )
 }
