@@ -6,7 +6,7 @@ import app.AppConfigs
 fun main() = application {
     Window(
         title = AppConfigs.TITLE,
-        onCloseRequest = ::exitApplication) {
-        App()
-    }
+        onCloseRequest = ::exitApplication,
+        content = { App() }
+    )
 }

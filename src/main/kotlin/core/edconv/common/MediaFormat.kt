@@ -17,7 +17,7 @@ enum class MediaFormat(val codec: String) {
             EAC3_ -> EAC3
             H265_ -> H265
             AV1_ -> AV1
-            else -> throw Exception("Format not supported")
+            else -> null
         }
     }
 }
