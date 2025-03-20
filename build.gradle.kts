@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation(libs.material.icons)
+    implementation(compose.materialIconsExtended)
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.swing)
     implementation(libs.serialization.json)
