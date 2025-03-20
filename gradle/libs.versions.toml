@@ -1,8 +1,10 @@
 [versions]
 coroutines = "1.7.3"
 serialization-json = "1.6.0"
+compose = "1.7.3"
 
 [libraries]
+material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization-json" }
