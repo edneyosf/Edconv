@@ -1,20 +1,27 @@
 package features.home.states
 
 import core.edconv.common.Resolutions
-import features.home.states.status.HomeStatus
 
 data class HomeState(
     val status: HomeStatus,
-    var inputFile: String?,
-    var outputFile: String,
-    var format: String,
-    var channels: String,
-    var vbr: String,
-    var kbps: String,
-    var sampleRate: String?,
-    var preset: String?,
-    var crf: Int,
-    var resolution: Resolutions,
-    var bit: String,
-    var noAudio: Boolean,
+    val inputFile: String?,
+    val outputFile: String,
+    val format: String,
+    val channels: String,
+    val vbr: String,
+    val kbps: String,
+    val sampleRate: String?,
+    val preset: String?,
+    val crf: Int,
+    val resolution: Resolutions,
+    val bit: String,
+    val noAudio: Boolean
 )
+
+sealed interface HomeStatus {
+    data object Initial: HomeStatus
+    data object Loading: HomeStatus
+    data class Progress(val percentage: Float): HomeStatus
+    data object Complete: HomeStatus
+    data class Error(val message: String? = null): HomeStatus
+}
