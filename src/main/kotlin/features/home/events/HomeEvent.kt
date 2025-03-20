@@ -16,4 +16,5 @@ sealed interface HomeEvent {
     data class SetBit(val bit: String): HomeEvent
     data class SetNoAudio(val noAudio: Boolean): HomeEvent
     data object OnStart: HomeEvent
+    data object OnStop: HomeEvent
 }

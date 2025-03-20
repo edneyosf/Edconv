@@ -21,7 +21,7 @@ import edconv.core.utils.*
 import features.home.events.HomeEvent
 import features.home.states.HomeState
 import features.home.states.HomeStatus
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
@@ -30,6 +30,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private val _logs = mutableStateOf("")
     val logs: State<String> = _logs
 
+    private var conversionJob: Job? = null
     private var mediaInfo: MediaInfoData? = null
     private val converter = Edconv(
         binDir = PropertyUtils.binDir,
@@ -53,6 +54,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetBit -> setBit(bit)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
             is HomeEvent.OnStart -> convert()
+            is HomeEvent.OnStop -> stopConversion()
         }
     }
 
@@ -80,8 +82,13 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
+    private fun stopConversion() = scope.launch(context = Dispatchers.Main) {
+        conversionJob?.cancelAndJoin()
+        setStatus(HomeStatus.Initial)
+    }
+
     private fun convertToAAC(inputFile: String) = _state.value.run {
-        converter.toAAC(
+        conversionJob = converter.toAAC(
             inputFile = inputFile,
             outputFile = outputFile,
             channels = channels,
@@ -92,7 +99,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun convertToEAC3(inputFile: String) = _state.value.run {
-        converter.toEAC3(
+        conversionJob = converter.toEAC3(
             inputFile = inputFile,
             outputFile = outputFile,
             channels = channels,
@@ -104,7 +111,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun convertToH265(inputFile: String) = _state.value.run {
         val preset = preset ?: h265PresetDefault
 
-        converter.toH265(
+        conversionJob = converter.toH265(
             inputFile = inputFile,
             outputFile = outputFile,
             preset = preset,
@@ -118,7 +125,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun convertToAV1(inputFile: String) = _state.value.run {
         val preset = preset ?: av1PresetDefault
 
-        converter.toAV1(
+        conversionJob = converter.toAV1(
             inputFile = inputFile,
             outputFile = outputFile,
             preset = preset,
