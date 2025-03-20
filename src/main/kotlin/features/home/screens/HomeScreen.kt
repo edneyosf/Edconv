@@ -12,17 +12,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import core.Languages
 import features.home.events.HomeEvent
 import features.home.events.HomeEvent.OnStart
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
+import features.home.texts.HomeTexts
 import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
 import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
 import features.home.texts.homeTexts
-import ui.compositions.dimens
-import ui.compositions.texts
-import ui.compositions.textsComp
+import ui.compositions.*
 import ui.previews.ScreenDelimiter
 import java.awt.FileDialog
 import java.awt.Frame
@@ -77,14 +77,26 @@ private fun Progress(percentage: Float = 0f) {
     )
 }
 
-@Preview
-@Composable
-private fun Default() = ScreenDelimiter { HomeView(state = HomeManager.defaultState(), onEvent = {}) }
-
 private fun pickFile(title: String): String? {
     val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
         .apply { isVisible = true }
     val file = dialog.files.firstOrNull()
 
     return file?.absolutePath
+}
+
+@Preview
+@Composable
+private fun English() = ScreenDelimiter {
+    CompositionLocalProvider(textsComp provides HomeTexts(Languages.EN)) {
+        HomeView(state = HomeManager.defaultState(), onEvent = {})
+    }
+}
+
+@Preview
+@Composable
+private fun Portuguese() = ScreenDelimiter {
+    CompositionLocalProvider(textsComp provides HomeTexts(Languages.PT)) {
+        HomeView(state = HomeManager.defaultState(), onEvent = {})
+    }
 }
