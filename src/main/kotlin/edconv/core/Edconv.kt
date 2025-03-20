@@ -12,10 +12,7 @@ import edconv.core.EdconvConfigs.STATUS_COMPLETE
 import edconv.core.EdconvConfigs.STATUS_ERROR
 import edconv.common.Resolutions
 import edconv.h265.H265Builder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -37,7 +34,7 @@ class Edconv(
 
     fun toAAC(
         inputFile: String, outputFile: String, channels: String, kbps: String? = null, vbr: String? = null,
-        sampleRate: String? = null) {
+        sampleRate: String? = null): Job {
 
         val cmd = AACBuilder(
             inputFile = inputFile,
@@ -48,11 +45,11 @@ class Edconv(
             sampleRate = sampleRate
         )
 
-        run(command = cmd.build())
+        return run(command = cmd.build())
     }
 
     fun toEAC3(inputFile: String, outputFile: String, channels: String, kbps: String,
-               sampleRate: String? = null) {
+               sampleRate: String? = null): Job {
 
         val cmd = EAC3Builder(
             inputFile = inputFile,
@@ -62,12 +59,12 @@ class Edconv(
             sampleRate = sampleRate
         )
 
-        run(command = cmd.build())
+        return run(command = cmd.build())
     }
 
     fun toH265(
         inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions?,
-        noAudio: Boolean = false, bit: String? = null) {
+        noAudio: Boolean = false, bit: String? = null): Job {
 
         val cmd = H265Builder(
             inputFile = inputFile,
@@ -79,12 +76,12 @@ class Edconv(
             noAudio = noAudio
         )
 
-        run(command = cmd.build())
+        return run(command = cmd.build())
     }
 
     fun toAV1(
         inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions?,
-        noAudio: Boolean = false, bit: String? = null) {
+        noAudio: Boolean = false, bit: String? = null): Job {
 
         val cmd = AV1Builder(
             inputFile = inputFile,
@@ -96,14 +93,14 @@ class Edconv(
             noAudio = noAudio
         )
 
-        run(command = cmd.build())
+        return run(command = cmd.build())
     }
 
-    private fun run(command: List<String>) {
+    private fun run(command: List<String>): Job {
         val cmd = mutableListOf(core, FFMPEG_PATH, ffmpeg, FFPROBE_PATH, ffprobe)
             .apply { addAll(command) }
 
-        scope.launch(context = Dispatchers.IO) {
+        return scope.launch(context = Dispatchers.IO) {
             try {
                 val process = ProcessBuilder(cmd).start()
                 val outReader = BufferedReader(InputStreamReader(process.inputStream))
