@@ -12,4 +12,5 @@ object Configs {
     var av1CrfDefault = 0
     var bitDefault = ""
     var languageDefault = Languages.EN
+    var outputFileDefault = ""
 }

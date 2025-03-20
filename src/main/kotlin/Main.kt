@@ -9,6 +9,7 @@ import edconv.common.Channels
 import edconv.common.Kbps
 import edconv.common.PixelFormats
 import edconv.h265.H265Preset
+import java.io.File
 
 fun main() {
     setConfigs()
@@ -33,4 +34,5 @@ private fun setConfigs() {
     Configs.h265CrfDefault = 21
     Configs.av1CrfDefault = 25
     Configs.bitDefault = PixelFormats.bit8
+    Configs.outputFileDefault = PropertyUtils.userHomeDir + File.separator + "Edconv" + File.separator
 }
