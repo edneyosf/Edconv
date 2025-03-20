@@ -10,4 +10,4 @@ val texts: Texts
 @ReadOnlyComposable
 get() = textsComp.current
 
-val textsComp = compositionLocalOf<Texts> { error("No value provided for textsComp") }
+val textsComp = compositionLocalOf<Texts> { error("No value provided for texts") }
