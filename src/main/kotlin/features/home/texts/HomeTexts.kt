@@ -1,8 +1,16 @@
 package features.home.texts
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import app.AppLanguages.EN
 import app.AppLanguages.PT
 import core.common.Texts
+import ui.compositions.languages
+
+inline val homeTexts: HomeTexts
+    @ReadOnlyComposable
+    @Composable
+    get() = HomeTexts(languages.current)
 
 class HomeTexts(override val language: String): Texts(language) {
 

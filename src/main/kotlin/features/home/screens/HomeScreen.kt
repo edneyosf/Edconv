@@ -17,25 +17,28 @@ import features.home.events.HomeEvent.OnStart
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
-import features.home.texts.HomeTexts
 import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
+import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
+import features.home.texts.homeTexts
 import ui.compositions.dimens
-import ui.compositions.languages
 import ui.compositions.texts
 import ui.previews.ScreenDelimiter
+import java.awt.FileDialog
+import java.awt.Frame
 
 @Composable
 fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val manager = remember { HomeManager(scope) }
 
-    CompositionLocalProvider(texts provides HomeTexts(languages.current)) {
+    CompositionLocalProvider(texts provides homeTexts) {
         HomeView(state = manager.state.value, onEvent = manager::onEvent)
     }
 }
 
 @Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
+    val title = texts.current.retrieve(TITLE_PICK_FILE_TEXT)
     val status = state.status
     val scrollState = rememberScrollState()
     val modifier = Modifier
@@ -45,7 +48,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     Column(modifier = modifier) {
         Row {
             Button(onClick = {
-                onEvent(HomeEvent.PickFile)
+                pickFile(title)?.let { onEvent(HomeEvent.SetInputFile(it)) }
             }) {
                 Text(texts.current.retrieve(SELECT_FILE_TEXT))
             }
@@ -72,6 +75,12 @@ private fun Progress(percentage: Float = 0f) {
 
 @Preview
 @Composable
-private fun Default() = ScreenDelimiter {
-    HomeView(state = HomeManager.defaultState(), onEvent = {})
+private fun Default() = ScreenDelimiter { HomeView(state = HomeManager.defaultState(), onEvent = {}) }
+
+private fun pickFile(title: String): String? {
+    val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
+        .apply { isVisible = true }
+    val file = dialog.files.firstOrNull()
+
+    return file?.absolutePath
 }
