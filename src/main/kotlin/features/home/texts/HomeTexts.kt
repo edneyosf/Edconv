@@ -10,7 +10,7 @@ import ui.compositions.languages
 inline val homeTexts: HomeTexts
     @ReadOnlyComposable
     @Composable
-    get() = HomeTexts(languages.current)
+    get() = HomeTexts(languages)
 
 class HomeTexts(override val language: String): Texts(language) {
 

@@ -6,13 +6,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.intl.Locale
 import core.common.getAvailableLanguage
 import features.home.screens.HomeScreen
-import ui.compositions.languages
+import ui.compositions.languagesComp
 
 @Composable
 fun App() {
     val language = Locale.current.getAvailableLanguage()
 
-    CompositionLocalProvider(languages provides language) {
+    CompositionLocalProvider(languagesComp provides language) {
         MaterialTheme { HomeScreen() }
     }
 }
