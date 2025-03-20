@@ -15,7 +15,10 @@ private const val WIDTH_DEFAULT = 800f
 private const val HEIGHT_DEFAULT = 600f
 
 @Composable
-fun Desktop(width: Dp = WIDTH_DEFAULT.dp, height: Dp = HEIGHT_DEFAULT.dp, content: @Composable (BoxScope.() -> Unit)) {
+fun ScreenDelimiter(
+    width: Dp = WIDTH_DEFAULT.dp, height: Dp = HEIGHT_DEFAULT.dp,
+    content: @Composable (BoxScope.() -> Unit)) {
+
     val modifier = Modifier
         .size(width = width, height = height)
         .border(width = 1.dp, color = Color.Black)
