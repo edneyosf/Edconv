@@ -7,6 +7,7 @@ import core.Configs.channelsDefault
 import core.Configs.h265PresetDefault
 import core.Configs.kbpsDefault
 import core.Configs.noAudioDefault
+import core.Configs.outputFileDefault
 import core.Configs.vbrDefault
 import core.common.Manager
 import core.extensions.update
@@ -22,6 +23,7 @@ import features.home.events.HomeEvent
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import kotlinx.coroutines.*
+import java.io.File
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
@@ -149,6 +151,10 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun prepareConversion() {
+        val output = File(_state.value.outputFile).parentFile
+
+        if(!output.exists()) output.mkdirs()
+
         setStatus(HomeStatus.Loading)
         _logs.value = ""
         mediaInfo = null
@@ -206,7 +212,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         fun defaultState() = HomeState(
             status = HomeStatus.Initial,
             inputFile = null,
-            outputFile = "",
+            outputFile = outputFileDefault,
             format = MediaFormat.AAC.codec,
             channels = channelsDefault,
             vbr = vbrDefault,
