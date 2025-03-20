@@ -1,6 +1,6 @@
 package features.home.states
 
-import core.edconv.common.Resolutions
+import edconv.common.Resolutions
 
 data class HomeState(
     val status: HomeStatus,
@@ -13,7 +13,7 @@ data class HomeState(
     val sampleRate: String?,
     val preset: String?,
     val crf: Int,
-    val resolution: Resolutions,
+    val resolution: Resolutions?,
     val bit: String,
     val noAudio: Boolean
 )

@@ -2,8 +2,8 @@ package features.home.texts
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import app.AppLanguages.EN
-import app.AppLanguages.PT
+import core.Languages.EN
+import core.Languages.PT
 import core.common.Texts
 import ui.compositions.languages
 

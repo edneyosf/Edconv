@@ -1,6 +1,6 @@
 package features.home.events
 
-import core.edconv.common.Resolutions
+import edconv.common.Resolutions
 
 sealed interface HomeEvent {
     data class SetInputFile(val inputFile: String): HomeEvent

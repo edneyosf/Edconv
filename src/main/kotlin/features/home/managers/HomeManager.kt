@@ -2,20 +2,22 @@ package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import app.AppConfigs.AV1_PRESET_DEFAULT
-import app.AppConfigs.CHANNELS_DEFAULT
-import app.AppConfigs.H265_PRESET_DEFAULT
-import app.AppConfigs.KBPS_DEFAULT
-import app.AppConfigs.NO_AUDIO_DEFAULT
-import app.AppConfigs.RESOLUTION_DEFAULT
-import app.AppConfigs.VBR_DEFAULT
-import core.edconv.Edconv
+import core.Configs.av1PresetDefault
+import core.Configs.channelsDefault
+import core.Configs.h265PresetDefault
+import core.Configs.kbpsDefault
+import core.Configs.noAudioDefault
+import core.Configs.vbrDefault
 import core.common.Manager
-import core.common.update
-import core.edconv.common.*
-import core.edconv.data.MediaInfoData
-import core.edconv.data.ProgressData
-import core.edconv.utils.*
+import core.extensions.update
+import core.utils.PropertyUtils
+import edconv.common.MediaFormat
+import edconv.common.PixelFormats
+import edconv.common.Resolutions
+import edconv.core.Edconv
+import edconv.core.data.MediaInfoData
+import edconv.core.data.ProgressData
+import edconv.core.utils.*
 import features.home.events.HomeEvent
 import features.home.states.HomeState
 import features.home.states.HomeStatus
@@ -28,8 +30,13 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private val _logs = mutableStateOf("")
     val logs: State<String> = _logs
 
-    private val converter = Edconv(scope = scope, onStdout = ::onStdout, onStderr = ::onStderr)
     private var mediaInfo: MediaInfoData? = null
+    private val converter = Edconv(
+        binDir = PropertyUtils.binDir,
+        scope = scope,
+        onStdout = ::onStdout,
+        onStderr = ::onStderr
+    )
 
     fun onEvent(event: HomeEvent) = event.run {
         when(this) {
@@ -95,7 +102,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun convertToH265(inputFile: String) = _state.value.run {
-        val preset = preset ?: H265_PRESET_DEFAULT
+        val preset = preset ?: h265PresetDefault
 
         converter.toH265(
             inputFile = inputFile,
@@ -109,7 +116,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun convertToAV1(inputFile: String) = _state.value.run {
-        val preset = preset ?: AV1_PRESET_DEFAULT
+        val preset = preset ?: av1PresetDefault
 
         converter.toAV1(
             inputFile = inputFile,
@@ -194,15 +201,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             inputFile = null,
             outputFile = "",
             format = MediaFormat.AAC.codec,
-            channels = CHANNELS_DEFAULT,
-            vbr = VBR_DEFAULT,
-            kbps = KBPS_DEFAULT,
+            channels = channelsDefault,
+            vbr = vbrDefault,
+            kbps = kbpsDefault,
             sampleRate = null,
             preset = null,
             crf = 0,
-            resolution = RESOLUTION_DEFAULT,
+            resolution = null,
             bit = PixelFormats.bit8,
-            noAudio = NO_AUDIO_DEFAULT
+            noAudio = noAudioDefault
         )
     }
 }

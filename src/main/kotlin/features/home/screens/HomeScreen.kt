@@ -22,6 +22,7 @@ import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
 import features.home.texts.homeTexts
 import ui.compositions.dimens
 import ui.compositions.texts
+import ui.compositions.textsComp
 import ui.previews.ScreenDelimiter
 import java.awt.FileDialog
 import java.awt.Frame
@@ -31,18 +32,21 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val manager = remember { HomeManager(scope) }
 
-    CompositionLocalProvider(texts provides homeTexts) {
-        HomeView(state = manager.state.value, onEvent = manager::onEvent)
+    CompositionLocalProvider(textsComp provides homeTexts) {
+        HomeView(
+            state = manager.state.value,
+            onEvent = manager::onEvent
+        )
     }
 }
 
 @Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
-    val title = texts.current.retrieve(TITLE_PICK_FILE_TEXT)
     val status = state.status
     val scrollState = rememberScrollState()
+    val title = texts.get(TITLE_PICK_FILE_TEXT)
     val modifier = Modifier
-        .padding(dimens.current.wavelet)
+        .padding(dimens.i)
         .verticalScroll(scrollState)
 
     Column(modifier = modifier) {
@@ -50,7 +54,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             Button(onClick = {
                 pickFile(title)?.let { onEvent(HomeEvent.SetInputFile(it)) }
             }) {
-                Text(texts.current.retrieve(SELECT_FILE_TEXT))
+                Text(texts.get(SELECT_FILE_TEXT))
             }
             IconButton(onClick = { onEvent(OnStart) }){
                 Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
