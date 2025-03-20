@@ -2,26 +2,26 @@ package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import app.AppConfigs.AV1_CRF_DEFAULT
 import app.AppConfigs.AV1_PRESET_DEFAULT
 import app.AppConfigs.CHANNELS_DEFAULT
-import app.AppConfigs.H265_CRF_DEFAULT
 import app.AppConfigs.H265_PRESET_DEFAULT
 import app.AppConfigs.KBPS_DEFAULT
 import app.AppConfigs.NO_AUDIO_DEFAULT
-import app.AppConfigs.OUTPUT_FILE_DEFAULT
 import app.AppConfigs.RESOLUTION_DEFAULT
 import app.AppConfigs.VBR_DEFAULT
 import core.edconv.Edconv
 import core.common.Manager
+import core.common.update
 import core.edconv.common.*
 import core.edconv.data.MediaInfoData
 import core.edconv.data.ProgressData
 import core.edconv.utils.*
 import features.home.events.HomeEvent
 import features.home.states.HomeState
-import features.home.states.status.HomeStatus
+import features.home.states.HomeStatus
 import kotlinx.coroutines.CoroutineScope
+import java.awt.FileDialog
+import java.awt.Frame
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
@@ -33,34 +33,75 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private val converter = Edconv(scope = scope, onStdout = ::onStdout, onStderr = ::onStderr)
     private var mediaInfo: MediaInfoData? = null
 
-    fun onEvent(it: HomeEvent) {
-        when(it) {
-            is HomeEvent.OnStart -> convert(it.inputFile)
+    fun onEvent(event: HomeEvent) = event.run {
+        when(this) {
+            is HomeEvent.PickFile -> pickFile(title)
+            is HomeEvent.SetOutputFile -> setOutputFile(outputFile)
+            is HomeEvent.SetFormat -> setFormat(format)
+            is HomeEvent.SetChannels -> setChannels(channels)
+            is HomeEvent.SetVbr -> setVbr(vbr)
+            is HomeEvent.SetKbps -> setKbps(kbps)
+            is HomeEvent.SetSampleRate -> setSampleRate(sampleRate)
+            is HomeEvent.SetPreset -> setPreset(preset)
+            is HomeEvent.SetCrf -> setCrf(crf)
+            is HomeEvent.SetResolution -> setResolution(resolution)
+            is HomeEvent.SetBit -> setBit(bit)
+            is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
+            is HomeEvent.OnStart -> convert()
         }
     }
 
-    fun setState(
-        inputFile: String? = _state.value.inputFile,
-        outputFile: String = _state.value.outputFile,
-        format: String = _state.value.format,
-        channels: String = _state.value.channels,
-        vbr: String = _state.value.vbr,
-        kbps: String = _state.value.kbps,
-        sampleRate: String? = _state.value.sampleRate,
-        preset: String? = _state.value.preset,
-        crf: Int = _state.value.crf,
-        resolution: Resolutions = _state.value.resolution,
-        bit: String = _state.value.bit,
-        noAudio: Boolean = _state.value.noAudio,
-    ) {
-        _state.value = _state.value.copy(
+    private fun convert() {
+        val inputFile = state.value.inputFile
+        val format = state.value.format
+
+        if(inputFile != null) {
+            val mediaFormat = MediaFormat.fromString(format)
+
+            prepareConversion()
+
+            when(mediaFormat) {
+                MediaFormat.AAC -> convertToAAC(inputFile)
+                MediaFormat.EAC3 -> convertToEAC3(inputFile)
+                MediaFormat.H265 -> convertToH265(inputFile)
+                MediaFormat.AV1 -> convertToAV1(inputFile)
+                else -> {
+                    //TODO
+                }
+            }
+        }
+        else {
+            //TODO
+        }
+    }
+
+    private fun convertToAAC(inputFile: String) = _state.value.run {
+        converter.toAAC(
             inputFile = inputFile,
             outputFile = outputFile,
-            format = format,
             channels = channels,
             vbr = vbr,
             kbps = kbps,
-            sampleRate = sampleRate,
+            sampleRate = sampleRate
+        )
+    }
+
+    private fun convertToEAC3(inputFile: String) = _state.value.run {
+        converter.toEAC3(
+            inputFile = inputFile,
+            outputFile = outputFile,
+            channels = channels,
+            kbps = kbps,
+            sampleRate = sampleRate
+        )
+    }
+
+    private fun convertToH265(inputFile: String) = _state.value.run {
+        val preset = preset ?: H265_PRESET_DEFAULT
+
+        converter.toH265(
+            inputFile = inputFile,
+            outputFile = outputFile,
             preset = preset,
             crf = crf,
             resolution = resolution,
@@ -69,63 +110,17 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         )
     }
 
-    private fun convert(inputFile: String) {
-        val mediaFormat = MediaFormat.fromString(format.value)
-
-        prepareConversion()
-
-        when(mediaFormat) {
-            MediaFormat.AAC -> convertToAAC(inputFile)
-            MediaFormat.EAC3 -> convertToEAC3(inputFile)
-            MediaFormat.H265 -> convertToH265(inputFile)
-            MediaFormat.AV1 -> convertToAV1(inputFile)
-        }
-    }
-
-    private fun convertToAAC(inputFile: String) = converter.toAAC(
-        inputFile = inputFile,
-        outputFile = outputFile.value,
-        channels = channels.value,
-        vbr = vbr.value,
-        kbps = kbps.value,
-        sampleRate = sampleRate.value
-    )
-
-    private fun convertToEAC3(inputFile: String) = converter.toEAC3(
-        inputFile = inputFile,
-        outputFile = outputFile.value,
-        channels = channels.value,
-        kbps = kbps.value,
-        sampleRate = sampleRate.value
-    )
-
-    private fun convertToH265(inputFile: String) {
-        val preset = preset.value ?: H265_PRESET_DEFAULT
-        val crf = crf.value ?: H265_CRF_DEFAULT
-
-        converter.toH265(
-            inputFile = inputFile,
-            outputFile = outputFile.value,
-            preset = preset,
-            crf = crf,
-            resolution = resolution.value,
-            bit = bit.value,
-            noAudio = noAudio.value
-        )
-    }
-
-    private fun convertToAV1(inputFile: String) {
-        val preset = preset.value ?: AV1_PRESET_DEFAULT
-        val crf = crf.value ?: AV1_CRF_DEFAULT
+    private fun convertToAV1(inputFile: String) = _state.value.run {
+        val preset = preset ?: AV1_PRESET_DEFAULT
 
         converter.toAV1(
             inputFile = inputFile,
-            outputFile = outputFile.value,
+            outputFile = outputFile,
             preset = preset,
             crf = crf,
-            resolution = resolution.value,
-            bit = bit.value,
-            noAudio = noAudio.value
+            resolution = resolution,
+            bit = bit,
+            noAudio = noAudio
         )
     }
 
@@ -137,13 +132,12 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun onStderr(it: String) {
-        _state.value = HomeState.Error(it)
+        setStatus(HomeStatus.Error(it))
         setLog(it)
-        println("Error: "+it)
     }
 
     private fun prepareConversion() {
-        _state.value = HomeState.Loading
+        setStatus(HomeStatus.Loading)
         _logs.value = ""
         mediaInfo = null
     }
@@ -170,7 +164,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             val currentDuration = progress.time
             val percentage = duration calculateProgress currentDuration
 
-            _state.value = HomeState.Progress(percentage)
+            setStatus(HomeStatus.Progress(percentage))
         }
     }
 
@@ -178,23 +172,47 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         val isComplete = it.isStatusComplete()
         val isError = it.isStatusError()
 
-        if(isComplete) _state.value = HomeState.Complete
-        else if(isError) _state.value = HomeState.Error()
+        if(isComplete) setStatus(HomeStatus.Complete)
+        else if(isError) setStatus(HomeStatus.Error())
     }
 
-    private fun defaultState() = HomeState(
-        status = HomeStatus.Initial,
-        inputFile = null,
-        outputFile = OUTPUT_FILE_DEFAULT,
-        format = MediaFormat.AAC.codec,
-        channels = CHANNELS_DEFAULT,
-        vbr = VBR_DEFAULT,
-        kbps = KBPS_DEFAULT,
-        sampleRate = null,
-        preset = null,
-        crf = 0,
-        resolution = RESOLUTION_DEFAULT,
-        bit = PixelFormats.bit8,
-        noAudio = NO_AUDIO_DEFAULT
-    )
+    private fun pickFile(title: String) {
+        val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
+            .apply { isVisible = true }
+        val file = dialog.files.firstOrNull()
+
+        if(file != null) setInputFile(file.absolutePath)
+    }
+
+    private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }
+    private fun setInputFile(inputFile: String) = _state.update { copy(inputFile = inputFile) }
+    private fun setOutputFile(outputFile: String) = _state.update { copy(outputFile = outputFile) }
+    private fun setFormat(format: String) = _state.update { copy(format = format) }
+    private fun setChannels(channels: String) = _state.update { copy(channels = channels) }
+    private fun setVbr(vbr: String) = _state.update { copy(vbr = vbr) }
+    private fun setKbps(kbps: String) = _state.update { copy(kbps = kbps) }
+    private fun setSampleRate(sampleRate: String?) = _state.update { copy(sampleRate = sampleRate) }
+    private fun setPreset(preset: String?) = _state.update { copy(preset = preset) }
+    private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
+    private fun setResolution(resolution: Resolutions) = _state.update { copy(resolution = resolution) }
+    private fun setBit(bit: String) = _state.update { copy(bit = bit) }
+    private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
+
+    companion object {
+        fun defaultState() = HomeState(
+            status = HomeStatus.Initial,
+            inputFile = null,
+            outputFile = "",
+            format = MediaFormat.AAC.codec,
+            channels = CHANNELS_DEFAULT,
+            vbr = VBR_DEFAULT,
+            kbps = KBPS_DEFAULT,
+            sampleRate = null,
+            preset = null,
+            crf = 0,
+            resolution = RESOLUTION_DEFAULT,
+            bit = PixelFormats.bit8,
+            noAudio = NO_AUDIO_DEFAULT
+        )
+    }
 }
