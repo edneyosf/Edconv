@@ -12,12 +12,12 @@ import core.edconv.EdconvConfigs.STATUS_COMPLETE
 import core.edconv.EdconvConfigs.STATUS_ERROR
 import core.edconv.common.Resolutions
 import core.h265.H265Builder
+import core.utils.DirUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 
 class Edconv(
@@ -28,12 +28,11 @@ class Edconv(
     private val ffprobe: String
 
     init {
-        val root = File(System.getProperty("compose.application.resources.dir")).parentFile.parentFile.parentFile
-        val binDir = root.absolutePath + "/bin/"
-
-        core = binDir + CORE
-        ffmpeg = binDir + FFMPEG
-        ffprobe = binDir + FFPROBE
+        DirUtils.bin.let {
+            core = it + CORE
+            ffmpeg = it + FFMPEG
+            ffprobe = it + FFPROBE
+        }
     }
 
     fun toAAC(
