@@ -1,11 +1,10 @@
 package features.home.texts
 
-import app.AppConfigs.LANGUAGE
 import app.AppLanguages.EN
 import app.AppLanguages.PT
 import core.common.Texts
 
-class HomeTexts(override val language: String = LANGUAGE): Texts(language) {
+class HomeTexts(override val language: String): Texts(language) {
 
     override val pt = mapOf(
         TITLE_PICK_FILE_TEXT to "Escolha um arquivo",

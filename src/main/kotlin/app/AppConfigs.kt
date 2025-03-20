@@ -19,6 +19,6 @@ object AppConfigs {
     const val AV1_CRF_DEFAULT = 25
     const val BIT_DEFAULT = PixelFormats.bit8
     const val NO_AUDIO_DEFAULT = false
-    var LANGUAGE = AppLanguages.PT
+    var LANGUAGE_DEFAULT = AppLanguages.EN
     val RESOLUTION_DEFAULT = Resolutions.P1080
 }

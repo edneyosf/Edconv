@@ -3,7 +3,7 @@ package features.home.events
 import core.edconv.common.Resolutions
 
 sealed interface HomeEvent {
-    data class PickFile(val title: String): HomeEvent
+    data object PickFile: HomeEvent
     data class SetOutputFile(val outputFile: String): HomeEvent
     data class SetFormat(val format: String) : HomeEvent
     data class SetChannels(val channels: String) : HomeEvent

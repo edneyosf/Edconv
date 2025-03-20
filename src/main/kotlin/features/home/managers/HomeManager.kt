@@ -2,6 +2,7 @@ package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.intl.Locale
 import app.AppConfigs.AV1_PRESET_DEFAULT
 import app.AppConfigs.CHANNELS_DEFAULT
 import app.AppConfigs.H265_PRESET_DEFAULT
@@ -11,6 +12,7 @@ import app.AppConfigs.RESOLUTION_DEFAULT
 import app.AppConfigs.VBR_DEFAULT
 import core.edconv.Edconv
 import core.common.Manager
+import core.common.getAvailableLanguage
 import core.common.update
 import core.edconv.common.*
 import core.edconv.data.MediaInfoData
@@ -19,6 +21,8 @@ import core.edconv.utils.*
 import features.home.events.HomeEvent
 import features.home.states.HomeState
 import features.home.states.HomeStatus
+import features.home.texts.HomeTexts
+import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
 import kotlinx.coroutines.CoroutineScope
 import java.awt.FileDialog
 import java.awt.Frame
@@ -35,7 +39,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     fun onEvent(event: HomeEvent) = event.run {
         when(this) {
-            is HomeEvent.PickFile -> pickFile(title)
+            is HomeEvent.PickFile -> pickFile()
             is HomeEvent.SetOutputFile -> setOutputFile(outputFile)
             is HomeEvent.SetFormat -> setFormat(format)
             is HomeEvent.SetChannels -> setChannels(channels)
@@ -176,7 +180,9 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         else if(isError) setStatus(HomeStatus.Error())
     }
 
-    private fun pickFile(title: String) {
+    private fun pickFile() {
+        val language = Locale.current.getAvailableLanguage()
+        val title = HomeTexts(language).retrieve(TITLE_PICK_FILE_TEXT)
         val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
             .apply { isVisible = true }
         val file = dialog.files.firstOrNull()
