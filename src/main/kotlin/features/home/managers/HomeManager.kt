@@ -2,18 +2,18 @@ package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import core.Configs.aacKbpsDefault
 import core.Configs.av1PresetDefault
-import core.Configs.channelsDefault
+import core.Configs.eac3KbpsDefault
 import core.Configs.h265PresetDefault
-import core.Configs.kbpsDefault
 import core.Configs.noAudioDefault
 import core.Configs.outputFileDefault
 import core.Configs.vbrDefault
 import core.common.Manager
 import core.extensions.update
-import core.utils.PropertyUtils
+import core.utils.DirUtils
+import edconv.common.Channels
 import edconv.common.MediaFormat
-import edconv.common.PixelFormats
 import edconv.common.Resolutions
 import edconv.core.Edconv
 import edconv.core.data.MediaInfoData
@@ -33,7 +33,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private var conversionJob: Job? = null
     private var mediaInfo: MediaInfoData? = null
     private val converter = Edconv(
-        binDir = PropertyUtils.binDir,
+        binDir = DirUtils.binDir,
         scope = scope,
         onStdout = ::onStdout,
         onStderr = ::onStderr
@@ -60,25 +60,18 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     private fun startConversion() {
         val inputFile = state.value.inputFile
-        val format = state.value.format
+        val outputFile = state.value.outputFile
+        val mediaFormat = state.value.format
 
-        if(inputFile != null) {
-            val mediaFormat = MediaFormat.fromString(format)
-
+        if(inputFile != null && mediaFormat != null && outputFile != null) {
             prepareConversion()
 
             when(mediaFormat) {
-                MediaFormat.AAC -> convertToAAC(inputFile)
-                MediaFormat.EAC3 -> convertToEAC3(inputFile)
-                MediaFormat.H265 -> convertToH265(inputFile)
-                MediaFormat.AV1 -> convertToAV1(inputFile)
-                else -> {
-                    //TODO
-                }
+                MediaFormat.AAC -> convertToAAC(inputFile, outputFile)
+                MediaFormat.EAC3 -> convertToEAC3(inputFile, outputFile)
+                MediaFormat.H265 -> convertToH265(inputFile, outputFile)
+                MediaFormat.AV1 -> convertToAV1(inputFile, outputFile)
             }
-        }
-        else {
-            //TODO
         }
     }
 
@@ -90,7 +83,9 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Initial) }
     }
 
-    private fun convertToAAC(inputFile: String) = _state.value.run {
+    private fun convertToAAC(inputFile: String, outputFile: String) = _state.value.run {
+        val kbps = kbps ?: aacKbpsDefault
+
         conversionJob = converter.toAAC(
             inputFile = inputFile,
             outputFile = outputFile,
@@ -101,7 +96,9 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         )
     }
 
-    private fun convertToEAC3(inputFile: String) = _state.value.run {
+    private fun convertToEAC3(inputFile: String, outputFile: String) = _state.value.run {
+        val kbps = kbps ?: eac3KbpsDefault
+
         conversionJob = converter.toEAC3(
             inputFile = inputFile,
             outputFile = outputFile,
@@ -111,7 +108,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         )
     }
 
-    private fun convertToH265(inputFile: String) = _state.value.run {
+    private fun convertToH265(inputFile: String, outputFile: String) = _state.value.run {
         val preset = preset ?: h265PresetDefault
 
         conversionJob = converter.toH265(
@@ -125,7 +122,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         )
     }
 
-    private fun convertToAV1(inputFile: String) = _state.value.run {
+    private fun convertToAV1(inputFile: String, outputFile: String) = _state.value.run {
         val preset = preset ?: av1PresetDefault
 
         conversionJob = converter.toAV1(
@@ -152,10 +149,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun prepareConversion() {
-        setStatus(HomeStatus.Loading)
-        val output = File(_state.value.outputFile).parentFile
+        val output = _state.value.outputFile
 
-        if(!output.exists()) output.mkdirs()
+        setStatus(HomeStatus.Loading)
+
+        if(output != null) {
+            val outputFile = File(output).parentFile
+
+            if(!outputFile.exists()) outputFile.mkdirs()
+        }
 
         setLogs("")
         mediaInfo = null
@@ -193,18 +195,38 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         else if(isError) setStatus(HomeStatus.Error())
     }
 
+    private fun setFormat(format: MediaFormat) = _state.update {
+        val inputFile = inputFile
+
+        if(inputFile != null) {
+            val outputFileName = File(inputFile).nameWithoutExtension
+            val extension = format.toFileExtension()
+            val output = "$outputFileDefault$outputFileName.$extension"
+
+            copy(format = format, outputFile = output)
+        }
+        else copy(format = format)
+    }
+
+    private fun setInputFile(inputFile: String) = _state.update {
+        val input = File(inputFile)
+        val outputFileName = input.nameWithoutExtension
+        val extension = format?.toFileExtension() ?: input.extension
+        val output = "$outputFileDefault$outputFileName.$extension"
+
+        copy(inputFile = inputFile, outputFile = output)
+    }
+
     private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }
-    private fun setInputFile(inputFile: String) = _state.update { copy(inputFile = inputFile) }
     private fun setOutputFile(outputFile: String) = _state.update { copy(outputFile = outputFile) }
-    private fun setFormat(format: String) = _state.update { copy(format = format) }
-    private fun setChannels(channels: String) = _state.update { copy(channels = channels) }
+    private fun setChannels(channels: Channels?) = _state.update { copy(channels = channels) }
     private fun setVbr(vbr: String) = _state.update { copy(vbr = vbr) }
     private fun setKbps(kbps: String) = _state.update { copy(kbps = kbps) }
     private fun setSampleRate(sampleRate: String?) = _state.update { copy(sampleRate = sampleRate) }
-    private fun setPreset(preset: String?) = _state.update { copy(preset = preset) }
+    private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
     private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
-    private fun setResolution(resolution: Resolutions) = _state.update { copy(resolution = resolution) }
-    private fun setBit(bit: String) = _state.update { copy(bit = bit) }
+    private fun setResolution(resolution: Resolutions?) = _state.update { copy(resolution = resolution) }
+    private fun setBit(bit: String?) = _state.update { copy(bit = bit) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
     private fun setLogs(logs: String) = _state.update { copy(logs = logs) }
 
@@ -213,16 +235,16 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             status = HomeStatus.Initial,
             logs = "",
             inputFile = null,
-            outputFile = outputFileDefault,
-            format = MediaFormat.AAC.codec,
-            channels = channelsDefault,
+            outputFile = null,
+            format = null,
+            channels = null,
             vbr = vbrDefault,
-            kbps = kbpsDefault,
+            kbps = null,
             sampleRate = null,
             preset = null,
             crf = 0,
             resolution = null,
-            bit = PixelFormats.bit8,
+            bit = null,
             noAudio = noAudioDefault
         )
     }
