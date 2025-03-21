@@ -4,6 +4,7 @@ import edconv.common.Resolutions
 
 data class HomeState(
     val status: HomeStatus,
+    val logs: String,
     val inputFile: String?,
     val outputFile: String,
     val format: String,

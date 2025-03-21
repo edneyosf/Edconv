@@ -38,14 +38,13 @@ fun HomeScreen() {
     CompositionLocalProvider(textsComp provides homeTexts) {
         HomeView(
             state = manager.state.value,
-            logs = manager.logs.value,
             onEvent = manager::onEvent
         )
     }
 }
 
 @Composable
-private fun HomeView(state: HomeState, logs: String, onEvent: (HomeEvent) -> Unit) {
+private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
     val scrollState = rememberScrollState()
     val title = texts.get(TITLE_PICK_FILE_TEXT)
@@ -98,7 +97,7 @@ private fun HomeView(state: HomeState, logs: String, onEvent: (HomeEvent) -> Uni
 
         Row {
             Card(modifier = Modifier.fillMaxWidth().height(150.dp).verticalScroll(rememberScrollState())) {
-                Text(logs)
+                Text(state.logs)
             }
         }
 
@@ -174,7 +173,7 @@ private fun pickFile(title: String): String? {
 @Composable
 private fun English() = ScreenDelimiter {
     CompositionLocalProvider(textsComp provides HomeTexts(Languages.EN)) {
-        HomeView(state = HomeManager.defaultState(),"", onEvent = {})
+        HomeView(state = HomeManager.defaultState(), onEvent = {})
     }
 }
 
@@ -182,6 +181,6 @@ private fun English() = ScreenDelimiter {
 @Composable
 private fun Portuguese() = ScreenDelimiter {
     CompositionLocalProvider(textsComp provides HomeTexts(Languages.PT)) {
-        HomeView(state = HomeManager.defaultState(), "", onEvent = {})
+        HomeView(state = HomeManager.defaultState(), onEvent = {})
     }
 }

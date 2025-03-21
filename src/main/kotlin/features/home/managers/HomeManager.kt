@@ -29,8 +29,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     private val _state = mutableStateOf(defaultState())
     val state: State<HomeState> = _state
-    private val _logs = mutableStateOf("")
-    val logs: State<String> = _logs
 
     private var conversionJob: Job? = null
     private var mediaInfo: MediaInfoData? = null
@@ -154,18 +152,16 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun prepareConversion() {
+        setStatus(HomeStatus.Loading)
         val output = File(_state.value.outputFile).parentFile
 
         if(!output.exists()) output.mkdirs()
 
-        setStatus(HomeStatus.Loading)
-        _logs.value = ""
+        setLogs("")
         mediaInfo = null
     }
 
-    private fun setLog(it: String) {
-        _logs.value += "\n$it"
-    }
+    private fun setLog(it: String) = setLogs(_state.value.logs + "\n$it")
 
     private fun retrieveMediaInfo(it: String) {
         val isMediaInfo = it.isMediaInfo()
@@ -210,10 +206,12 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setResolution(resolution: Resolutions) = _state.update { copy(resolution = resolution) }
     private fun setBit(bit: String) = _state.update { copy(bit = bit) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
+    private fun setLogs(logs: String) = _state.update { copy(logs = logs) }
 
     companion object {
         fun defaultState() = HomeState(
             status = HomeStatus.Initial,
+            logs = "",
             inputFile = null,
             outputFile = outputFileDefault,
             format = MediaFormat.AAC.codec,
