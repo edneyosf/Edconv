@@ -2,8 +2,8 @@ package edconv.core
 
 object EdconvConfigs {
     const val CORE = "edconv"
-    const val FFMPEG = "ffmpeg"
-    const val FFPROBE = "ffprobe"
+    const val FFMPEG = "ffmpeg-ed"
+    const val FFPROBE = "ffprobe-ed"
     const val PROGRESS = "progress="
     const val MEDIA_INFO = "mediaInfo="
     const val TIME_PATTERN = "HH:mm:ss.SS"

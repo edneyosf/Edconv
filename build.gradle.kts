@@ -11,8 +11,8 @@ val binDir = File(project.rootDir, "bin")
 val appName = "Edconv"
 val appVersion = "1.0.0"
 val core = "edconv"
-val ffmpeg = "ffmpeg"
-val ffprobe = "ffprobe"
+val ffmpeg = "ffmpeg-ed"
+val ffprobe = "ffprobe-ed"
 
 group = "com.radiuere"
 version = "${appVersion}-SNAPSHOT"
