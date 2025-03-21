@@ -1,21 +1,23 @@
 package features.home.states
 
+import edconv.common.Channels
+import edconv.common.MediaFormat
 import edconv.common.Resolutions
 
 data class HomeState(
     val status: HomeStatus,
     val logs: String,
     val inputFile: String?,
-    val outputFile: String,
-    val format: String,
-    val channels: String,
+    val outputFile: String?,
+    val format: MediaFormat?,
+    val channels: Channels?,
     val vbr: String,
-    val kbps: String,
+    val kbps: String?,
     val sampleRate: String?,
     val preset: String?,
     val crf: Int,
     val resolution: Resolutions?,
-    val bit: String,
+    val bit: String?,
     val noAudio: Boolean
 )
 
