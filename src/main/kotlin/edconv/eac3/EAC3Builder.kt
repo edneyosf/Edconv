@@ -1,5 +1,6 @@
 package edconv.eac3
 
+import edconv.common.Channels
 import edconv.common.MediaBuilder
 import edconv.core.EdconvArgs
 import edconv.common.MediaFormat
@@ -7,7 +8,7 @@ import edconv.common.MediaFormat
 data class EAC3Builder(
     override val inputFile: String,
     override val outputFile: String,
-    private val channels: String? = null,
+    private val channels: Channels? = null,
     private val kbps: String,
     private val sampleRate: String? = null
 ): MediaBuilder(inputFile, outputFile) {
@@ -16,9 +17,9 @@ data class EAC3Builder(
         cmd.add(EdconvArgs.FORMAT)
         cmd.add(MediaFormat.EAC3.codec)
 
-        if(!channels.isNullOrBlank()) {
+        if(channels != null) {
             cmd.add(EdconvArgs.CHANNELS)
-            cmd.add(channels)
+            cmd.add(channels.value)
         }
 
         cmd.add(EdconvArgs.KBPS)

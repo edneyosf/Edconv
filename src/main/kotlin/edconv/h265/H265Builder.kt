@@ -12,7 +12,7 @@ data class H265Builder(
     private val crf: Int,
     private val noAudio: Boolean = false,
     private val preset: String,
-    private val resolution: Resolutions?
+    private val resolution: Resolutions? = null
 ): MediaBuilder(inputFile, outputFile) {
 
     init {

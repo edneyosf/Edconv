@@ -2,6 +2,7 @@ package edconv.core
 
 import edconv.aac.AACBuilder
 import edconv.av1.AV1Builder
+import edconv.common.Channels
 import edconv.eac3.EAC3Builder
 import edconv.core.EdconvArgs.FFMPEG_PATH
 import edconv.core.EdconvArgs.FFPROBE_PATH
@@ -35,7 +36,7 @@ class Edconv(
     }
 
     fun toAAC(
-        inputFile: String, outputFile: String, channels: String, kbps: String? = null, vbr: String? = null,
+        inputFile: String, outputFile: String, channels: Channels? = null, kbps: String? = null, vbr: String? = null,
         sampleRate: String? = null): Job {
 
         val cmd = AACBuilder(
@@ -50,8 +51,9 @@ class Edconv(
         return run(command = cmd.build())
     }
 
-    fun toEAC3(inputFile: String, outputFile: String, channels: String, kbps: String,
-               sampleRate: String? = null): Job {
+    fun toEAC3(
+        inputFile: String, outputFile: String, kbps: String, channels: Channels? = null,
+        sampleRate: String? = null): Job {
 
         val cmd = EAC3Builder(
             inputFile = inputFile,
@@ -65,7 +67,7 @@ class Edconv(
     }
 
     fun toH265(
-        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions?,
+        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions? = null,
         noAudio: Boolean = false, bit: String? = null): Job {
 
         val cmd = H265Builder(
@@ -82,7 +84,7 @@ class Edconv(
     }
 
     fun toAV1(
-        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions?,
+        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions? = null,
         noAudio: Boolean = false, bit: String? = null): Job {
 
         val cmd = AV1Builder(
