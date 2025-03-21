@@ -55,12 +55,12 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetResolution -> setResolution(resolution)
             is HomeEvent.SetBit -> setBit(bit)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
-            is HomeEvent.OnStart -> convert()
+            is HomeEvent.OnStart -> startConversion()
             is HomeEvent.OnStop -> stopConversion()
         }
     }
 
-    private fun convert() {
+    private fun startConversion() {
         val inputFile = state.value.inputFile
         val format = state.value.format
 
@@ -84,9 +84,12 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
-    private fun stopConversion() = scope.launch(context = Dispatchers.Main) {
+    private fun stopConversion() = scope.launch(context = Dispatchers.IO) {
+        withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Loading) }
+        converter.destroyProcess()
         conversionJob?.cancelAndJoin()
-        setStatus(HomeStatus.Initial)
+        conversionJob = null
+        withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Initial) }
     }
 
     private fun convertToAAC(inputFile: String) = _state.value.run {

@@ -11,15 +11,17 @@ import edconv.core.EdconvConfigs.FFPROBE
 import edconv.core.EdconvConfigs.STATUS_COMPLETE
 import edconv.core.EdconvConfigs.STATUS_ERROR
 import edconv.common.Resolutions
+import edconv.core.utils.CmdUtils
 import edconv.h265.H265Builder
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 class Edconv(
-    private val binDir: String, private val scope: CoroutineScope, private val onStdout: (String) -> Unit,
+    binDir: String, private val scope: CoroutineScope, private val onStdout: (String) -> Unit,
     private val onStderr: (String) -> Unit) {
 
+    private var process: Process? = null
     private val core: String
     private val ffmpeg: String
     private val ffprobe: String
@@ -102,28 +104,45 @@ class Edconv(
 
         return scope.launch(context = Dispatchers.IO) {
             try {
-                val process = ProcessBuilder(cmd).start()
-                val outReader = BufferedReader(InputStreamReader(process.inputStream))
-                val errReader = BufferedReader(InputStreamReader(process.errorStream))
-                var line: String?
+                process = ProcessBuilder(cmd).start()
 
-                while (true) {
-                    line = outReader.readLine() ?: break
-                    notify(line, onStdout)
+                process?.let {
+                    val outReader = BufferedReader(InputStreamReader(it.inputStream))
+                    val errReader = BufferedReader(InputStreamReader(it.errorStream))
+                    var line: String?
+
+                    while (true) {
+                        line = outReader.readLine() ?: break
+                        notify(line, onStdout)
+                    }
+
+                    while (true) {
+                        line = errReader.readLine() ?: break
+                        notify(line, onStderr)
+                    }
+
+                    notify(STATUS_COMPLETE, onStdout)
+
+                } ?: run {
+                    notify("Process is null", onStderr)
+                    notify(STATUS_ERROR, onStdout)
                 }
 
-                while (true) {
-                    line = errReader.readLine() ?: break
-                    notify(line, onStderr)
-                }
-
-                notify(STATUS_COMPLETE, onStdout)
+                process = null
             }
             catch (e: Exception) {
+                destroyProcess()
                 notify(e.message, onStderr)
                 notify(STATUS_ERROR, onStdout)
             }
         }
+    }
+
+    fun destroyProcess() {
+        CmdUtils.killProcess(FFPROBE)
+        CmdUtils.killProcess(FFMPEG)
+        process?.destroyForcibly()
+        process = null
     }
 
     private suspend fun notify(content: String?, onStd: (String) -> Unit) = content?.let {
