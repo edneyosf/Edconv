@@ -1,10 +1,16 @@
 package edconv.common
 
 enum class MediaFormat(val codec: String, val text: String) {
-    AAC("aac", "AAC"),
-    EAC3("eac3", "E-AC3"),
-    H265("h265", "H.265 (x265)"),
-    AV1("av1", "AV1 (SVT)");
+    AAC(codec = "aac", text = "AAC"),
+    EAC3(codec = "eac3", text = "E-AC3"),
+    H265(codec = "h265", text = "H.265 (x265)"),
+    AV1(codec = "av1", text = "AV1 (SVT)");
+
+    fun toFileExtension() = when(this) {
+        AAC -> "aac"
+        EAC3 -> "eac3"
+        H265, AV1 -> "mkv"
+    }
 
     companion object {
         fun fromString(it: String) = when(it.lowercase()) {
