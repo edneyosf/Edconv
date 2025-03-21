@@ -53,9 +53,14 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
     val scrollState = rememberScrollState()
     val title = texts.get(TITLE_PICK_FILE_TEXT)
+    val logsScrolls = rememberScrollState()
     val modifier = Modifier
         .padding(dimens.i)
         .verticalScroll(scrollState)
+
+    LaunchedEffect(state.logs) {
+        logsScrolls.animateScrollTo(scrollState.maxValue)
+    }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(dimens.d)) {
 
@@ -164,8 +169,12 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
         }
 
         Row {
-            Card(modifier = Modifier.fillMaxWidth().height(150.dp).verticalScroll(rememberScrollState())) {
-                Text(state.logs)
+            Card {
+                Box(Modifier.fillMaxWidth().height(200.dp).padding(dimens.i)) {
+                    Box(modifier = Modifier.verticalScroll(logsScrolls, reverseScrolling = true)) {
+                        Text(state.logs)
+                    }
+                }
             }
         }
 
