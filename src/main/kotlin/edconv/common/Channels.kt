@@ -1,7 +1,7 @@
 package edconv.common
 
-object Channels {
-    const val STEREO = "2"
-    const val SURROUND_51 = "6"
-    const val DOWNMIXING_SURROUND_51 = "62"
+enum class Channels(val value: String, val text: String) {
+    STEREO(value = "2", text = "Stereo"),
+    SURROUND_51(value = "6", text = "Surround 5.1"),
+    DOWNMIXING_SURROUND_51(value = "62", text = "Stereo (Surround 5.1)")
 }
