@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import core.Languages
 import edconv.common.Channels
@@ -62,139 +63,141 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
         logsScrolls.animateScrollTo(scrollState.maxValue)
     }
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(dimens.d)) {
+    Scaffold {
+        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(dimens.d)) {
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
-            Button(onClick = {
-                pickFile(title)?.let { onEvent(HomeEvent.SetInputFile(it)) }
-            }) {
-                Text(texts.get(SELECT_FILE_TEXT))
-            }
-            if(state.inputFile != null) {
-                Text(state.inputFile.toString())
-            }
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            IconButton(
-                enabled = status !is HomeStatus.Loading && status !is HomeStatus.Progress,
-                onClick = { onEvent(OnStart) }){
-                Icon(imageVector = Icons.Filled.PlayArrow, tint = if(status is HomeStatus.Loading || status is HomeStatus.Progress) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.primary, contentDescription = null)
-            }
-            IconButton(
-                enabled = status !is HomeStatus.Loading,
-                onClick = { onEvent(OnStop) }){
-                Icon(imageVector = Icons.Filled.Stop, tint = if(status is HomeStatus.Loading) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.primary, contentDescription = null)
-            }
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
-            FilterChip(
-                onClick = { },
-                label = {
-                    Text("Ipod")
-                },
-                selected = true,
-                leadingIcon = if (true) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                } else {
-                    null
-                },
-            )
-            FilterChip(
-                onClick = { },
-                label = {
-                    Text("Movie")
-                },
-                selected = true,
-                leadingIcon = if (false) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                } else {
-                    null
-                },
-            )
-            FilterChip(
-                onClick = { },
-                label = {
-                    Text("Anime")
-                },
-                selected = true,
-                leadingIcon = if (false) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                } else {
-                    null
-                },
-            )
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(dimens.d), verticalAlignment = Alignment.CenterVertically) {
-            Format(value = state.format, onValueChange = {
-                onEvent(SetFormat(it))
-            })
-            Channels(value = state.channels, onValueChange = {
-                onEvent(SetChannels(it))
-            })
-            Switch(
-                checked = true,
-                onCheckedChange = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
+                Button(onClick = {
+                    pickFile(title)?.let { onEvent(HomeEvent.SetInputFile(it)) }
+                }) {
+                    Text(texts.get(SELECT_FILE_TEXT))
                 }
-            )
-            Column {
-                val teste = remember { mutableStateOf(0.0f) }
-                Text(String.format("%.0f", teste.value))
-                Slider(
-                    value = teste.value,
-                    onValueChange = { teste.value = it.roundToInt().toFloat() },
-                    valueRange = 0f..100f
+                if(state.inputFile != null) {
+                    Text(state.inputFile.toString())
+                }
+            }
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                IconButton(
+                    enabled = status !is HomeStatus.Loading && status !is HomeStatus.Progress,
+                    onClick = { onEvent(OnStart) }){
+                        Icon(imageVector = Icons.Filled.PlayArrow, tint = if(status is HomeStatus.Loading || status is HomeStatus.Progress) MaterialTheme.colorScheme.surfaceDim else Color(0xFFA7D394), contentDescription = null)
+                }
+                IconButton(
+                    enabled = status !is HomeStatus.Loading,
+                    onClick = { onEvent(OnStop) }){
+                    Icon(imageVector = Icons.Filled.Stop, tint = if(status is HomeStatus.Loading) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.error, contentDescription = null)
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
+                FilterChip(
+                    onClick = { },
+                    label = {
+                        Text("Ipod")
+                    },
+                    selected = true,
+                    leadingIcon = if (true) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                )
+                FilterChip(
+                    onClick = { },
+                    label = {
+                        Text("Movie")
+                    },
+                    selected = true,
+                    leadingIcon = if (false) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                )
+                FilterChip(
+                    onClick = { },
+                    label = {
+                        Text("Anime")
+                    },
+                    selected = true,
+                    leadingIcon = if (false) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else {
+                        null
+                    },
                 )
             }
-        }
 
-        Row {
-            Card {
-                Box(Modifier.fillMaxWidth().height(200.dp).padding(dimens.i)) {
-                    Box(modifier = Modifier.verticalScroll(logsScrolls, reverseScrolling = true)) {
-                        Text(state.logs)
+            Row(horizontalArrangement = Arrangement.spacedBy(dimens.d), verticalAlignment = Alignment.CenterVertically) {
+                Format(value = state.format, onValueChange = {
+                    onEvent(SetFormat(it))
+                })
+                Channels(value = state.channels, onValueChange = {
+                    onEvent(SetChannels(it))
+                })
+                Switch(
+                    checked = true,
+                    onCheckedChange = {
+                    }
+                )
+                Column {
+                    val teste = remember { mutableStateOf(0.0f) }
+                    Text(String.format("%.0f", teste.value))
+                    Slider(
+                        value = teste.value,
+                        onValueChange = { teste.value = it.roundToInt().toFloat() },
+                        valueRange = 0f..100f
+                    )
+                }
+            }
+
+            Row {
+                Card {
+                    Box(Modifier.fillMaxWidth().height(200.dp).padding(dimens.i)) {
+                        Box(modifier = Modifier.verticalScroll(logsScrolls, reverseScrolling = true)) {
+                            Text(state.logs)
+                        }
                     }
                 }
             }
-        }
 
-        Row {
-            TextField(
-                value = state.outputFile ?: "",
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = { onEvent(SetOutputFile(it)) },
-                label = { Text("Output") }
-            )
-        }
+            Row {
+                TextField(
+                    value = state.outputFile ?: "",
+                    modifier = Modifier.fillMaxWidth(),
+                    onValueChange = { onEvent(SetOutputFile(it)) },
+                    label = { Text("Output") }
+                )
+            }
 
-        Column(verticalArrangement = Arrangement.spacedBy(dimens.d), horizontalAlignment = Alignment.CenterHorizontally) {
-            when(status) {
-                is HomeStatus.Loading -> Progress()
-                is HomeStatus.Progress -> {
-                    Progress(status.percentage)
-                    Text("${String.format("%.2f", status.percentage)}%")
+            Column(verticalArrangement = Arrangement.spacedBy(dimens.d), horizontalAlignment = Alignment.CenterHorizontally) {
+                when(status) {
+                    is HomeStatus.Loading -> Progress()
+                    is HomeStatus.Progress -> {
+                        Progress(status.percentage)
+                        Text("${String.format("%.2f", status.percentage)}%")
+                    }
+                    else -> Unit
                 }
-                else -> Unit
             }
         }
     }
