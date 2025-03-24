@@ -12,7 +12,9 @@ import ui.theme.AppTheme
 fun App() {
     val language = Locale.current.getAvailableLanguage()
 
-    CompositionLocalProvider(languagesComp provides language) {
-        AppTheme{ HomeScreen() }
+    CompositionLocalProvider(
+        value = languagesComp provides language
+    ) {
+        AppTheme { HomeScreen() }
     }
 }
