@@ -1,20 +1,23 @@
 package features.home.screens
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.rounded.FileOpen
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import core.Languages
 import edconv.common.Channels
 import edconv.common.MediaFormat
 import features.home.events.HomeEvent
@@ -26,12 +29,11 @@ import features.home.events.HomeEvent.SetChannels
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
-import features.home.texts.HomeTexts
-import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
 import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
 import features.home.texts.homeTexts
 import ui.compositions.*
-import ui.previews.ScreenDelimiter
+import ui.theme.AppTheme
+import ui.theme.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
 import kotlin.math.roundToInt
@@ -41,7 +43,7 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val manager = remember { HomeManager(scope) }
 
-    CompositionLocalProvider(textsComp provides homeTexts) {
+    Providers {
         HomeView(
             state = manager.state.value,
             onEvent = manager::onEvent
@@ -50,153 +52,122 @@ fun HomeScreen() {
 }
 
 @Composable
+private fun Providers(content: @Composable () -> Unit) = CompositionLocalProvider(
+    value = textsComp provides homeTexts,
+    content = content
+)
+
+@Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
     val scrollState = rememberScrollState()
-    val title = texts.get(TITLE_PICK_FILE_TEXT)
-    val logsScrolls = rememberScrollState()
-    val modifier = Modifier
-        .padding(dimens.i)
-        .verticalScroll(scrollState)
+    val titlePickFile = texts.get(TITLE_PICK_FILE_TEXT)
+    val logsScroll = rememberScrollState()
 
-    LaunchedEffect(state.logs) {
-        logsScrolls.animateScrollTo(scrollState.maxValue)
-    }
+    LaunchedEffect(state.logs) { logsScroll.animateScrollTo(scrollState.maxValue) }
 
-    Scaffold {
-        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(dimens.d)) {
-
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
-                Button(onClick = {
-                    pickFile(title)?.let { onEvent(HomeEvent.SetInputFile(it)) }
-                }) {
-                    Text(texts.get(SELECT_FILE_TEXT))
+    Scaffold(
+        topBar =  {
+            Row(modifier = Modifier.padding(vertical = dimens.b, horizontal = dimens.c), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = {
+                        pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) }
+                    },
+                ) {
+                    Icon(imageVector = Icons.Rounded.FileOpen, contentDescription = null)
                 }
                 if(state.inputFile != null) {
-                    Text(state.inputFile.toString())
+                    Text(state.inputFile.toString(), style = TextStyle(fontSize = fontSizes.a, fontWeight = FontWeight.Normal))
                 }
-            }
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Spacer(modifier = Modifier.weight(1f))
                 IconButton(
-                    enabled = status !is HomeStatus.Loading && status !is HomeStatus.Progress,
-                    onClick = { onEvent(OnStart) }){
-                        Icon(imageVector = Icons.Filled.PlayArrow, tint = if(status is HomeStatus.Loading || status is HomeStatus.Progress) MaterialTheme.colorScheme.surfaceDim else Color(0xFFA7D394), contentDescription = null)
-                }
-                IconButton(
-                    enabled = status !is HomeStatus.Loading,
-                    onClick = { onEvent(OnStop) }){
-                    Icon(imageVector = Icons.Filled.Stop, tint = if(status is HomeStatus.Loading) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.error, contentDescription = null)
+                    onClick = {
+                    },
+                ) {
+                    Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
                 }
             }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
-                FilterChip(
-                    onClick = { },
-                    label = {
-                        Text("Ipod")
-                    },
-                    selected = true,
-                    leadingIcon = if (true) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = "Done icon",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(scrollState)) {
+            Column(modifier = Modifier.padding(dimens.i), verticalArrangement = Arrangement.spacedBy(dimens.f)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        FilledIconButton(
+                            enabled = status !is HomeStatus.Loading && status !is HomeStatus.Progress,
+                            onClick = { onEvent(OnStart) }){
+                            Icon(imageVector = Icons.Rounded.PlayArrow, contentDescription = null)
                         }
-                    } else {
-                        null
-                    },
-                )
-                FilterChip(
-                    onClick = { },
-                    label = {
-                        Text("Movie")
-                    },
-                    selected = true,
-                    leadingIcon = if (false) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = "Done icon",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    } else {
-                        null
-                    },
-                )
-                FilterChip(
-                    onClick = { },
-                    label = {
-                        Text("Anime")
-                    },
-                    selected = true,
-                    leadingIcon = if (false) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = "Done icon",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    } else {
-                        null
-                    },
-                )
-            }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(dimens.d), verticalAlignment = Alignment.CenterVertically) {
-                Format(value = state.format, onValueChange = {
-                    onEvent(SetFormat(it))
-                })
-                Channels(value = state.channels, onValueChange = {
-                    onEvent(SetChannels(it))
-                })
-                Switch(
-                    checked = true,
-                    onCheckedChange = {
+                        Text("Iniciar", style = TextStyle(fontSize = fontSizes.a))
                     }
-                )
-                Column {
-                    val teste = remember { mutableStateOf(0.0f) }
-                    Text(String.format("%.0f", teste.value))
-                    Slider(
-                        value = teste.value,
-                        onValueChange = { teste.value = it.roundToInt().toFloat() },
-                        valueRange = 0f..100f
+                    Spacer(modifier = Modifier.width(dimens.i))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        FilledTonalIconButton(
+                            enabled = status !is HomeStatus.Loading,
+                            onClick = { onEvent(OnStop) }){
+                            Icon(imageVector = Icons.Rounded.Stop, contentDescription = null)
+                        }
+                        Text("Parar", style = TextStyle(fontSize = fontSizes.a))
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.d), verticalAlignment = Alignment.CenterVertically) {
+                    Format(value = state.format, onValueChange = {
+                        onEvent(SetFormat(it))
+                    })
+                    Channels(value = state.channels, onValueChange = {
+                        onEvent(SetChannels(it))
+                    })
+                    Switch(
+                        checked = true,
+                        onCheckedChange = {
+                        }
+                    )
+                    Column {
+                        val teste = remember { mutableStateOf(0.0f) }
+                        Text(String.format("%.0f", teste.value))
+                        Slider(
+                            value = teste.value,
+                            onValueChange = { teste.value = it.roundToInt().toFloat() },
+                            valueRange = 0f..63f,
+                            //colors = SliderDefaults.colors().copy(inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest)
+
+                        )
+                    }
+                }
+
+                Row {
+                    Card {
+                        Box(Modifier.fillMaxWidth().height(200.dp).padding(dimens.i)) {
+                            Box(modifier = Modifier.verticalScroll(logsScroll, reverseScrolling = true)) {
+                                Text(state.logs)
+                            }
+                        }
+                    }
+                }
+
+                Row {
+                    TextField(
+                        value = state.outputFile ?: "",
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors().custom(),
+                        onValueChange = { onEvent(SetOutputFile(it)) },
+                        label = { Text("Output") }
                     )
                 }
-            }
 
-            Row {
-                Card {
-                    Box(Modifier.fillMaxWidth().height(200.dp).padding(dimens.i)) {
-                        Box(modifier = Modifier.verticalScroll(logsScrolls, reverseScrolling = true)) {
-                            Text(state.logs)
+                Column(verticalArrangement = Arrangement.spacedBy(dimens.d), horizontalAlignment = Alignment.CenterHorizontally) {
+                    when(status) {
+                        is HomeStatus.Loading -> Progress()
+                        is HomeStatus.Progress -> {
+                            Progress(status.percentage)
+                            Text("${String.format("%.2f", status.percentage)}%")
                         }
+                        else -> Unit
                     }
-                }
-            }
-
-            Row {
-                TextField(
-                    value = state.outputFile ?: "",
-                    modifier = Modifier.fillMaxWidth(),
-                    onValueChange = { onEvent(SetOutputFile(it)) },
-                    label = { Text("Output") }
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(dimens.d), horizontalAlignment = Alignment.CenterHorizontally) {
-                when(status) {
-                    is HomeStatus.Loading -> Progress()
-                    is HomeStatus.Progress -> {
-                        Progress(status.percentage)
-                        Text("${String.format("%.2f", status.percentage)}%")
-                    }
-                    else -> Unit
                 }
             }
         }
@@ -208,7 +179,7 @@ private fun Progress(percentage: Float = 0f) {
     LinearProgressIndicator(
         progress = { percentage / 100 },
         drawStopIndicator = {},
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
@@ -229,7 +200,7 @@ fun Format(value: MediaFormat?, onValueChange: (MediaFormat) -> Unit) {
             onValueChange = {  },
             label = { Text("Formato") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            colors = TextFieldDefaults.colors().custom(),
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).width(140.dp)
         )
         ExposedDropdownMenu(
@@ -298,16 +269,32 @@ private fun pickFile(title: String): String? {
 
 @Preview
 @Composable
-private fun English() = ScreenDelimiter {
-    CompositionLocalProvider(textsComp provides HomeTexts(Languages.EN)) {
+private fun EnglishLight() = Providers {
+    AppTheme(darkTheme = false) {
         HomeView(state = HomeManager.defaultState(), onEvent = {})
     }
 }
 
 @Preview
 @Composable
-private fun Portuguese() = ScreenDelimiter {
-    CompositionLocalProvider(textsComp provides HomeTexts(Languages.PT)) {
+private fun EnglishDark() = Providers {
+    AppTheme(darkTheme = true) {
+        HomeView(state = HomeManager.defaultState(), onEvent = {})
+    }
+}
+
+@Preview
+@Composable
+private fun PortugueseLight() = Providers {
+    AppTheme(darkTheme = false) {
+        HomeView(state = HomeManager.defaultState(), onEvent = {})
+    }
+}
+
+@Preview
+@Composable
+private fun PortugueseDark() = Providers {
+    AppTheme(darkTheme = true) {
         HomeView(state = HomeManager.defaultState(), onEvent = {})
     }
 }
