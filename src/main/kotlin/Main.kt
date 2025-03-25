@@ -8,6 +8,7 @@ import edconv.aac.AACVBRs
 import edconv.av1.AV1Preset
 import edconv.common.Kbps
 import edconv.h265.H265Preset
+import java.awt.Dimension
 
 fun main() {
     setConfigs()
@@ -16,13 +17,18 @@ fun main() {
         Window(
             title = Configs.title,
             onCloseRequest = ::exitApplication,
-            content = { App() }
+            content = {
+                window.minimumSize = Dimension(Configs.minWindowWidth, Configs.minWindowHeight)
+                App()
+            }
         )
     }
 }
 
 private fun setConfigs() {
     Configs.title = "Edconv ${PropertyUtils.version}"
+    Configs.minWindowWidth = 800
+    Configs.minWindowHeight = 600
     Configs.noAudioDefault = false
     Configs.vbrDefault = AACVBRs.Q5
     Configs.aacKbpsDefault = Kbps.K192

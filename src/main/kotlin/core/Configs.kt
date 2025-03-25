@@ -2,6 +2,8 @@ package core
 
 object Configs {
     var title = ""
+    var minWindowWidth = 0
+    var minWindowHeight = 0
     var noAudioDefault = false
     var vbrDefault = ""
     var aacKbpsDefault = ""
