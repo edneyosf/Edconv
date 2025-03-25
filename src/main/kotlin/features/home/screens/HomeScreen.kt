@@ -1,7 +1,6 @@
 package features.home.screens
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +27,9 @@ import features.home.events.HomeEvent.SetChannels
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
+import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
+import features.home.texts.HomeTexts.Companion.START_CONVERSION
+import features.home.texts.HomeTexts.Companion.STOP_CONVERSION
 import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
 import features.home.texts.homeTexts
 import ui.compositions.*
@@ -68,51 +69,29 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 
     Scaffold(
         topBar =  {
-            Row(modifier = Modifier.padding(vertical = dimens.b, horizontal = dimens.c), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = {
-                        pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) }
-                    },
-                ) {
-                    Icon(imageVector = Icons.Rounded.FileOpen, contentDescription = null)
+            TopBar(
+                inputFile = state.inputFile,
+                onPickFile = {
+                    pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) }
                 }
-                if(state.inputFile != null) {
-                    Text(state.inputFile.toString(), style = TextStyle(fontSize = fontSizes.a, fontWeight = FontWeight.Normal))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = {
-                    },
-                ) {
-                    Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
-                }
-            }
+            )
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .verticalScroll(scrollState)) {
-            Column(modifier = Modifier.padding(dimens.i), verticalArrangement = Arrangement.spacedBy(dimens.f)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        FilledIconButton(
-                            enabled = status !is HomeStatus.Loading && status !is HomeStatus.Progress,
-                            onClick = { onEvent(OnStart) }){
-                            Icon(imageVector = Icons.Rounded.PlayArrow, contentDescription = null)
-                        }
-                        Text("Iniciar", style = TextStyle(fontSize = fontSizes.a))
-                    }
-                    Spacer(modifier = Modifier.width(dimens.i))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        FilledTonalIconButton(
-                            enabled = status !is HomeStatus.Loading,
-                            onClick = { onEvent(OnStop) }){
-                            Icon(imageVector = Icons.Rounded.Stop, contentDescription = null)
-                        }
-                        Text("Parar", style = TextStyle(fontSize = fontSizes.a))
-                    }
-                }
+                .verticalScroll(scrollState)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(start = dimens.i, end = dimens.i, bottom = dimens.i),
+                verticalArrangement = Arrangement.spacedBy(dimens.f)
+            ) {
+                Actions(
+                    status = status,
+                    onStart = { onEvent(OnStart) },
+                    onStop = { onEvent(OnStop) }
+                )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(dimens.d), verticalAlignment = Alignment.CenterVertically) {
                     Format(value = state.format, onValueChange = {
@@ -170,6 +149,79 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TopBar(inputFile: String?, onPickFile: () -> Unit) {
+    val modifier = Modifier.padding(vertical = dimens.b, horizontal = dimens.c)
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onPickFile) {
+            Icon(imageVector = Icons.Rounded.FileOpen, contentDescription = texts.get(SELECT_FILE_TEXT))
+        }
+
+        inputFile?.let {
+            Spacer(modifier = Modifier.width(dimens.d))
+            Text(it, style = TextStyle(fontSize = fontSizes.a))
+        }
+
+//        Spacer(modifier = Modifier.weight(1f))
+//
+//        IconButton(onClick = {}) {
+//            Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
+//        }
+    }
+}
+
+@Composable
+private fun Actions(status: HomeStatus, onStart: () -> Unit, onStop: () -> Unit) {
+    val isLoading = status is HomeStatus.Loading
+    val startEnabled = !isLoading && status !is HomeStatus.Progress
+    val stopEnabled = !isLoading
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            FilledIconButton(
+                enabled = startEnabled,
+                onClick = onStart
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayArrow,
+                    contentDescription = texts.get(START_CONVERSION)
+                )
+            }
+
+            Text(
+                text = texts.get(START_CONVERSION),
+                style = TextStyle(fontSize = fontSizes.a)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(dimens.i))
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            FilledTonalIconButton(
+                enabled = stopEnabled,
+                onClick = onStop
+            ){
+                Icon(
+                    imageVector = Icons.Rounded.Stop,
+                    contentDescription = texts.get(STOP_CONVERSION)
+                )
+            }
+
+            Text(
+                text = texts.get(STOP_CONVERSION),
+                style = TextStyle(fontSize = fontSizes.a)
+            )
         }
     }
 }
