@@ -1,8 +1,8 @@
 package edconv.common
 
 enum class MediaFormat(
-    val codec: String, val text: String, val isVideo: Boolean, minCrf: Int? = null, maxCrf: Int? = null,
-    minVbr: Int? = null, maxVbr: Int? = null
+    val codec: String, val text: String, val isVideo: Boolean, val minCrf: Int? = null, val maxCrf: Int? = null,
+    val minVbr: Int? = null, val maxVbr: Int? = null
 ) {
     AAC(codec = "aac", text = "AAC", isVideo = false, minVbr = 1, maxVbr = 5),
     EAC3(codec = "eac3", text = "E-AC3", isVideo = false),
