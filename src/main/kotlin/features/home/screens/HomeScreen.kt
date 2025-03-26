@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
 import core.Languages
 import edconv.common.Channels
 import edconv.common.MediaFormat
@@ -27,6 +26,7 @@ import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import features.home.texts.HomeTexts
+import features.home.texts.HomeTexts.Companion.CHANNELS_INPUT
 import features.home.texts.HomeTexts.Companion.FORMAT_INPUT
 import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
 import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
@@ -117,9 +117,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 
                 LogsView(state.logs)
 
-                if(status is HomeStatus.Loading || status is HomeStatus.Progress) {
-                    Progress(status)
-                }
+                Progress(status)
 
                 TextField(
                     value = state.outputFile ?: "",
@@ -147,7 +145,7 @@ private fun TopBar(inputFile: String?, onPickFile: () -> Unit) {
 
         inputFile?.let {
             Spacer(modifier = Modifier.width(dimens.d))
-            Text(it, style = TextStyle(fontSize = fontSizes.a))
+            Text(it, style = TextStyle(fontSize = fontSizes.a, color = MaterialTheme.colorScheme.onSurface))
         }
     }
 }
@@ -231,7 +229,7 @@ fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
 
     Selector(
         text = selected?.text ?: "",
-        label = texts.get(FORMAT_INPUT),
+        label = texts.get(CHANNELS_INPUT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -254,7 +252,7 @@ private fun ColumnScope.LogsView(text: String) {
     val modifier = Modifier
         .fillMaxWidth()
         .weight(1f)
-        .verticalScroll(state = logsScroll, reverseScrolling = true)
+        .verticalScroll(state = logsScroll)
 
     LaunchedEffect(text) { logsScroll.animateScrollTo(logsScroll.maxValue) }
 
@@ -267,9 +265,13 @@ private fun ColumnScope.LogsView(text: String) {
 
 @Composable
 private fun Progress(status: HomeStatus) {
+    val modifier = Modifier
+        .fillMaxWidth()
+        .height(dimens.s)
+
     Column(
-        modifier = Modifier.padding(vertical = dimens.e),
-        verticalArrangement = Arrangement.spacedBy(dimens.d)
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center
     ) {
         if(status is HomeStatus.Loading) {
             LinearProgress()
@@ -278,6 +280,7 @@ private fun Progress(status: HomeStatus) {
             val text = "${String.format("%.2f", status.percentage)}%"
 
             LinearProgress(status.percentage)
+            Spacer(modifier = Modifier.height(dimens.d))
             Text(text, style = TextStyle(color = MaterialTheme.colorScheme.onSurface))
         }
     }
