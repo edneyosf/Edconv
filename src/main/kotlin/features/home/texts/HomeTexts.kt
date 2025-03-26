@@ -21,6 +21,7 @@ class HomeTexts(override val language: String): Texts(language) {
         STOP_CONVERSION to "Parar",
         OUTPUT_FILE to "Salvar como",
         FORMAT_INPUT to "Formato",
+        CHANNELS_INPUT to "Canais",
     )
 
     override val en = mapOf(
@@ -29,7 +30,8 @@ class HomeTexts(override val language: String): Texts(language) {
         START_CONVERSION to "Start",
         STOP_CONVERSION to "Stop",
         OUTPUT_FILE to "Save as",
-        FORMAT_INPUT to "Format"
+        FORMAT_INPUT to "Format",
+        CHANNELS_INPUT to "Channels",
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -41,5 +43,6 @@ class HomeTexts(override val language: String): Texts(language) {
         const val STOP_CONVERSION = 4L
         const val OUTPUT_FILE = 5L
         const val FORMAT_INPUT = 6L
+        const val CHANNELS_INPUT = 7L
     }
 }

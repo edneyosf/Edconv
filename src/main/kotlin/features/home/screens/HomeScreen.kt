@@ -27,6 +27,7 @@ import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import features.home.texts.HomeTexts
+import features.home.texts.HomeTexts.Companion.FORMAT_INPUT
 import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
 import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
 import features.home.texts.HomeTexts.Companion.START_CONVERSION
@@ -39,7 +40,6 @@ import ui.theme.AppTheme
 import ui.theme.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
-import javax.swing.SwingUtilities
 import kotlin.math.roundToInt
 
 @Composable
@@ -86,17 +86,22 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(dimens.d),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Format(value = state.format, onValueChange = {
-                        onEvent(SetFormat(it))
-                    })
-                    Channels(value = state.channels, onValueChange = {
-                        onEvent(SetChannels(it))
-                    })
+                    FormatInput(
+                        value = state.format,
+                        onValueChange = { onEvent(SetFormat(it)) }
+                    )
+
+                    ChannelsInput(
+                        value = state.channels,
+                        onValueChange = { onEvent(SetChannels(it)) }
+                    )
+
                     Switch(
                         checked = true,
                         onCheckedChange = {
                         }
                     )
+
                     Column {
                         val teste = remember { mutableStateOf(0.0f) }
                         Text(String.format("%.0f", teste.value))
@@ -196,6 +201,54 @@ private fun Actions(status: HomeStatus, onStart: () -> Unit, onStop: () -> Unit)
 }
 
 @Composable
+fun FormatInput(value: MediaFormat?, onValueChange: (MediaFormat) -> Unit) {
+    var expanded by remember { mutableStateOf(value = false) }
+    var selected by remember { mutableStateOf(value) }
+
+    Selector(
+        text = selected?.text ?: "",
+        label = texts.get(FORMAT_INPUT),
+        expanded = expanded,
+        onExpanded = { expanded = it }
+    ) {
+        MediaFormat.getAll().forEach { item ->
+            DropdownMenuItem(
+                text = { Text(item.text) },
+                onClick = {
+                    selected = item
+                    expanded = false
+                    onValueChange(item)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
+    var expanded by remember { mutableStateOf(value = false) }
+    var selected by remember { mutableStateOf(value) }
+
+    Selector(
+        text = selected?.text ?: "",
+        label = texts.get(FORMAT_INPUT),
+        expanded = expanded,
+        onExpanded = { expanded = it }
+    ) {
+        Channels.getAll().forEach { item ->
+            DropdownMenuItem(
+                text = { Text(item.text) },
+                onClick = {
+                    selected = item
+                    expanded = false
+                    onValueChange(item)
+                }
+            )
+        }
+    }
+}
+
+@Composable
 private fun ColumnScope.LogsView(text: String) {
     val logsScroll = rememberScrollState()
     val modifier = Modifier
@@ -237,71 +290,6 @@ private fun LinearProgress(percentage: Float = 0f) {
         progress = { percentage / 100 },
         strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
     )
-}
-
-@Composable
-fun Format(value: MediaFormat?, onValueChange: (MediaFormat) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf(value) }
-    val options = listOf(MediaFormat.AAC, MediaFormat.EAC3, MediaFormat.H265, MediaFormat.AV1)
-
-    Selector(
-        text = selectedOption?.text ?: "",
-        label = "Formato",
-        expanded = expanded,
-        onExpanded = {
-            expanded = it
-        }
-    ) {
-        options.forEach { selectionOption ->
-            DropdownMenuItem(
-                text = { Text(selectionOption.text) },
-                onClick = {
-                    selectedOption = selectionOption
-                    expanded = false
-                    onValueChange(selectionOption)
-                }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Channels(value: Channels?, onValueChange: (Channels) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf(value) }
-    val options = listOf(Channels.STEREO, Channels.DOWNMIXING_SURROUND_51, Channels.SURROUND_51)
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        TextField(
-            value = selectedOption?.text ?: "",
-            readOnly = true,
-            onValueChange = {  },
-            label = { Text("Canais") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).width(220.dp)
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEach { selectionOption ->
-                DropdownMenuItem(
-                    text = { Text(selectionOption.text) },
-                    onClick = {
-                        selectedOption = selectionOption
-                        expanded = false
-                        onValueChange(selectionOption)
-                    }
-                )
-            }
-        }
-    }
 }
 
 private fun pickFile(title: String): String? {
