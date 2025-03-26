@@ -8,14 +8,13 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import core.Languages
 import edconv.common.Channels
 import edconv.common.MediaFormat
 import features.home.events.HomeEvent
@@ -27,16 +26,20 @@ import features.home.events.HomeEvent.SetChannels
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
+import features.home.texts.HomeTexts
+import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
 import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
 import features.home.texts.HomeTexts.Companion.START_CONVERSION
 import features.home.texts.HomeTexts.Companion.STOP_CONVERSION
 import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
 import features.home.texts.homeTexts
+import ui.components.Selector
 import ui.compositions.*
 import ui.theme.AppTheme
 import ui.theme.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
+import javax.swing.SwingUtilities
 import kotlin.math.roundToInt
 
 @Composable
@@ -44,7 +47,7 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val manager = remember { HomeManager(scope) }
 
-    Providers {
+    CompositionLocalProvider(textsComp provides homeTexts) {
         HomeView(
             state = manager.state.value,
             onEvent = manager::onEvent
@@ -53,19 +56,9 @@ fun HomeScreen() {
 }
 
 @Composable
-private fun Providers(content: @Composable () -> Unit) = CompositionLocalProvider(
-    value = textsComp provides homeTexts,
-    content = content
-)
-
-@Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
-    val scrollState = rememberScrollState()
     val titlePickFile = texts.get(TITLE_PICK_FILE_TEXT)
-    val logsScroll = rememberScrollState()
-
-    LaunchedEffect(state.logs) { logsScroll.animateScrollTo(scrollState.maxValue) }
 
     Scaffold(
         topBar =  {
@@ -77,15 +70,10 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .verticalScroll(scrollState)
-        ) {
+        Box(modifier = Modifier.padding(innerPadding)) {
             Column(
-                modifier = Modifier
-                    .padding(start = dimens.i, end = dimens.i, bottom = dimens.i),
-                verticalArrangement = Arrangement.spacedBy(dimens.f)
+                modifier = Modifier.padding(start = dimens.i, end = dimens.i, bottom = dimens.i),
+                verticalArrangement = Arrangement.spacedBy(dimens.i)
             ) {
                 Actions(
                     status = status,
@@ -93,7 +81,11 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     onStop = { onEvent(OnStop) }
                 )
 
-                Row(horizontalArrangement = Arrangement.spacedBy(dimens.d), verticalAlignment = Alignment.CenterVertically) {
+                // Settings
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(dimens.d),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Format(value = state.format, onValueChange = {
                         onEvent(SetFormat(it))
                     })
@@ -118,36 +110,19 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     }
                 }
 
-                Row {
-                    Card {
-                        Box(Modifier.fillMaxWidth().height(200.dp).padding(dimens.i)) {
-                            Box(modifier = Modifier.verticalScroll(logsScroll, reverseScrolling = true)) {
-                                Text(state.logs)
-                            }
-                        }
-                    }
+                LogsView(state.logs)
+
+                if(status is HomeStatus.Loading || status is HomeStatus.Progress) {
+                    Progress(status)
                 }
 
-                Row {
-                    TextField(
-                        value = state.outputFile ?: "",
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors().custom(),
-                        onValueChange = { onEvent(SetOutputFile(it)) },
-                        label = { Text("Output") }
-                    )
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(dimens.d), horizontalAlignment = Alignment.CenterHorizontally) {
-                    when(status) {
-                        is HomeStatus.Loading -> Progress()
-                        is HomeStatus.Progress -> {
-                            Progress(status.percentage)
-                            Text("${String.format("%.2f", status.percentage)}%")
-                        }
-                        else -> Unit
-                    }
-                }
+                TextField(
+                    value = state.outputFile ?: "",
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors().custom(),
+                    onValueChange = { onEvent(SetOutputFile(it)) },
+                    label = { Text(text = texts.get(OUTPUT_FILE)) }
+                )
             }
         }
     }
@@ -169,12 +144,6 @@ private fun TopBar(inputFile: String?, onPickFile: () -> Unit) {
             Spacer(modifier = Modifier.width(dimens.d))
             Text(it, style = TextStyle(fontSize = fontSizes.a))
         }
-
-//        Spacer(modifier = Modifier.weight(1f))
-//
-//        IconButton(onClick = {}) {
-//            Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
-//        }
     }
 }
 
@@ -227,48 +196,72 @@ private fun Actions(status: HomeStatus, onStart: () -> Unit, onStop: () -> Unit)
 }
 
 @Composable
-private fun Progress(percentage: Float = 0f) {
+private fun ColumnScope.LogsView(text: String) {
+    val logsScroll = rememberScrollState()
+    val modifier = Modifier
+        .fillMaxWidth()
+        .weight(1f)
+        .verticalScroll(state = logsScroll, reverseScrolling = true)
+
+    LaunchedEffect(text) { logsScroll.animateScrollTo(logsScroll.maxValue) }
+
+    Card(modifier = modifier) {
+        Box(modifier = Modifier.padding(dimens.i)) {
+            Text(text)
+        }
+    }
+}
+
+@Composable
+private fun Progress(status: HomeStatus) {
+    Column(
+        modifier = Modifier.padding(vertical = dimens.e),
+        verticalArrangement = Arrangement.spacedBy(dimens.d)
+    ) {
+        if(status is HomeStatus.Loading) {
+            LinearProgress()
+        }
+        else if(status is HomeStatus.Progress) {
+            val text = "${String.format("%.2f", status.percentage)}%"
+
+            LinearProgress(status.percentage)
+            Text(text, style = TextStyle(color = MaterialTheme.colorScheme.onSurface))
+        }
+    }
+}
+
+@Composable
+private fun LinearProgress(percentage: Float = 0f) {
     LinearProgressIndicator(
+        modifier = Modifier.fillMaxWidth(),
         progress = { percentage / 100 },
-        drawStopIndicator = {},
-        modifier = Modifier.fillMaxWidth()
+        strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Format(value: MediaFormat?, onValueChange: (MediaFormat) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf(value) }
     val options = listOf(MediaFormat.AAC, MediaFormat.EAC3, MediaFormat.H265, MediaFormat.AV1)
 
-    ExposedDropdownMenuBox(
+    Selector(
+        text = selectedOption?.text ?: "",
+        label = "Formato",
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
+        onExpanded = {
+            expanded = it
+        }
     ) {
-        TextField(
-            value = selectedOption?.text ?: "",
-            readOnly = true,
-            onValueChange = {  },
-            label = { Text("Formato") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = TextFieldDefaults.colors().custom(),
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).width(140.dp)
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEach { selectionOption ->
-                DropdownMenuItem(
-                    text = { Text(selectionOption.text) },
-                    onClick = {
-                        selectedOption = selectionOption
-                        expanded = false
-                        onValueChange(selectionOption)
-                    }
-                )
-            }
+        options.forEach { selectionOption ->
+            DropdownMenuItem(
+                text = { Text(selectionOption.text) },
+                onClick = {
+                    selectedOption = selectionOption
+                    expanded = false
+                    onValueChange(selectionOption)
+                }
+            )
         }
     }
 }
@@ -312,41 +305,33 @@ fun Channels(value: Channels?, onValueChange: (Channels) -> Unit) {
 }
 
 private fun pickFile(title: String): String? {
-    val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
-        .apply { isVisible = true }
+    val dialog = FileDialog(Frame(), title, FileDialog.LOAD).apply { isVisible = true }
     val file = dialog.files.firstOrNull()
 
     return file?.absolutePath
 }
 
-@Preview
 @Composable
-private fun EnglishLight() = Providers {
-    AppTheme(darkTheme = false) {
-        HomeView(state = HomeManager.defaultState(), onEvent = {})
+private fun HomeScreenPreview(language: String, darkTheme: Boolean) {
+    CompositionLocalProvider(textsComp provides HomeTexts(language)) {
+        AppTheme(darkTheme = darkTheme) {
+            HomeView(state = HomeManager.defaultState(), onEvent = {})
+        }
     }
 }
 
 @Preview
 @Composable
-private fun EnglishDark() = Providers {
-    AppTheme(darkTheme = true) {
-        HomeView(state = HomeManager.defaultState(), onEvent = {})
-    }
-}
+private fun EnglishLight() = HomeScreenPreview(language = Languages.EN, darkTheme = false)
 
 @Preview
 @Composable
-private fun PortugueseLight() = Providers {
-    AppTheme(darkTheme = false) {
-        HomeView(state = HomeManager.defaultState(), onEvent = {})
-    }
-}
+private fun EnglishDark() = HomeScreenPreview(language = Languages.EN, darkTheme = true)
 
 @Preview
 @Composable
-private fun PortugueseDark() = Providers {
-    AppTheme(darkTheme = true) {
-        HomeView(state = HomeManager.defaultState(), onEvent = {})
-    }
-}
+private fun PortugueseLight() = HomeScreenPreview(language = Languages.PT, darkTheme = false)
+
+@Preview
+@Composable
+private fun PortugueseDark() = HomeScreenPreview(language = Languages.PT, darkTheme = true)
