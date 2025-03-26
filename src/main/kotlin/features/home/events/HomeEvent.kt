@@ -7,7 +7,7 @@ import edconv.common.Resolutions
 sealed interface HomeEvent {
     data class SetInputFile(val inputFile: String): HomeEvent
     data class SetOutputFile(val outputFile: String): HomeEvent
-    data class SetFormat(val format: MediaFormat): HomeEvent
+    data class SetFormat(val format: MediaFormat?): HomeEvent
     data class SetChannels(val channels: Channels?): HomeEvent
     data class SetVbr(val vbr: String): HomeEvent
     data class SetKbps(val kbps: String): HomeEvent
