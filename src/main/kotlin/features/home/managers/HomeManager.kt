@@ -195,10 +195,10 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         else if(isError) setStatus(HomeStatus.Error())
     }
 
-    private fun setFormat(format: MediaFormat) = _state.update {
+    private fun setFormat(format: MediaFormat?) = _state.update {
         val inputFile = inputFile
 
-        if(inputFile != null) {
+        if(inputFile != null && format != null) {
             val outputFileName = File(inputFile).nameWithoutExtension
             val extension = format.toFileExtension()
             val output = "$outputFileDefault$outputFileName.$extension"
