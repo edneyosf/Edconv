@@ -1,10 +1,13 @@
 package edconv.common
 
-enum class MediaFormat(val codec: String, val text: String, val isVideo: Boolean) {
-    AAC(codec = "aac", text = "AAC", isVideo = false),
+enum class MediaFormat(
+    val codec: String, val text: String, val isVideo: Boolean, minCrf: Int? = null, maxCrf: Int? = null,
+    minVbr: Int? = null, maxVbr: Int? = null
+) {
+    AAC(codec = "aac", text = "AAC", isVideo = false, minVbr = 1, maxVbr = 5),
     EAC3(codec = "eac3", text = "E-AC3", isVideo = false),
-    H265(codec = "h265", text = "H.265 (x265)", isVideo = true),
-    AV1(codec = "av1", text = "AV1 (SVT)", isVideo = true);
+    H265(codec = "h265", text = "H.265 (x265)", isVideo = true, minCrf = 0, maxCrf = 51),
+    AV1(codec = "av1", text = "AV1 (SVT)", isVideo = true, minCrf = 0, maxCrf = 63);
 
     fun toFileExtension() = when(this) {
         AAC -> "aac"
