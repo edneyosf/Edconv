@@ -165,9 +165,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                         Slider(
                                             value = teste.value,
                                             onValueChange = { teste.value = it.roundToInt().toFloat() },
-                                            valueRange = 0f..63f,
-                                            //colors = SliderDefaults.colors().copy(inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest)
-
+                                            valueRange = ((if(index == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(index == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 0f),
                                         )
                                     }
                                 }
