@@ -13,6 +13,8 @@ enum class MediaFormat(val codec: String, val text: String) {
     }
 
     companion object {
+        fun getAll() = listOf(AAC, EAC3, H265, AV1)
+
         fun fromString(it: String) = when(it.lowercase()) {
             "aac" -> AAC
             "eac3" -> EAC3
