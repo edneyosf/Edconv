@@ -22,6 +22,8 @@ class HomeTexts(override val language: String): Texts(language) {
         OUTPUT_FILE to "Salvar como",
         FORMAT_INPUT to "Formato",
         CHANNELS_INPUT to "Canais",
+        AUDIO_MEDIA_TYPE to "Áudio",
+        VIDEO_MEDIA_TYPE  to "Vídeo",
     )
 
     override val en = mapOf(
@@ -32,6 +34,8 @@ class HomeTexts(override val language: String): Texts(language) {
         OUTPUT_FILE to "Save as",
         FORMAT_INPUT to "Format",
         CHANNELS_INPUT to "Channels",
+        AUDIO_MEDIA_TYPE to "Audio",
+        VIDEO_MEDIA_TYPE  to "Video",
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -44,5 +48,7 @@ class HomeTexts(override val language: String): Texts(language) {
         const val OUTPUT_FILE = 5L
         const val FORMAT_INPUT = 6L
         const val CHANNELS_INPUT = 7L
+        const val AUDIO_MEDIA_TYPE = 8L
+        const val VIDEO_MEDIA_TYPE = 9L
     }
 }
