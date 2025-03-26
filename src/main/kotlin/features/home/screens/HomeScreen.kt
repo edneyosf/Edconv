@@ -3,36 +3,42 @@ package features.home.screens
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FileOpen
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import core.Languages
 import edconv.common.Channels
 import edconv.common.MediaFormat
+import edconv.common.SampleRates
 import features.home.events.HomeEvent
 import features.home.events.HomeEvent.OnStart
 import features.home.events.HomeEvent.OnStop
 import features.home.events.HomeEvent.SetOutputFile
 import features.home.events.HomeEvent.SetFormat
 import features.home.events.HomeEvent.SetChannels
+import features.home.events.HomeEvent.SetSampleRate
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import features.home.texts.HomeTexts
+import features.home.texts.HomeTexts.Companion.AUDIO_MEDIA_TYPE
 import features.home.texts.HomeTexts.Companion.CHANNELS_INPUT
 import features.home.texts.HomeTexts.Companion.FORMAT_INPUT
 import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
-import features.home.texts.HomeTexts.Companion.SELECT_FILE_TEXT
+import features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT
 import features.home.texts.HomeTexts.Companion.START_CONVERSION
 import features.home.texts.HomeTexts.Companion.STOP_CONVERSION
 import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
+import features.home.texts.HomeTexts.Companion.VIDEO_MEDIA_TYPE
 import features.home.texts.homeTexts
 import ui.components.Selector
 import ui.compositions.*
@@ -58,61 +64,132 @@ fun HomeScreen() {
 @Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
+    val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE), texts.get(VIDEO_MEDIA_TYPE))
+    var selectedMediaType by remember { mutableIntStateOf(value = 0) }
+    val iconsMediaType = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
     val titlePickFile = texts.get(TITLE_PICK_FILE_TEXT)
+    val radioOptions = listOf("Qualidade constante:", "Taxa de bits (kbps)")
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf<String?>(null) }
 
-    Scaffold(
-        topBar =  {
-            TopBar(
-                inputFile = state.inputFile,
-                onPickFile = {
-                    pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) }
-                }
-            )
+    LaunchedEffect(selectedMediaType) {
+        onEvent(SetFormat(null))
+    }
+
+    LaunchedEffect(state.format) {
+        if(state.format == null) onOptionSelected(null)
+        else {
+            if(state.format != MediaFormat.EAC3) {
+                onOptionSelected(radioOptions[0])
+            }
+            else {
+                onOptionSelected(radioOptions[1])
+            }
         }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+    }
+
+    Scaffold { innerPadding ->
+        Row(modifier = Modifier.padding(innerPadding)) {
+            NavigationRail {
+                FloatingActionButton(
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                    onClick = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
+                ) {
+                    Icon(Icons.Rounded.FileOpen, contentDescription = null)
+                }
+
+                Spacer(modifier = Modifier.height(dimens.m))
+
+                mediaTypes.forEachIndexed { index, item ->
+                    NavigationRailItem(
+                        icon = { Icon(iconsMediaType[index], contentDescription = item) },
+                        label = { Text(item) },
+                        selected = selectedMediaType == index,
+                        onClick = { selectedMediaType = index }
+                    )
+                }
+            }
+
+            VerticalDivider(color = MaterialTheme.colorScheme.surfaceContainer)
+
             Column(
-                modifier = Modifier.padding(start = dimens.i, end = dimens.i, bottom = dimens.i),
+                modifier = Modifier.padding(dimens.i),
                 verticalArrangement = Arrangement.spacedBy(dimens.i)
             ) {
+
                 Actions(
                     status = status,
+                    enabled = state.inputFile != null,
                     onStart = { onEvent(OnStart) },
                     onStop = { onEvent(OnStop) }
                 )
 
-                // Settings
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(dimens.d),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Common Settings
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
                     FormatInput(
                         value = state.format,
+                        isVideo = selectedMediaType == 1,
                         onValueChange = { onEvent(SetFormat(it)) }
                     )
 
-                    ChannelsInput(
-                        value = state.channels,
-                        onValueChange = { onEvent(SetChannels(it)) }
-                    )
-
-                    Switch(
-                        checked = true,
-                        onCheckedChange = {
-                        }
-                    )
-
                     Column {
-                        val teste = remember { mutableStateOf(0.0f) }
-                        Text(String.format("%.0f", teste.value))
-                        Slider(
-                            value = teste.value,
-                            onValueChange = { teste.value = it.roundToInt().toFloat() },
-                            valueRange = 0f..63f,
-                            //colors = SliderDefaults.colors().copy(inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest)
+                        Column(Modifier.selectableGroup()) {
+                            radioOptions.forEachIndexed { index, text ->
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp)
+                                        .selectable(
+                                            selected = (text == selectedOption),
+                                            onClick = { onOptionSelected(text) },
+                                            enabled = if(index == 0) state.format != MediaFormat.EAC3 && state.format != null else state.format != MediaFormat.H265 && state.format != MediaFormat.AV1 && state.format != null,
+                                            role = Role.RadioButton
+                                        )
+                                        .padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        val teste = remember { mutableStateOf(0.0f) }
+                                        Row {
+                                            RadioButton(
+                                                selected = (text == selectedOption),
+                                                onClick = null // null recommended for accessibility with screen readers
+                                            )
+                                            Text(
+                                                text = text,
+                                                style = TextStyle(fontSize = fontSizes.a),
+                                                modifier = Modifier.padding(start = 16.dp)
+                                            )
+                                            Text(String.format("%.0f", teste.value))
 
+                                        }
+                                        Slider(
+                                            value = teste.value,
+                                            onValueChange = { teste.value = it.roundToInt().toFloat() },
+                                            valueRange = 0f..63f,
+                                            //colors = SliderDefaults.colors().copy(inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest)
+
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(selectedMediaType == 0) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
+                        ChannelsInput(
+                            value = state.channels,
+                            onValueChange = { onEvent(SetChannels(it)) }
+                        )
+                        SampleRateInput(
+                            value = state.sampleRate,
+                            onValueChange = { onEvent(SetSampleRate(it)) }
                         )
                     }
+                }
+                else{
+                    //TODO video
                 }
 
                 LogsView(state.logs)
@@ -122,6 +199,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 TextField(
                     value = state.outputFile ?: "",
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = state.inputFile != null,
                     colors = TextFieldDefaults.colors().custom(),
                     onValueChange = { onEvent(SetOutputFile(it)) },
                     label = { Text(text = texts.get(OUTPUT_FILE)) }
@@ -132,37 +210,21 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 }
 
 @Composable
-private fun TopBar(inputFile: String?, onPickFile: () -> Unit) {
-    val modifier = Modifier.padding(vertical = dimens.b, horizontal = dimens.c)
-
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onPickFile) {
-            Icon(imageVector = Icons.Rounded.FileOpen, contentDescription = texts.get(SELECT_FILE_TEXT))
-        }
-
-        inputFile?.let {
-            Spacer(modifier = Modifier.width(dimens.d))
-            Text(it, style = TextStyle(fontSize = fontSizes.a, color = MaterialTheme.colorScheme.onSurface))
-        }
-    }
-}
-
-@Composable
-private fun Actions(status: HomeStatus, onStart: () -> Unit, onStop: () -> Unit) {
+private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
     val isLoading = status is HomeStatus.Loading
     val startEnabled = !isLoading && status !is HomeStatus.Progress
     val stopEnabled = !isLoading
+    val modifier =  Modifier
+        .fillMaxWidth()
+        .padding(bottom = dimens.f)
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledIconButton(
-                enabled = startEnabled,
+                enabled = startEnabled && enabled,
                 onClick = onStart
             ) {
                 Icon(
@@ -181,7 +243,7 @@ private fun Actions(status: HomeStatus, onStart: () -> Unit, onStop: () -> Unit)
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledTonalIconButton(
-                enabled = stopEnabled,
+                enabled = stopEnabled && enabled,
                 onClick = onStop
             ){
                 Icon(
@@ -199,21 +261,20 @@ private fun Actions(status: HomeStatus, onStart: () -> Unit, onStop: () -> Unit)
 }
 
 @Composable
-fun FormatInput(value: MediaFormat?, onValueChange: (MediaFormat) -> Unit) {
+fun FormatInput(value: MediaFormat?, isVideo: Boolean, onValueChange: (MediaFormat) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    var selected by remember { mutableStateOf(value) }
+    val medias = MediaFormat.getAll().filter { it.isVideo == isVideo }
 
     Selector(
-        text = selected?.text ?: "",
+        text = value?.text ?: "",
         label = texts.get(FORMAT_INPUT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
-        MediaFormat.getAll().forEach { item ->
+        medias.forEach { item ->
             DropdownMenuItem(
                 text = { Text(item.text) },
                 onClick = {
-                    selected = item
                     expanded = false
                     onValueChange(item)
                 }
@@ -225,10 +286,9 @@ fun FormatInput(value: MediaFormat?, onValueChange: (MediaFormat) -> Unit) {
 @Composable
 fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    var selected by remember { mutableStateOf(value) }
 
     Selector(
-        text = selected?.text ?: "",
+        text = value?.text ?: "",
         label = texts.get(CHANNELS_INPUT),
         expanded = expanded,
         onExpanded = { expanded = it }
@@ -237,7 +297,31 @@ fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
             DropdownMenuItem(
                 text = { Text(item.text) },
                 onClick = {
-                    selected = item
+                    expanded = false
+                    onValueChange(item)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun SampleRateInput(value: String?, onValueChange: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(value = false) }
+    var text = ""
+
+    if(value != null) text = "$value Hz"
+
+    Selector(
+        text = text,
+        label = texts.get(SAMPLE_RATE_INPUT),
+        expanded = expanded,
+        onExpanded = { expanded = it }
+    ) {
+        SampleRates.getAll().forEach { item ->
+            DropdownMenuItem(
+                text = { Text(item) },
+                onClick = {
                     expanded = false
                     onValueChange(item)
                 }
