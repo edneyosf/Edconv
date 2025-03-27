@@ -2,7 +2,8 @@ package features.home.events
 
 import edconv.common.Channels
 import edconv.common.MediaFormat
-import edconv.common.Resolutions
+import edconv.common.PixelFormat
+import edconv.common.Resolution
 
 sealed interface HomeEvent {
     data class SetInputFile(val inputFile: String): HomeEvent
@@ -14,8 +15,8 @@ sealed interface HomeEvent {
     data class SetSampleRate(val sampleRate: String?): HomeEvent
     data class SetPreset(val preset: String): HomeEvent
     data class SetCrf(val crf: Int): HomeEvent
-    data class SetResolution(val resolution: Resolutions?): HomeEvent
-    data class SetPixelFormat(val pixelFormat: String?): HomeEvent
+    data class SetResolution(val resolution: Resolution?): HomeEvent
+    data class SetPixelFormat(val pixelFormat: PixelFormat?): HomeEvent
     data class SetNoAudio(val noAudio: Boolean): HomeEvent
     data object OnStart: HomeEvent
     data object OnStop: HomeEvent

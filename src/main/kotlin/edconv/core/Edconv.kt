@@ -3,6 +3,7 @@ package edconv.core
 import edconv.aac.AACBuilder
 import edconv.av1.AV1Builder
 import edconv.common.Channels
+import edconv.common.PixelFormat
 import edconv.eac3.EAC3Builder
 import edconv.core.EdconvArgs.FFMPEG_PATH
 import edconv.core.EdconvArgs.FFPROBE_PATH
@@ -11,7 +12,7 @@ import edconv.core.EdconvConfigs.FFMPEG
 import edconv.core.EdconvConfigs.FFPROBE
 import edconv.core.EdconvConfigs.STATUS_COMPLETE
 import edconv.core.EdconvConfigs.STATUS_ERROR
-import edconv.common.Resolutions
+import edconv.common.Resolution
 import edconv.core.utils.CmdUtils
 import edconv.h265.H265Builder
 import kotlinx.coroutines.*
@@ -67,8 +68,8 @@ class Edconv(
     }
 
     fun toH265(
-        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions? = null,
-        noAudio: Boolean = false, pixelFormat: String? = null): Job {
+        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolution? = null,
+        noAudio: Boolean = false, pixelFormat: PixelFormat? = null): Job {
 
         val cmd = H265Builder(
             inputFile = inputFile,
@@ -84,8 +85,8 @@ class Edconv(
     }
 
     fun toAV1(
-        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions? = null,
-        noAudio: Boolean = false, pixelFormat: String? = null): Job {
+        inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolution? = null,
+        noAudio: Boolean = false, pixelFormat: PixelFormat? = null): Job {
 
         val cmd = AV1Builder(
             inputFile = inputFile,

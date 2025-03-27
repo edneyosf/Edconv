@@ -2,7 +2,8 @@ package features.home.states
 
 import edconv.common.Channels
 import edconv.common.MediaFormat
-import edconv.common.Resolutions
+import edconv.common.PixelFormat
+import edconv.common.Resolution
 
 data class HomeState(
     val status: HomeStatus,
@@ -16,8 +17,8 @@ data class HomeState(
     val sampleRate: String?,
     val preset: String?,
     val crf: Int,
-    val resolution: Resolutions?,
-    val pixelFormat: String?,
+    val resolution: Resolution?,
+    val pixelFormat: PixelFormat?,
     val noAudio: Boolean
 )
 

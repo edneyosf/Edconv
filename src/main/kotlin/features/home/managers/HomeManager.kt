@@ -14,7 +14,8 @@ import core.extensions.update
 import core.utils.DirUtils
 import edconv.common.Channels
 import edconv.common.MediaFormat
-import edconv.common.Resolutions
+import edconv.common.PixelFormat
+import edconv.common.Resolution
 import edconv.core.Edconv
 import edconv.core.data.MediaInfoData
 import edconv.core.data.ProgressData
@@ -225,8 +226,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setSampleRate(sampleRate: String?) = _state.update { copy(sampleRate = sampleRate) }
     private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
     private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
-    private fun setResolution(resolution: Resolutions?) = _state.update { copy(resolution = resolution) }
-    private fun setPixelFormat(pixelFormat: String?) = _state.update { copy(pixelFormat = pixelFormat) }
+    private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
+    private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
     private fun setLogs(logs: String) = _state.update { copy(logs = logs) }
 

@@ -3,16 +3,17 @@ package edconv.av1
 import edconv.common.MediaBuilder
 import edconv.core.EdconvArgs
 import edconv.common.MediaFormat
-import edconv.common.Resolutions
+import edconv.common.PixelFormat
+import edconv.common.Resolution
 
 data class AV1Builder(
     override val inputFile: String,
     override val outputFile: String,
-    private val pixelFormat: String? = null,
+    private val pixelFormat: PixelFormat? = null,
     private val crf: Int,
     private val noAudio: Boolean = false,
     private val preset: String,
-    private val resolution: Resolutions? = null
+    private val resolution: Resolution? = null
 ): MediaBuilder(inputFile, outputFile) {
 
     init {
@@ -30,9 +31,9 @@ data class AV1Builder(
             cmd.add(resolution.width.toString())
         }
 
-        if(!pixelFormat.isNullOrBlank()) {
+        if(pixelFormat != null) {
             cmd.add(EdconvArgs.PIXEL_FORMAT)
-            cmd.add(pixelFormat)
+            cmd.add(pixelFormat.value)
         }
 
         if(noAudio) cmd.add(EdconvArgs.NO_AUDIO)
