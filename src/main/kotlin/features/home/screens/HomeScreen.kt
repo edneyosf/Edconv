@@ -16,9 +16,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import core.Languages
-import edconv.common.Channels
-import edconv.common.MediaFormat
-import edconv.common.SampleRates
+import edconv.av1.AV1Preset
+import edconv.common.*
+import edconv.h265.H265Preset
 import features.home.events.HomeEvent
 import features.home.events.HomeEvent.OnStart
 import features.home.events.HomeEvent.OnStop
@@ -26,6 +26,9 @@ import features.home.events.HomeEvent.SetOutputFile
 import features.home.events.HomeEvent.SetFormat
 import features.home.events.HomeEvent.SetChannels
 import features.home.events.HomeEvent.SetSampleRate
+import features.home.events.HomeEvent.SetPixelFormat
+import features.home.events.HomeEvent.SetResolution
+import features.home.events.HomeEvent.SetNoAudio
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
@@ -33,7 +36,10 @@ import features.home.texts.HomeTexts
 import features.home.texts.HomeTexts.Companion.AUDIO_MEDIA_TYPE
 import features.home.texts.HomeTexts.Companion.CHANNELS_INPUT
 import features.home.texts.HomeTexts.Companion.FORMAT_INPUT
+import features.home.texts.HomeTexts.Companion.NO_AUDIO_INPUT
 import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
+import features.home.texts.HomeTexts.Companion.PIXEL_FORMAT_INPUT
+import features.home.texts.HomeTexts.Companion.RESOLUTION_INPUT
 import features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT
 import features.home.texts.HomeTexts.Companion.START_CONVERSION
 import features.home.texts.HomeTexts.Companion.STOP_CONVERSION
@@ -165,7 +171,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                         Slider(
                                             value = teste.value,
                                             onValueChange = { teste.value = it.roundToInt().toFloat() },
-                                            valueRange = ((if(index == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(index == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 0f),
+                                            valueRange = ((if(index == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(index == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
                                         )
                                     }
                                 }
@@ -187,7 +193,50 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     }
                 }
                 else{
-                    //TODO video
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
+                        val teste = remember { mutableStateOf(0.0f) }
+
+                        Column {
+                            ResolutionInput(
+                                value = state.resolution,
+                                onValueChange = { onEvent(SetResolution(it)) }
+                            )
+
+                            PixelFormatInput(
+                                value = state.pixelFormat,
+                                onValueChange = { onEvent(SetPixelFormat(it)) }
+                            )
+                        }
+
+                        Column {
+                            Text((if(state.format == MediaFormat.H265) H265Preset.fromId(teste.value.toInt())?.value else AV1Preset.fromId(teste.value.toInt())?.value) ?: "")
+                            Slider(
+                                value = teste.value,
+                                enabled = state.format != null,
+                                onValueChange = { teste.value = it.roundToInt().toFloat() },
+                                valueRange = (when(state.format) {
+                                    MediaFormat.H265 -> H265Preset.MIN_ID
+                                    MediaFormat.AV1 -> AV1Preset.MIN_ID
+                                    else -> 0
+                                }).toFloat() .. (when(state.format) {
+                                    MediaFormat.H265 -> H265Preset.MAX_ID
+                                    MediaFormat.AV1 -> AV1Preset.MAX_ID
+                                    else -> 1
+                                }).toFloat()
+                            )
+
+                            Row {
+                                Switch(
+                                    checked = state.noAudio,
+                                    onCheckedChange = {
+                                        onEvent(SetNoAudio(it))
+                                    }
+                                )
+
+                                Text(texts.get(NO_AUDIO_INPUT))
+                            }
+                        }
+                    }
                 }
 
                 LogsView(state.logs)
@@ -259,7 +308,7 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
 }
 
 @Composable
-fun FormatInput(value: MediaFormat?, isVideo: Boolean, onValueChange: (MediaFormat) -> Unit) {
+private fun FormatInput(value: MediaFormat?, isVideo: Boolean, onValueChange: (MediaFormat) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
     val medias = MediaFormat.getAll().filter { it.isVideo == isVideo }
 
@@ -282,7 +331,7 @@ fun FormatInput(value: MediaFormat?, isVideo: Boolean, onValueChange: (MediaForm
 }
 
 @Composable
-fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
+private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
@@ -304,7 +353,7 @@ fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
 }
 
 @Composable
-fun SampleRateInput(value: String?, onValueChange: (String) -> Unit) {
+private fun SampleRateInput(value: String?, onValueChange: (String) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
     var text = ""
 
@@ -319,6 +368,56 @@ fun SampleRateInput(value: String?, onValueChange: (String) -> Unit) {
         SampleRates.getAll().forEach { item ->
             DropdownMenuItem(
                 text = { Text(item) },
+                onClick = {
+                    expanded = false
+                    onValueChange(item)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -> Unit) {
+    var expanded by remember { mutableStateOf(value = false) }
+    var text = ""
+
+    if(value != null) text = value.text
+
+    Selector(
+        text = text,
+        label = texts.get(PIXEL_FORMAT_INPUT),
+        expanded = expanded,
+        onExpanded = { expanded = it }
+    ) {
+        PixelFormat.getAll().forEach { item ->
+            DropdownMenuItem(
+                text = { Text(item.text) },
+                onClick = {
+                    expanded = false
+                    onValueChange(item)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> Unit) {
+    var expanded by remember { mutableStateOf(value = false) }
+    var text = ""
+
+    if(value != null) text = value.text
+
+    Selector(
+        text = text,
+        label = texts.get(RESOLUTION_INPUT),
+        expanded = expanded,
+        onExpanded = { expanded = it }
+    ) {
+        Resolution.getAll().forEach { item ->
+            DropdownMenuItem(
+                text = { Text(item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
