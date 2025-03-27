@@ -3,8 +3,6 @@ package features.home.screens
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -12,7 +10,6 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import core.Languages
@@ -34,20 +31,20 @@ import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import features.home.texts.HomeTexts
-import features.home.texts.HomeTexts.Companion.AUDIO_MEDIA_TYPE
-import features.home.texts.HomeTexts.Companion.BIT_RATE_INPUT
-import features.home.texts.HomeTexts.Companion.CHANNELS_INPUT
-import features.home.texts.HomeTexts.Companion.FORMAT_INPUT
-import features.home.texts.HomeTexts.Companion.NO_AUDIO_INPUT
-import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
-import features.home.texts.HomeTexts.Companion.PIXEL_FORMAT_INPUT
-import features.home.texts.HomeTexts.Companion.QUALITY_INPUT
-import features.home.texts.HomeTexts.Companion.RESOLUTION_INPUT
-import features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT
-import features.home.texts.HomeTexts.Companion.START_CONVERSION
-import features.home.texts.HomeTexts.Companion.STOP_CONVERSION
-import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TEXT
-import features.home.texts.HomeTexts.Companion.VIDEO_MEDIA_TYPE
+import features.home.texts.HomeTexts.Companion.AUDIO_MEDIA_TYPE_TXT
+import features.home.texts.HomeTexts.Companion.BIT_RATE_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.CHANNELS_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.FORMAT_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.NO_AUDIO_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.OUTPUT_FILE_TXT
+import features.home.texts.HomeTexts.Companion.PIXEL_FORMAT_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.QUALITY_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.RESOLUTION_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.START_CONVERSION_TXT
+import features.home.texts.HomeTexts.Companion.STOP_CONVERSION_TXT
+import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TXT
+import features.home.texts.HomeTexts.Companion.VIDEO_MEDIA_TYPE_TXT
 import features.home.texts.homeTexts
 import ui.components.Selector
 import ui.compositions.*
@@ -79,19 +76,26 @@ fun HomeScreen() {
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
     var selectedMediaType by remember { mutableStateOf(value = AUDIO_MEDIA) }
-    val titlePickFile = texts.get(TITLE_PICK_FILE_TEXT)
-    val compressions = listOf(texts.get(QUALITY_INPUT), texts.get(BIT_RATE_INPUT))
-    var selectedCompression by remember { mutableStateOf<String?>(null) }
+    val isAudio = selectedMediaType == AUDIO_MEDIA
+    val isVideo = selectedMediaType == VIDEO_MEDIA
+    val titlePickFile = texts.get(TITLE_PICK_FILE_TXT)
+    var selectedCompression by remember { mutableStateOf<Int?>(value = null) }
+    val compressions = listOf(texts.get(QUALITY_INPUT_TXT), texts.get(BIT_RATE_INPUT_TXT))
+    val teste = remember { mutableStateOf(0.0f) }
+    val teste1 = remember { mutableStateOf(0.0f) }
 
+    // Media Type
     LaunchedEffect(selectedMediaType) {
         onEvent(SetFormat(null))
     }
-
+    // Format
     LaunchedEffect(state.format) {
+        teste.value = 0.0f
+        teste1.value = 0.0f
         selectedCompression = if(state.format == null) null
         else {
-            if(state.format != MediaFormat.EAC3) compressions[CONSTANT_COMPRESSION]
-            else compressions[VARIABLE_COMPRESSION]
+            if(state.format != MediaFormat.EAC3) CONSTANT_COMPRESSION
+            else VARIABLE_COMPRESSION
         }
     }
 
@@ -100,6 +104,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             Navigation(
                 selected = selectedMediaType,
                 onSelected = { selectedMediaType = it },
+                hasInputFile = state.inputFile != null,
                 onPickFile = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
             )
 
@@ -121,64 +126,30 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
                     FormatInput(
                         value = state.format,
-                        isVideo = selectedMediaType == VIDEO_MEDIA,
+                        isVideo = isVideo,
                         onValueChange = { onEvent(SetFormat(it)) }
                     )
 
-                    Column {
-                        Column(Modifier.selectableGroup()) {
-                            compressions.forEachIndexed { index, text ->
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(56.dp)
-                                        .selectable(
-                                            selected = text == selectedCompression,
-                                            onClick = { selectedCompression = text },
-                                            enabled = if(index == 0) state.format != MediaFormat.EAC3 && state.format != null else state.format != MediaFormat.H265 && state.format != MediaFormat.AV1 && state.format != null,
-                                            role = Role.RadioButton
-                                        )
-                                        .padding(horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column {
-                                        val teste = remember { mutableStateOf(0.0f) }
-                                        Row {
-                                            RadioButton(
-                                              selected = text == selectedCompression,
-                                                onClick = {}
-                                            )
-                                            Text(
-                                                text = text,
-                                                style = TextStyle(fontSize = fontSizes.a),
-                                                modifier = Modifier.padding(start = 16.dp)
-                                            )
-                                            Text(String.format("%.0f", teste.value))
-
-                                        }
-
-                                        if(index == CONSTANT_COMPRESSION) {
-                                            Slider(
-                                                value = teste.value,
-                                                onValueChange = { teste.value = it.roundToInt().toFloat() },
-                                                valueRange = ((if(index == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(index == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
-                                            )
-                                        }
-                                        else if(index == VARIABLE_COMPRESSION) {
-                                            VariableCompressionInput(
-                                                value = state.kbps,
-                                                onValueChange = { onEvent(SetKbps(it)) }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                    if(isAudio) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = CONSTANT_COMPRESSION == selectedCompression,
+                                onClick = { selectedCompression = CONSTANT_COMPRESSION }
+                            )
+                            Text(compressions[CONSTANT_COMPRESSION])
                         }
                     }
+                    Slider(
+                        modifier = Modifier.width(300.dp),
+                        value = teste.value,
+                        enabled = selectedCompression == CONSTANT_COMPRESSION,
+                        onValueChange = { teste.value = it.roundToInt().toFloat() },
+                        valueRange = ((if(CONSTANT_COMPRESSION == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(CONSTANT_COMPRESSION == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
+                    )
                 }
 
                 // Audio Settings
-                if(selectedMediaType == AUDIO_MEDIA) {
+                if(isAudio) {
                     Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
                         ChannelsInput(
                             value = state.channels,
@@ -189,14 +160,26 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                             value = state.sampleRate,
                             onValueChange = { onEvent(SetSampleRate(it)) }
                         )
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = VARIABLE_COMPRESSION == selectedCompression,
+                                onClick = { selectedCompression = VARIABLE_COMPRESSION }
+                            )
+                            Text(compressions[VARIABLE_COMPRESSION])
+                            Spacer(modifier = Modifier.width(dimens.i))
+                            VariableCompressionInput(
+                                value = state.kbps,
+                                enabled = VARIABLE_COMPRESSION == selectedCompression,
+                                onValueChange = { onEvent(SetKbps(it)) }
+                            )
+                        }
                     }
                 }
                 // Video Settings
-                else if(selectedMediaType == VIDEO_MEDIA) {
+                else if(isVideo) {
                     Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
-                        val teste = remember { mutableStateOf(0.0f) }
-
-                        Column {
+                        Column(verticalArrangement = Arrangement.spacedBy(dimens.f)) {
                             ResolutionInput(
                                 value = state.resolution,
                                 onValueChange = { onEvent(SetResolution(it)) }
@@ -208,12 +191,13 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                             )
                         }
 
-                        Column {
-                            Text((if(state.format == MediaFormat.H265) H265Preset.fromId(teste.value.toInt())?.value else AV1Preset.fromId(teste.value.toInt())?.value) ?: "")
+                        Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
+                            Text((if(state.format == MediaFormat.H265) H265Preset.fromId(teste1.value.toInt())?.value else AV1Preset.fromId(teste1.value.toInt())?.value) ?: "")
                             Slider(
-                                value = teste.value,
+                                value = teste1.value,
+                                modifier = Modifier.width(300.dp),
                                 enabled = state.format != null,
-                                onValueChange = { teste.value = it.roundToInt().toFloat() },
+                                onValueChange = { teste1.value = it.roundToInt().toFloat() },
                                 valueRange = (when(state.format) {
                                     MediaFormat.H265 -> H265Preset.MIN_ID
                                     MediaFormat.AV1 -> AV1Preset.MIN_ID
@@ -225,15 +209,15 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                 }).toFloat()
                             )
 
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Switch(
                                     checked = state.noAudio,
                                     onCheckedChange = {
                                         onEvent(SetNoAudio(it))
                                     }
                                 )
-
-                                Text(texts.get(NO_AUDIO_INPUT))
+                                Spacer(modifier = Modifier.width(dimens.f))
+                                Text(texts.get(NO_AUDIO_INPUT_TXT))
                             }
                         }
                     }
@@ -249,7 +233,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     enabled = state.inputFile != null,
                     colors = TextFieldDefaults.colors().custom(),
                     onValueChange = { onEvent(SetOutputFile(it)) },
-                    label = { Text(text = texts.get(OUTPUT_FILE)) }
+                    label = { Text(text = texts.get(OUTPUT_FILE_TXT)) }
                 )
             }
         }
@@ -257,16 +241,22 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 }
 
 @Composable
-private fun Navigation(selected: Int, onSelected: (Int) -> Unit, onPickFile: () -> Unit) {
-    val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE), texts.get(VIDEO_MEDIA_TYPE))
+private fun Navigation(selected: Int, hasInputFile: Boolean, onSelected: (Int) -> Unit, onPickFile: () -> Unit) {
+    val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE_TXT), texts.get(VIDEO_MEDIA_TYPE_TXT))
     val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
 
     NavigationRail {
         FloatingActionButton(
-            elevation = FloatingActionButtonDefaults.elevation(0.dp),
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp, focusedElevation = 0.dp),
             onClick = onPickFile
         ) {
-            Icon(Icons.Rounded.FileOpen, contentDescription = null)
+            BadgedBox(
+                badge = {
+                    if(hasInputFile) Badge()
+                }
+            ) {
+                Icon(Icons.Rounded.FileOpen, contentDescription = texts.get(TITLE_PICK_FILE_TXT))
+            }
         }
 
         Spacer(modifier = Modifier.height(dimens.m))
@@ -302,12 +292,12 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
             ) {
                 Icon(
                     imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = texts.get(START_CONVERSION)
+                    contentDescription = texts.get(START_CONVERSION_TXT)
                 )
             }
 
             Text(
-                text = texts.get(START_CONVERSION),
+                text = texts.get(START_CONVERSION_TXT),
                 style = TextStyle(fontSize = fontSizes.a)
             )
         }
@@ -321,12 +311,12 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
             ){
                 Icon(
                     imageVector = Icons.Rounded.Stop,
-                    contentDescription = texts.get(STOP_CONVERSION)
+                    contentDescription = texts.get(STOP_CONVERSION_TXT)
                 )
             }
 
             Text(
-                text = texts.get(STOP_CONVERSION),
+                text = texts.get(STOP_CONVERSION_TXT),
                 style = TextStyle(fontSize = fontSizes.a)
             )
         }
@@ -340,7 +330,7 @@ private fun FormatInput(value: MediaFormat?, isVideo: Boolean, onValueChange: (M
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(FORMAT_INPUT),
+        label = texts.get(FORMAT_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -362,7 +352,7 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(CHANNELS_INPUT),
+        label = texts.get(CHANNELS_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -379,21 +369,18 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
 }
 
 @Composable
-private fun SampleRateInput(value: String?, onValueChange: (String) -> Unit) {
+private fun SampleRateInput(value: SampleRate?, onValueChange: (SampleRate) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    var text = ""
-
-    if(value != null) text = "$value Hz"
 
     Selector(
-        text = text,
-        label = texts.get(SAMPLE_RATE_INPUT),
+        text = value?.text ?: "",
+        label = texts.get(SAMPLE_RATE_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
-        SampleRates.getAll().forEach { item ->
+        SampleRate.getAll().forEach { item ->
             DropdownMenuItem(
-                text = { Text(item) },
+                text = { Text(item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -406,13 +393,10 @@ private fun SampleRateInput(value: String?, onValueChange: (String) -> Unit) {
 @Composable
 private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    var text = ""
-
-    if(value != null) text = value.text
 
     Selector(
-        text = text,
-        label = texts.get(PIXEL_FORMAT_INPUT),
+        text = value?.text ?: "",
+        label = texts.get(PIXEL_FORMAT_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -431,13 +415,10 @@ private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -
 @Composable
 private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    var text = ""
-
-    if(value != null) text = value.text
 
     Selector(
-        text = text,
-        label = texts.get(RESOLUTION_INPUT),
+        text = value?.text ?: "",
+        label = texts.get(RESOLUTION_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -454,21 +435,19 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
 }
 
 @Composable
-private fun VariableCompressionInput(value: Kbps?, onValueChange: (Kbps) -> Unit) {
+private fun VariableCompressionInput(value: Kbps?, enabled: Boolean = true, onValueChange: (Kbps) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    var text = ""
-
-    if(value != null) text = value.value
 
     Selector(
-        text = text,
-        label = texts.get(RESOLUTION_INPUT),
+        text = value?.text ?: "",
+        label = texts.get(BIT_RATE_INPUT_TXT),
+        enabled = enabled,
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
         Kbps.getAll().forEach { item ->
             DropdownMenuItem(
-                text = { Text(item.value) },
+                text = { Text(item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -533,6 +512,8 @@ private fun pickFile(title: String): String? {
 
     return file?.absolutePath
 }
+
+// Previews
 
 @Composable
 private fun HomeScreenPreview(language: String, darkTheme: Boolean) {

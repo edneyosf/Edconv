@@ -9,16 +9,17 @@ import ui.theme.extensions.custom
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Selector(
-    text: String, label: String, expanded: Boolean, onExpanded: (Boolean) -> Unit,
+    text: String, label: String, expanded: Boolean, enabled: Boolean = true, onExpanded: (Boolean) -> Unit,
     content: @Composable ColumnScope.() -> Unit) {
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { onExpanded(!expanded) },
+        onExpandedChange = { if(enabled) onExpanded(!expanded) },
     ) {
         TextField(
             value = text,
             readOnly = true,
+            enabled = enabled,
             onValueChange = {},
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
