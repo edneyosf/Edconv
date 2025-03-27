@@ -1,20 +1,24 @@
 package edconv.common
 
-object Kbps {
-    const val K32 = "32"
-    const val K48 = "48"
-    const val K64 = "64"
-    const val K96 = "96"
-    const val K128 = "128"
-    const val K160 = "160"
-    const val K192 = "192"
-    const val K224 = "224"
-    const val K256 = "256"
-    const val K320 = "320"
-    const val K384 = "384"
-    const val K448 = "448"
-    const val K512 = "512"
-    const val K640 = "640"
-    const val K768 = "768"
-    const val K960 = "960"
+enum class Kbps(val value: String) {
+    K32(value = "32"),
+    K48(value = "48"),
+    K64(value = "64"),
+    K96(value = "96"),
+    K128(value = "128"),
+    K160(value = "160"),
+    K192(value = "192"),
+    K224(value = "224"),
+    K256(value = "256"),
+    K320(value = "320"),
+    K384(value = "384"),
+    K448(value = "448"),
+    K512(value = "512"),
+    K640(value = "640"),
+    K768(value = "768"),
+    K960(value = "960");
+
+    companion object {
+        fun getAll() = entries.toList()
+    }
 }

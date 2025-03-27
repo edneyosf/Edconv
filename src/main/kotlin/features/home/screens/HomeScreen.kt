@@ -29,16 +29,19 @@ import features.home.events.HomeEvent.SetSampleRate
 import features.home.events.HomeEvent.SetPixelFormat
 import features.home.events.HomeEvent.SetResolution
 import features.home.events.HomeEvent.SetNoAudio
+import features.home.events.HomeEvent.SetKbps
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import features.home.texts.HomeTexts
 import features.home.texts.HomeTexts.Companion.AUDIO_MEDIA_TYPE
+import features.home.texts.HomeTexts.Companion.BIT_RATE_INPUT
 import features.home.texts.HomeTexts.Companion.CHANNELS_INPUT
 import features.home.texts.HomeTexts.Companion.FORMAT_INPUT
 import features.home.texts.HomeTexts.Companion.NO_AUDIO_INPUT
 import features.home.texts.HomeTexts.Companion.OUTPUT_FILE
 import features.home.texts.HomeTexts.Companion.PIXEL_FORMAT_INPUT
+import features.home.texts.HomeTexts.Companion.QUALITY_INPUT
 import features.home.texts.HomeTexts.Companion.RESOLUTION_INPUT
 import features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT
 import features.home.texts.HomeTexts.Companion.START_CONVERSION
@@ -53,6 +56,11 @@ import ui.theme.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
 import kotlin.math.roundToInt
+
+private const val AUDIO_MEDIA = 0
+private const val VIDEO_MEDIA = 1
+private const val CONSTANT_COMPRESSION = 0
+private const val VARIABLE_COMPRESSION = 1
 
 @Composable
 fun HomeScreen() {
@@ -70,50 +78,30 @@ fun HomeScreen() {
 @Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val status = state.status
-    val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE), texts.get(VIDEO_MEDIA_TYPE))
-    var selectedMediaType by remember { mutableIntStateOf(value = 0) }
-    val iconsMediaType = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
+    var selectedMediaType by remember { mutableStateOf(value = AUDIO_MEDIA) }
     val titlePickFile = texts.get(TITLE_PICK_FILE_TEXT)
-    val radioOptions = listOf("Qualidade constante:", "Taxa de bits (kbps)")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf<String?>(null) }
+    val compressions = listOf(texts.get(QUALITY_INPUT), texts.get(BIT_RATE_INPUT))
+    var selectedCompression by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(selectedMediaType) {
         onEvent(SetFormat(null))
     }
 
     LaunchedEffect(state.format) {
-        if(state.format == null) onOptionSelected(null)
+        selectedCompression = if(state.format == null) null
         else {
-            if(state.format != MediaFormat.EAC3) {
-                onOptionSelected(radioOptions[0])
-            }
-            else {
-                onOptionSelected(radioOptions[1])
-            }
+            if(state.format != MediaFormat.EAC3) compressions[CONSTANT_COMPRESSION]
+            else compressions[VARIABLE_COMPRESSION]
         }
     }
 
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
-            NavigationRail {
-                FloatingActionButton(
-                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
-                    onClick = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
-                ) {
-                    Icon(Icons.Rounded.FileOpen, contentDescription = null)
-                }
-
-                Spacer(modifier = Modifier.height(dimens.m))
-
-                mediaTypes.forEachIndexed { index, item ->
-                    NavigationRailItem(
-                        icon = { Icon(iconsMediaType[index], contentDescription = item) },
-                        label = { Text(item) },
-                        selected = selectedMediaType == index,
-                        onClick = { selectedMediaType = index }
-                    )
-                }
-            }
+            Navigation(
+                selected = selectedMediaType,
+                onSelected = { selectedMediaType = it },
+                onPickFile = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
+            )
 
             VerticalDivider(color = MaterialTheme.colorScheme.surfaceContainer)
 
@@ -133,20 +121,20 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
                     FormatInput(
                         value = state.format,
-                        isVideo = selectedMediaType == 1,
+                        isVideo = selectedMediaType == VIDEO_MEDIA,
                         onValueChange = { onEvent(SetFormat(it)) }
                     )
 
                     Column {
                         Column(Modifier.selectableGroup()) {
-                            radioOptions.forEachIndexed { index, text ->
+                            compressions.forEachIndexed { index, text ->
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
                                         .height(56.dp)
                                         .selectable(
-                                            selected = (text == selectedOption),
-                                            onClick = { onOptionSelected(text) },
+                                            selected = text == selectedCompression,
+                                            onClick = { selectedCompression = text },
                                             enabled = if(index == 0) state.format != MediaFormat.EAC3 && state.format != null else state.format != MediaFormat.H265 && state.format != MediaFormat.AV1 && state.format != null,
                                             role = Role.RadioButton
                                         )
@@ -157,8 +145,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                         val teste = remember { mutableStateOf(0.0f) }
                                         Row {
                                             RadioButton(
-                                                selected = (text == selectedOption),
-                                                onClick = null // null recommended for accessibility with screen readers
+                                              selected = text == selectedCompression,
+                                                onClick = {}
                                             )
                                             Text(
                                                 text = text,
@@ -168,11 +156,20 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                             Text(String.format("%.0f", teste.value))
 
                                         }
-                                        Slider(
-                                            value = teste.value,
-                                            onValueChange = { teste.value = it.roundToInt().toFloat() },
-                                            valueRange = ((if(index == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(index == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
-                                        )
+
+                                        if(index == CONSTANT_COMPRESSION) {
+                                            Slider(
+                                                value = teste.value,
+                                                onValueChange = { teste.value = it.roundToInt().toFloat() },
+                                                valueRange = ((if(index == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(index == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
+                                            )
+                                        }
+                                        else if(index == VARIABLE_COMPRESSION) {
+                                            VariableCompressionInput(
+                                                value = state.kbps,
+                                                onValueChange = { onEvent(SetKbps(it)) }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -180,19 +177,22 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     }
                 }
 
-                if(selectedMediaType == 0) {
+                // Audio Settings
+                if(selectedMediaType == AUDIO_MEDIA) {
                     Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
                         ChannelsInput(
                             value = state.channels,
                             onValueChange = { onEvent(SetChannels(it)) }
                         )
+
                         SampleRateInput(
                             value = state.sampleRate,
                             onValueChange = { onEvent(SetSampleRate(it)) }
                         )
                     }
                 }
-                else{
+                // Video Settings
+                else if(selectedMediaType == VIDEO_MEDIA) {
                     Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
                         val teste = remember { mutableStateOf(0.0f) }
 
@@ -252,6 +252,32 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     label = { Text(text = texts.get(OUTPUT_FILE)) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun Navigation(selected: Int, onSelected: (Int) -> Unit, onPickFile: () -> Unit) {
+    val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE), texts.get(VIDEO_MEDIA_TYPE))
+    val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
+
+    NavigationRail {
+        FloatingActionButton(
+            elevation = FloatingActionButtonDefaults.elevation(0.dp),
+            onClick = onPickFile
+        ) {
+            Icon(Icons.Rounded.FileOpen, contentDescription = null)
+        }
+
+        Spacer(modifier = Modifier.height(dimens.m))
+
+        mediaTypes.forEachIndexed { index, item ->
+            NavigationRailItem(
+                icon = { Icon(icons[index], contentDescription = item) },
+                label = { Text(item) },
+                selected = selected == index,
+                onClick = { onSelected(index) }
+            )
         }
     }
 }
@@ -418,6 +444,31 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
         Resolution.getAll().forEach { item ->
             DropdownMenuItem(
                 text = { Text(item.text) },
+                onClick = {
+                    expanded = false
+                    onValueChange(item)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun VariableCompressionInput(value: Kbps?, onValueChange: (Kbps) -> Unit) {
+    var expanded by remember { mutableStateOf(value = false) }
+    var text = ""
+
+    if(value != null) text = value.value
+
+    Selector(
+        text = text,
+        label = texts.get(RESOLUTION_INPUT),
+        expanded = expanded,
+        onExpanded = { expanded = it }
+    ) {
+        Kbps.getAll().forEach { item ->
+            DropdownMenuItem(
+                text = { Text(item.value) },
                 onClick = {
                     expanded = false
                     onValueChange(item)

@@ -26,6 +26,8 @@ class HomeTexts(override val language: String): Texts(language) {
         PIXEL_FORMAT_INPUT to "Formato de pixel",
         RESOLUTION_INPUT to "Resolução",
         NO_AUDIO_INPUT to "Sem áudio",
+        QUALITY_INPUT to "Qualidade constante",
+        BIT_RATE_INPUT to "Taxa de bits (kbps)",
         AUDIO_MEDIA_TYPE to "Áudio",
         VIDEO_MEDIA_TYPE  to "Vídeo",
     )
@@ -42,6 +44,8 @@ class HomeTexts(override val language: String): Texts(language) {
         PIXEL_FORMAT_INPUT to "Pixel format",
         RESOLUTION_INPUT to "Resolution",
         NO_AUDIO_INPUT to "No audio",
+        QUALITY_INPUT to "Constant quality",
+        BIT_RATE_INPUT to "Bitrate (kbps)",
         AUDIO_MEDIA_TYPE to "Audio",
         VIDEO_MEDIA_TYPE  to "Video",
     )
@@ -60,7 +64,9 @@ class HomeTexts(override val language: String): Texts(language) {
         const val PIXEL_FORMAT_INPUT = 9L
         const val RESOLUTION_INPUT = 10L
         const val NO_AUDIO_INPUT = 11L
-        const val AUDIO_MEDIA_TYPE = 12L
-        const val VIDEO_MEDIA_TYPE = 13L
+        const val QUALITY_INPUT = 12L
+        const val BIT_RATE_INPUT = 13L
+        const val AUDIO_MEDIA_TYPE = 14L
+        const val VIDEO_MEDIA_TYPE = 15L
     }
 }

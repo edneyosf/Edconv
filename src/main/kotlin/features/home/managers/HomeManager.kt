@@ -2,20 +2,11 @@ package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import core.Configs.aacKbpsDefault
-import core.Configs.av1PresetDefault
-import core.Configs.eac3KbpsDefault
-import core.Configs.h265PresetDefault
-import core.Configs.noAudioDefault
 import core.Configs.outputFileDefault
-import core.Configs.vbrDefault
 import core.common.Manager
 import core.extensions.update
 import core.utils.DirUtils
-import edconv.common.Channels
-import edconv.common.MediaFormat
-import edconv.common.PixelFormat
-import edconv.common.Resolution
+import edconv.common.*
 import edconv.core.Edconv
 import edconv.core.data.MediaInfoData
 import edconv.core.data.ProgressData
@@ -85,56 +76,56 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun convertToAAC(inputFile: String, outputFile: String) = _state.value.run {
-        val kbps = kbps ?: aacKbpsDefault
-
-        conversionJob = converter.toAAC(
-            inputFile = inputFile,
-            outputFile = outputFile,
-            channels = channels,
-            vbr = vbr,
-            kbps = kbps,
-            sampleRate = sampleRate
-        )
+        if(vbr != null || kbps != null) {
+            conversionJob = converter.toAAC(
+                inputFile = inputFile,
+                outputFile = outputFile,
+                channels = channels,
+                vbr = vbr,
+                kbps = kbps,
+                sampleRate = sampleRate
+            )
+        }
     }
 
     private fun convertToEAC3(inputFile: String, outputFile: String) = _state.value.run {
-        val kbps = kbps ?: eac3KbpsDefault
-
-        conversionJob = converter.toEAC3(
-            inputFile = inputFile,
-            outputFile = outputFile,
-            channels = channels,
-            kbps = kbps,
-            sampleRate = sampleRate
-        )
+        kbps?.let {
+            conversionJob = converter.toEAC3(
+                inputFile = inputFile,
+                outputFile = outputFile,
+                channels = channels,
+                kbps = it,
+                sampleRate = sampleRate
+            )
+        }
     }
 
     private fun convertToH265(inputFile: String, outputFile: String) = _state.value.run {
-        val preset = preset ?: h265PresetDefault
-
-        conversionJob = converter.toH265(
-            inputFile = inputFile,
-            outputFile = outputFile,
-            preset = preset,
-            crf = crf,
-            resolution = resolution,
-            pixelFormat = pixelFormat,
-            noAudio = noAudio
-        )
+        preset?.let {
+            conversionJob = converter.toH265(
+                inputFile = inputFile,
+                outputFile = outputFile,
+                preset = it,
+                crf = crf,
+                resolution = resolution,
+                pixelFormat = pixelFormat,
+                noAudio = noAudio
+            )
+        }
     }
 
     private fun convertToAV1(inputFile: String, outputFile: String) = _state.value.run {
-        val preset = preset ?: av1PresetDefault
-
-        conversionJob = converter.toAV1(
-            inputFile = inputFile,
-            outputFile = outputFile,
-            preset = preset,
-            crf = crf,
-            resolution = resolution,
-            pixelFormat = pixelFormat,
-            noAudio = noAudio
-        )
+        preset?.let {
+            conversionJob = converter.toAV1(
+                inputFile = inputFile,
+                outputFile = outputFile,
+                preset = it,
+                crf = crf,
+                resolution = resolution,
+                pixelFormat = pixelFormat,
+                noAudio = noAudio
+            )
+        }
     }
 
     private fun onStdout(it: String) {
@@ -222,7 +213,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setOutputFile(outputFile: String) = _state.update { copy(outputFile = outputFile) }
     private fun setChannels(channels: Channels?) = _state.update { copy(channels = channels) }
     private fun setVbr(vbr: String) = _state.update { copy(vbr = vbr) }
-    private fun setKbps(kbps: String) = _state.update { copy(kbps = kbps) }
+    private fun setKbps(kbps: Kbps) = _state.update { copy(kbps = kbps) }
     private fun setSampleRate(sampleRate: String?) = _state.update { copy(sampleRate = sampleRate) }
     private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
     private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
@@ -239,14 +230,14 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             outputFile = null,
             format = null,
             channels = null,
-            vbr = vbrDefault,
+            vbr = null,
             kbps = null,
             sampleRate = null,
             preset = null,
             crf = 0,
             resolution = null,
             pixelFormat = null,
-            noAudio = noAudioDefault
+            noAudio = false
         )
     }
 }

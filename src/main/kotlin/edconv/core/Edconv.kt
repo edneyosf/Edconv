@@ -3,6 +3,7 @@ package edconv.core
 import edconv.aac.AACBuilder
 import edconv.av1.AV1Builder
 import edconv.common.Channels
+import edconv.common.Kbps
 import edconv.common.PixelFormat
 import edconv.eac3.EAC3Builder
 import edconv.core.EdconvArgs.FFMPEG_PATH
@@ -37,7 +38,7 @@ class Edconv(
     }
 
     fun toAAC(
-        inputFile: String, outputFile: String, channels: Channels? = null, kbps: String? = null, vbr: String? = null,
+        inputFile: String, outputFile: String, channels: Channels? = null, kbps: Kbps? = null, vbr: String? = null,
         sampleRate: String? = null): Job {
 
         val cmd = AACBuilder(
@@ -53,7 +54,7 @@ class Edconv(
     }
 
     fun toEAC3(
-        inputFile: String, outputFile: String, kbps: String, channels: Channels? = null,
+        inputFile: String, outputFile: String, kbps: Kbps, channels: Channels? = null,
         sampleRate: String? = null): Job {
 
         val cmd = EAC3Builder(
