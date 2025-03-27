@@ -27,7 +27,7 @@ class HomeTexts(override val language: String): Texts(language) {
         RESOLUTION_INPUT_TXT to "Resolução",
         NO_AUDIO_INPUT_TXT to "Sem áudio",
         QUALITY_INPUT_TXT to "Qualidade constante",
-        BIT_RATE_INPUT_TXT to "Taxa de bits (kbps)",
+        BIT_RATE_INPUT_TXT to "Taxa de bits",
         AUDIO_MEDIA_TYPE_TXT to "Áudio",
         VIDEO_MEDIA_TYPE_TXT  to "Vídeo",
     )
@@ -45,7 +45,7 @@ class HomeTexts(override val language: String): Texts(language) {
         RESOLUTION_INPUT_TXT to "Resolution",
         NO_AUDIO_INPUT_TXT to "No audio",
         QUALITY_INPUT_TXT to "Constant quality",
-        BIT_RATE_INPUT_TXT to "Bitrate (kbps)",
+        BIT_RATE_INPUT_TXT to "Bitrate",
         AUDIO_MEDIA_TYPE_TXT to "Audio",
         VIDEO_MEDIA_TYPE_TXT  to "Video",
     )
