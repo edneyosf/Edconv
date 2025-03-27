@@ -25,6 +25,7 @@ class HomeTexts(override val language: String): Texts(language) {
         SAMPLE_RATE_INPUT to "Taxa de amostragem",
         AUDIO_MEDIA_TYPE to "Áudio",
         VIDEO_MEDIA_TYPE  to "Vídeo",
+        PIXEL_FORMAT_INPUT to "Formato de pixel",
     )
 
     override val en = mapOf(
@@ -38,6 +39,7 @@ class HomeTexts(override val language: String): Texts(language) {
         SAMPLE_RATE_INPUT to "Sample rate",
         AUDIO_MEDIA_TYPE to "Audio",
         VIDEO_MEDIA_TYPE  to "Video",
+        PIXEL_FORMAT_INPUT to "Pixel format",
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -51,7 +53,8 @@ class HomeTexts(override val language: String): Texts(language) {
         const val FORMAT_INPUT = 6L
         const val CHANNELS_INPUT = 7L
         const val SAMPLE_RATE_INPUT = 8L
-        const val AUDIO_MEDIA_TYPE = 9L
-        const val VIDEO_MEDIA_TYPE = 10L
+        const val PIXEL_FORMAT_INPUT = 9L
+        const val AUDIO_MEDIA_TYPE = 10L
+        const val VIDEO_MEDIA_TYPE = 11L
     }
 }
