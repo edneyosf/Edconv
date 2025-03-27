@@ -51,7 +51,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetPreset -> setPreset(preset)
             is HomeEvent.SetCrf -> setCrf(crf)
             is HomeEvent.SetResolution -> setResolution(resolution)
-            is HomeEvent.SetBit -> setBit(bit)
+            is HomeEvent.SetPixelFormat -> setPixelFormat(pixelFormat)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
             is HomeEvent.OnStart -> startConversion()
             is HomeEvent.OnStop -> stopConversion()
@@ -117,7 +117,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             preset = preset,
             crf = crf,
             resolution = resolution,
-            bit = bit,
+            pixelFormat = pixelFormat,
             noAudio = noAudio
         )
     }
@@ -131,7 +131,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             preset = preset,
             crf = crf,
             resolution = resolution,
-            bit = bit,
+            pixelFormat = pixelFormat,
             noAudio = noAudio
         )
     }
@@ -226,7 +226,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
     private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
     private fun setResolution(resolution: Resolutions?) = _state.update { copy(resolution = resolution) }
-    private fun setBit(bit: String?) = _state.update { copy(bit = bit) }
+    private fun setPixelFormat(pixelFormat: String?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
     private fun setLogs(logs: String) = _state.update { copy(logs = logs) }
 
@@ -244,7 +244,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             preset = null,
             crf = 0,
             resolution = null,
-            bit = null,
+            pixelFormat = null,
             noAudio = noAudioDefault
         )
     }

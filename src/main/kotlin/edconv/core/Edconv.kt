@@ -68,7 +68,7 @@ class Edconv(
 
     fun toH265(
         inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions? = null,
-        noAudio: Boolean = false, bit: String? = null): Job {
+        noAudio: Boolean = false, pixelFormat: String? = null): Job {
 
         val cmd = H265Builder(
             inputFile = inputFile,
@@ -76,7 +76,7 @@ class Edconv(
             preset = preset,
             crf = crf,
             resolution = resolution,
-            bit = bit,
+            pixelFormat = pixelFormat,
             noAudio = noAudio
         )
 
@@ -85,7 +85,7 @@ class Edconv(
 
     fun toAV1(
         inputFile: String, outputFile: String, preset: String, crf: Int, resolution: Resolutions? = null,
-        noAudio: Boolean = false, bit: String? = null): Job {
+        noAudio: Boolean = false, pixelFormat: String? = null): Job {
 
         val cmd = AV1Builder(
             inputFile = inputFile,
@@ -93,7 +93,7 @@ class Edconv(
             preset = preset,
             crf = crf,
             resolution = resolution,
-            bit = bit,
+            pixelFormat = pixelFormat,
             noAudio = noAudio
         )
 

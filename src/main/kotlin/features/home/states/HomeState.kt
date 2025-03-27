@@ -17,7 +17,7 @@ data class HomeState(
     val preset: String?,
     val crf: Int,
     val resolution: Resolutions?,
-    val bit: String?,
+    val pixelFormat: String?,
     val noAudio: Boolean
 )
 

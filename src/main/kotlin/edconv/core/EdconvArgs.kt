@@ -5,7 +5,7 @@ object EdconvArgs {
     const val FFPROBE_PATH = "-ffprobe"
     const val INPUT = "-input"
     const val FORMAT = "-format"
-    const val BIT = "-bit"
+    const val PIXEL_FORMAT = "-bit"
     const val CHANNELS = "-channels"
     const val CRF = "-crf"
     const val KBPS = "-kbps"

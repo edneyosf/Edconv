@@ -8,7 +8,7 @@ import edconv.core.EdconvArgs
 data class H265Builder(
     override val inputFile: String,
     override val outputFile: String,
-    private val bit: String? = null,
+    private val pixelFormat: String? = null,
     private val crf: Int,
     private val noAudio: Boolean = false,
     private val preset: String,
@@ -30,9 +30,9 @@ data class H265Builder(
             cmd.add(resolution.width.toString())
         }
 
-        if(!bit.isNullOrBlank()) {
-            cmd.add(EdconvArgs.BIT)
-            cmd.add(bit)
+        if(!pixelFormat.isNullOrBlank()) {
+            cmd.add(EdconvArgs.PIXEL_FORMAT)
+            cmd.add(pixelFormat)
         }
 
         if(noAudio) cmd.add(EdconvArgs.NO_AUDIO)

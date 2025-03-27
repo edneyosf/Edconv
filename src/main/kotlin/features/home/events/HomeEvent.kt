@@ -15,7 +15,7 @@ sealed interface HomeEvent {
     data class SetPreset(val preset: String): HomeEvent
     data class SetCrf(val crf: Int): HomeEvent
     data class SetResolution(val resolution: Resolutions?): HomeEvent
-    data class SetBit(val bit: String?): HomeEvent
+    data class SetPixelFormat(val pixelFormat: String?): HomeEvent
     data class SetNoAudio(val noAudio: Boolean): HomeEvent
     data object OnStart: HomeEvent
     data object OnStop: HomeEvent
