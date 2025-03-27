@@ -1,18 +1,25 @@
 package edconv.av1
 
-object AV1Preset {
-    const val P0 = "0"
-    const val P1 = "1"
-    const val P2 = "2"
-    const val P3 = "3"
-    const val P4 = "4"
-    const val P5 = "5"
-    const val P6 = "6"
-    const val P7 = "7"
-    const val P8 = "8"
-    const val P9 = "9"
-    const val P10 = "10"
-    const val P11 = "11"
-    const val P12 = "12"
-    const val P13 = "13"
+enum class AV1Preset(val id: Int, val value: String) {
+    P0(id = 0, value = "0"),
+    P1(id = 1, value = "1"),
+    P2(id = 2, value = "2"),
+    P3(id = 3, value = "3"),
+    P4(id = 4, value = "4"),
+    P5(id = 5, value = "5"),
+    P6(id = 6, value = "6"),
+    P7(id = 7, value = "7"),
+    P8(id = 8, value = "8"),
+    P9(id = 9, value = "9"),
+    P10(id = 10, value = "10"),
+    P11(id = 11, value = "11"),
+    P12(id = 12, value = "12"),
+    P13(id = 13, value = "13");
+
+    companion object {
+        const val MIN_ID = 0
+        const val MAX_ID = 13
+
+        fun fromId(id: Int) = entries.find { it.id == id }
+    }
 }

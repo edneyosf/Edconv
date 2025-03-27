@@ -16,14 +16,6 @@ enum class MediaFormat(
     }
 
     companion object {
-        fun getAll() = listOf(AAC, EAC3, H265, AV1)
-
-        fun fromString(it: String) = when(it.lowercase()) {
-            "aac" -> AAC
-            "eac3" -> EAC3
-            "h265" -> H265
-            "av1" -> AV1
-            else -> null
-        }
+        fun getAll() = entries.toList()
     }
 }

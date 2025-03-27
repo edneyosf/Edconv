@@ -6,6 +6,6 @@ enum class Channels(val value: String, val text: String) {
     DOWNMIXING_SURROUND_51(value = "62", text = "Stereo (Surround 5.1)");
 
     companion object {
-        fun getAll() = listOf(STEREO, DOWNMIXING_SURROUND_51, SURROUND_51)
+        fun getAll() = entries.toList()
     }
 }
