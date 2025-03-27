@@ -33,8 +33,8 @@ private fun setConfigs() {
     Configs.vbrDefault = AACVBRs.Q5
     Configs.aacKbpsDefault = Kbps.K192
     Configs.eac3KbpsDefault = Kbps.K384
-    Configs.h265PresetDefault = H265Preset.SLOW
-    Configs.av1PresetDefault = AV1Preset.P4
+    Configs.h265PresetDefault = H265Preset.SLOW.value
+    Configs.av1PresetDefault = AV1Preset.P4.value
     Configs.h265CrfDefault = 21
     Configs.av1CrfDefault = 25
     Configs.outputFileDefault = DirUtils.outputDir
