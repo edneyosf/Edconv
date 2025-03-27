@@ -11,7 +11,7 @@ data class HomeState(
     val channels: Channels?,
     val vbr: String?,
     val kbps: Kbps?,
-    val sampleRate: String?,
+    val sampleRate: SampleRate?,
     val preset: String?,
     val crf: Int,
     val resolution: Resolution?,
