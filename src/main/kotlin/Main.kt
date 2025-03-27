@@ -23,7 +23,7 @@ fun main() {
 
 private fun setConfigs() {
     Configs.title = "Edconv ${PropertyUtils.version}"
-    Configs.minWindowWidth = 800
-    Configs.minWindowHeight = 600
+    Configs.minWindowWidth = 1250
+    Configs.minWindowHeight = 730
     Configs.outputFileDefault = DirUtils.outputDir
 }
