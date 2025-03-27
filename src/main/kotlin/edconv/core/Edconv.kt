@@ -2,9 +2,7 @@ package edconv.core
 
 import edconv.aac.AACBuilder
 import edconv.av1.AV1Builder
-import edconv.common.Channels
-import edconv.common.Kbps
-import edconv.common.PixelFormat
+import edconv.common.*
 import edconv.eac3.EAC3Builder
 import edconv.core.EdconvArgs.FFMPEG_PATH
 import edconv.core.EdconvArgs.FFPROBE_PATH
@@ -13,7 +11,6 @@ import edconv.core.EdconvConfigs.FFMPEG
 import edconv.core.EdconvConfigs.FFPROBE
 import edconv.core.EdconvConfigs.STATUS_COMPLETE
 import edconv.core.EdconvConfigs.STATUS_ERROR
-import edconv.common.Resolution
 import edconv.core.utils.CmdUtils
 import edconv.h265.H265Builder
 import kotlinx.coroutines.*
@@ -39,7 +36,7 @@ class Edconv(
 
     fun toAAC(
         inputFile: String, outputFile: String, channels: Channels? = null, kbps: Kbps? = null, vbr: String? = null,
-        sampleRate: String? = null): Job {
+        sampleRate: SampleRate? = null): Job {
 
         val cmd = AACBuilder(
             inputFile = inputFile,
@@ -55,7 +52,7 @@ class Edconv(
 
     fun toEAC3(
         inputFile: String, outputFile: String, kbps: Kbps, channels: Channels? = null,
-        sampleRate: String? = null): Job {
+        sampleRate: SampleRate? = null): Job {
 
         val cmd = EAC3Builder(
             inputFile = inputFile,

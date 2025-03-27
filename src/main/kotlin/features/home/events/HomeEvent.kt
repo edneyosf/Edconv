@@ -9,7 +9,7 @@ sealed interface HomeEvent {
     data class SetChannels(val channels: Channels?): HomeEvent
     data class SetVbr(val vbr: String): HomeEvent
     data class SetKbps(val kbps: Kbps): HomeEvent
-    data class SetSampleRate(val sampleRate: String?): HomeEvent
+    data class SetSampleRate(val sampleRate: SampleRate?): HomeEvent
     data class SetPreset(val preset: String): HomeEvent
     data class SetCrf(val crf: Int): HomeEvent
     data class SetResolution(val resolution: Resolution?): HomeEvent

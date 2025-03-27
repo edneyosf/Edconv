@@ -1,9 +1,6 @@
 package edconv.aac
 
-import edconv.common.Channels
-import edconv.common.Kbps
-import edconv.common.MediaBuilder
-import edconv.common.MediaFormat
+import edconv.common.*
 import edconv.core.EdconvArgs
 
 data class AACBuilder(
@@ -12,7 +9,7 @@ data class AACBuilder(
     private val channels: Channels? = null,
     private val kbps: Kbps? = null,
     private val vbr: String? = null,
-    private val sampleRate: String? = null
+    private val sampleRate: SampleRate? = null
 ): MediaBuilder(inputFile, outputFile) {
 
     init {
@@ -34,9 +31,9 @@ data class AACBuilder(
             cmd.add(vbr)
         }
 
-        if(!sampleRate.isNullOrBlank()) {
+        if(sampleRate != null) {
             cmd.add(EdconvArgs.SAMPLE_RATE)
-            cmd.add(sampleRate)
+            cmd.add(sampleRate.value)
         }
     }
 }
