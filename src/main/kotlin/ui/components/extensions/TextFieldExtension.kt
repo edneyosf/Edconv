@@ -1,4 +1,4 @@
-package ui.theme.extensions
+package ui.components.extensions
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

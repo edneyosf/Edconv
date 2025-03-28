@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import ui.theme.extensions.custom
+import ui.components.extensions.custom
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
