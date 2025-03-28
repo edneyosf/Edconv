@@ -22,7 +22,9 @@ fun main() {
 }
 
 private fun setConfigs() {
-    Configs.title = "Edconv ${PropertyUtils.version}"
+    val version = PropertyUtils.version
+
+    Configs.title = "Edconv ${if(version != null) "v$version" else "- Dev"}"
     Configs.minWindowWidth = 1250
     Configs.minWindowHeight = 730
     Configs.outputFileDefault = DirUtils.outputDir
