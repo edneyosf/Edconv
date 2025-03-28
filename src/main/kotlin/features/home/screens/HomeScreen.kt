@@ -1,10 +1,13 @@
 package features.home.screens
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
@@ -108,10 +111,11 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 onPickFile = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
             )
 
-            VerticalDivider(color = MaterialTheme.colorScheme.surfaceContainer)
+            VerticalDivider(color = if(isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceDim)
 
             Column(
                 modifier = Modifier.padding(dimens.i),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(dimens.i)
             ) {
 
@@ -123,34 +127,61 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 )
 
                 // Common Settings
-                Row(horizontalArrangement = Arrangement.spacedBy(dimens.d)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
                     FormatInput(
                         value = state.format,
                         isVideo = isVideo,
                         onValueChange = { onEvent(SetFormat(it)) }
                     )
 
+                    Column {
+                        if(isAudio) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(
+                                    selected = CONSTANT_COMPRESSION == selectedCompression,
+                                    onClick = { selectedCompression = CONSTANT_COMPRESSION }
+                                )
+                                Text(compressions[CONSTANT_COMPRESSION], style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Spacer(modifier = Modifier.width(dimens.d))
+                                Text(teste.value.roundToInt().toString(), style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
+                            }
+                        }
+                        else if(isVideo) {
+                            Row {
+                                Text(compressions[CONSTANT_COMPRESSION], style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Spacer(modifier = Modifier.width(dimens.d))
+                                Text(teste.value.roundToInt().toString(), style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
+                            }
+                        }
+                        Box(modifier = Modifier.width(320.dp)) {
+                            Slider(
+                                value = teste.value,
+                                enabled = selectedCompression == CONSTANT_COMPRESSION,
+                                colors = SliderDefaults.colors(activeTrackColor = MaterialTheme.colorScheme.primary, thumbColor = MaterialTheme.colorScheme.primary, inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer),
+                                onValueChange = { teste.value = it.roundToInt().toFloat() },
+                                valueRange = ((if(CONSTANT_COMPRESSION == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(CONSTANT_COMPRESSION == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
+                            )
+                        }
+                    }
+
                     if(isAudio) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(
-                                selected = CONSTANT_COMPRESSION == selectedCompression,
-                                onClick = { selectedCompression = CONSTANT_COMPRESSION }
+                                selected = VARIABLE_COMPRESSION == selectedCompression,
+                                onClick = { selectedCompression = VARIABLE_COMPRESSION }
                             )
-                            Text(compressions[CONSTANT_COMPRESSION])
+                            VariableCompressionInput(
+                                value = state.kbps,
+                                enabled = VARIABLE_COMPRESSION == selectedCompression,
+                                onValueChange = { onEvent(SetKbps(it)) }
+                            )
                         }
                     }
-                    Slider(
-                        modifier = Modifier.width(300.dp),
-                        value = teste.value,
-                        enabled = selectedCompression == CONSTANT_COMPRESSION,
-                        onValueChange = { teste.value = it.roundToInt().toFloat() },
-                        valueRange = ((if(CONSTANT_COMPRESSION == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(CONSTANT_COMPRESSION == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
-                    )
                 }
 
                 // Audio Settings
                 if(isAudio) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
                         ChannelsInput(
                             value = state.channels,
                             onValueChange = { onEvent(SetChannels(it)) }
@@ -160,39 +191,29 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                             value = state.sampleRate,
                             onValueChange = { onEvent(SetSampleRate(it)) }
                         )
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = VARIABLE_COMPRESSION == selectedCompression,
-                                onClick = { selectedCompression = VARIABLE_COMPRESSION }
-                            )
-                            Text(compressions[VARIABLE_COMPRESSION])
-                            Spacer(modifier = Modifier.width(dimens.i))
-                            VariableCompressionInput(
-                                value = state.kbps,
-                                enabled = VARIABLE_COMPRESSION == selectedCompression,
-                                onValueChange = { onEvent(SetKbps(it)) }
-                            )
-                        }
                     }
                 }
                 // Video Settings
                 else if(isVideo) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
-                        Column(verticalArrangement = Arrangement.spacedBy(dimens.f)) {
-                            ResolutionInput(
-                                value = state.resolution,
-                                onValueChange = { onEvent(SetResolution(it)) }
-                            )
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
+                        ResolutionInput(
+                            value = state.resolution,
+                            onValueChange = { onEvent(SetResolution(it)) }
+                        )
 
-                            PixelFormatInput(
-                                value = state.pixelFormat,
-                                onValueChange = { onEvent(SetPixelFormat(it)) }
-                            )
-                        }
+                        PixelFormatInput(
+                            value = state.pixelFormat,
+                            onValueChange = { onEvent(SetPixelFormat(it)) }
+                        )
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(dimens.f)) {
-                            Text((if(state.format == MediaFormat.H265) H265Preset.fromId(teste1.value.toInt())?.value else AV1Preset.fromId(teste1.value.toInt())?.value) ?: "")
+                        Column {
+                            Row {
+                                Text("Preset:", style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Spacer(modifier = Modifier.width(dimens.d))
+                                Text(
+                                    (if(state.format == MediaFormat.H265) H265Preset.fromId(teste1.value.toInt())?.value else AV1Preset.fromId(teste1.value.toInt())?.value) ?: "",
+                                    style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
+                            }
                             Slider(
                                 value = teste1.value,
                                 modifier = Modifier.width(300.dp),
@@ -208,17 +229,17 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                     else -> 1
                                 }).toFloat()
                             )
+                        }
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Switch(
-                                    checked = state.noAudio,
-                                    onCheckedChange = {
-                                        onEvent(SetNoAudio(it))
-                                    }
-                                )
-                                Spacer(modifier = Modifier.width(dimens.f))
-                                Text(texts.get(NO_AUDIO_INPUT_TXT))
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Switch(
+                                checked = state.noAudio,
+                                onCheckedChange = {
+                                    onEvent(SetNoAudio(it))
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(dimens.f))
+                            Text(texts.get(NO_AUDIO_INPUT_TXT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
                         }
                     }
                 }
