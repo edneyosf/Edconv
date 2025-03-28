@@ -10,12 +10,14 @@ import androidx.compose.runtime.Composable
 fun TextFieldColors.custom(darkTheme: Boolean = isSystemInDarkTheme()): TextFieldColors {
     return if(darkTheme) {
         TextFieldDefaults.colors().copy(
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceContainer
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceContainer,
+            disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainer
         )
     }
     else {
         TextFieldDefaults.colors().copy(
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceDim
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceDim,
+            disabledIndicatorColor = MaterialTheme.colorScheme.surfaceDim
         )
     }
 }
