@@ -35,7 +35,7 @@ class Edconv(
     }
 
     fun toAAC(
-        inputFile: String, outputFile: String, channels: Channels? = null, kbps: Kbps? = null, vbr: String? = null,
+        inputFile: String, outputFile: String, channels: Channels? = null, kbps: Kbps? = null, vbr: Int? = null,
         sampleRate: SampleRate? = null): Job {
 
         val cmd = AACBuilder(

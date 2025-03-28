@@ -212,7 +212,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }
     private fun setOutputFile(outputFile: String) = _state.update { copy(outputFile = outputFile) }
     private fun setChannels(channels: Channels?) = _state.update { copy(channels = channels) }
-    private fun setVbr(vbr: String) = _state.update { copy(vbr = vbr) }
+    private fun setVbr(vbr: Int?) = _state.update { copy(vbr = vbr) }
     private fun setKbps(kbps: Kbps) = _state.update { copy(kbps = kbps) }
     private fun setSampleRate(sampleRate: SampleRate?) = _state.update { copy(sampleRate = sampleRate) }
     private fun setPreset(preset: String) = _state.update { copy(preset = preset) }

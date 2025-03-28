@@ -7,7 +7,7 @@ sealed interface HomeEvent {
     data class SetOutputFile(val outputFile: String): HomeEvent
     data class SetFormat(val format: MediaFormat?): HomeEvent
     data class SetChannels(val channels: Channels?): HomeEvent
-    data class SetVbr(val vbr: String): HomeEvent
+    data class SetVbr(val vbr: Int?): HomeEvent
     data class SetKbps(val kbps: Kbps): HomeEvent
     data class SetSampleRate(val sampleRate: SampleRate?): HomeEvent
     data class SetPreset(val preset: String): HomeEvent

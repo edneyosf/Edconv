@@ -9,7 +9,7 @@ data class HomeState(
     val outputFile: String?,
     val format: MediaFormat?,
     val channels: Channels?,
-    val vbr: String?,
+    val vbr: Int?,
     val kbps: Kbps?,
     val sampleRate: SampleRate?,
     val preset: String?,

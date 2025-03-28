@@ -8,7 +8,7 @@ data class AACBuilder(
     override val outputFile: String,
     private val channels: Channels? = null,
     private val kbps: Kbps? = null,
-    private val vbr: String? = null,
+    private val vbr: Int? = null,
     private val sampleRate: SampleRate? = null
 ): MediaBuilder(inputFile, outputFile) {
 
@@ -26,9 +26,9 @@ data class AACBuilder(
             cmd.add(kbps.value)
         }
 
-        if(!vbr.isNullOrBlank()) {
+        if(vbr != null) {
             cmd.add(EdconvArgs.VBR)
-            cmd.add(vbr)
+            cmd.add(vbr.toString())
         }
 
         if(sampleRate != null) {
