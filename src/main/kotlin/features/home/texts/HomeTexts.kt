@@ -28,6 +28,7 @@ class HomeTexts(override val language: String): Texts(language) {
         NO_AUDIO_INPUT_TXT to "Sem áudio",
         QUALITY_INPUT_TXT to "Qualidade:",
         BIT_RATE_INPUT_TXT to "Taxa de bits",
+        PRESET_INPUT_TXT to "Predefinição:",
         AUDIO_MEDIA_TYPE_TXT to "Áudio",
         VIDEO_MEDIA_TYPE_TXT  to "Vídeo",
     )
@@ -46,6 +47,7 @@ class HomeTexts(override val language: String): Texts(language) {
         NO_AUDIO_INPUT_TXT to "No audio",
         QUALITY_INPUT_TXT to "Constant:",
         BIT_RATE_INPUT_TXT to "Bitrate",
+        PRESET_INPUT_TXT to "Preset:",
         AUDIO_MEDIA_TYPE_TXT to "Audio",
         VIDEO_MEDIA_TYPE_TXT  to "Video",
     )
@@ -66,7 +68,8 @@ class HomeTexts(override val language: String): Texts(language) {
         const val NO_AUDIO_INPUT_TXT = 11L
         const val QUALITY_INPUT_TXT = 12L
         const val BIT_RATE_INPUT_TXT = 13L
-        const val AUDIO_MEDIA_TYPE_TXT = 14L
-        const val VIDEO_MEDIA_TYPE_TXT = 15L
+        const val PRESET_INPUT_TXT = 14L
+        const val AUDIO_MEDIA_TYPE_TXT = 15L
+        const val VIDEO_MEDIA_TYPE_TXT = 16L
     }
 }

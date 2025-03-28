@@ -30,6 +30,8 @@ import features.home.events.HomeEvent.SetPixelFormat
 import features.home.events.HomeEvent.SetResolution
 import features.home.events.HomeEvent.SetNoAudio
 import features.home.events.HomeEvent.SetKbps
+import features.home.events.HomeEvent.SetCrf
+import features.home.events.HomeEvent.SetVbr
 import features.home.managers.HomeManager
 import features.home.states.HomeState
 import features.home.states.HomeStatus
@@ -41,6 +43,7 @@ import features.home.texts.HomeTexts.Companion.FORMAT_INPUT_TXT
 import features.home.texts.HomeTexts.Companion.NO_AUDIO_INPUT_TXT
 import features.home.texts.HomeTexts.Companion.OUTPUT_FILE_TXT
 import features.home.texts.HomeTexts.Companion.PIXEL_FORMAT_INPUT_TXT
+import features.home.texts.HomeTexts.Companion.PRESET_INPUT_TXT
 import features.home.texts.HomeTexts.Companion.QUALITY_INPUT_TXT
 import features.home.texts.HomeTexts.Companion.RESOLUTION_INPUT_TXT
 import features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT_TXT
@@ -52,9 +55,10 @@ import features.home.texts.homeTexts
 import ui.components.Selector
 import ui.compositions.*
 import ui.theme.AppTheme
-import ui.theme.extensions.custom
+import ui.components.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 private const val AUDIO_MEDIA = 0
@@ -77,29 +81,40 @@ fun HomeScreen() {
 
 @Composable
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
+    val isDarkTheme = isSystemInDarkTheme()
     val status = state.status
     var selectedMediaType by remember { mutableStateOf(value = AUDIO_MEDIA) }
     val isAudio = selectedMediaType == AUDIO_MEDIA
     val isVideo = selectedMediaType == VIDEO_MEDIA
     val titlePickFile = texts.get(TITLE_PICK_FILE_TXT)
-    var selectedCompression by remember { mutableStateOf<Int?>(value = null) }
     val compressions = listOf(texts.get(QUALITY_INPUT_TXT), texts.get(BIT_RATE_INPUT_TXT))
-    val teste = remember { mutableStateOf(0.0f) }
-    val teste1 = remember { mutableStateOf(0.0f) }
+    var selectedCompression by remember { mutableStateOf<Int?>(value = null) }
+    var quality by remember { mutableStateOf<Int?>(value = null) }
+    var preset by remember { mutableStateOf<Int?>(value = null) }
 
     // Media Type
     LaunchedEffect(selectedMediaType) {
         onEvent(SetFormat(null))
     }
     // Format
-    LaunchedEffect(state.format) {
-        teste.value = 0.0f
-        teste1.value = 0.0f
-        selectedCompression = if(state.format == null) null
-        else {
-            if(state.format != MediaFormat.EAC3) CONSTANT_COMPRESSION
-            else VARIABLE_COMPRESSION
+    LaunchedEffect(state.format) { state.format.let {
+            quality = 0
+            preset = 0
+            selectedCompression = if(it == null) null
+            else {
+                if(it != MediaFormat.EAC3) CONSTANT_COMPRESSION
+                else VARIABLE_COMPRESSION
+            }
         }
+    }
+    // Quality
+    LaunchedEffect(quality) {
+        if(isAudio) onEvent(SetVbr(quality))
+        else if(isVideo) quality?.let { onEvent(SetCrf(it)) }
+    }
+    // Preset
+    LaunchedEffect(preset) {
+        onEvent(HomeEvent.SetPreset(preset))
     }
 
     Scaffold { innerPadding ->
@@ -111,14 +126,16 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 onPickFile = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
             )
 
-            VerticalDivider(color = if(isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceDim)
+            VerticalDivider(
+                color = if(isDarkTheme) MaterialTheme.colorScheme.surfaceContainer
+                else MaterialTheme.colorScheme.surfaceDim
+            )
 
             Column(
                 modifier = Modifier.padding(dimens.i),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(dimens.i)
             ) {
-
                 Actions(
                     status = status,
                     enabled = state.inputFile != null,
@@ -127,7 +144,10 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 )
 
                 // Common Settings
-                Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(dimens.m),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     FormatInput(
                         value = state.format,
                         isVideo = isVideo,
@@ -141,27 +161,61 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                     selected = CONSTANT_COMPRESSION == selectedCompression,
                                     onClick = { selectedCompression = CONSTANT_COMPRESSION }
                                 )
-                                Text(compressions[CONSTANT_COMPRESSION], style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+
+                                Text(
+                                    text = compressions[CONSTANT_COMPRESSION],
+                                    style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                )
+
                                 Spacer(modifier = Modifier.width(dimens.d))
-                                Text(teste.value.roundToInt().toString(), style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
+
+                                Text(
+                                    text = quality?.toString() ?: "0",
+                                    style = TextStyle(
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontSize = fontSizes.c
+                                    )
+                                )
                             }
                         }
                         else if(isVideo) {
                             Row {
-                                Text(compressions[CONSTANT_COMPRESSION], style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Text(
+                                    text = compressions[CONSTANT_COMPRESSION],
+                                    style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                )
+
                                 Spacer(modifier = Modifier.width(dimens.d))
-                                Text(teste.value.roundToInt().toString(), style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
+
+                                Text(
+                                    text = quality?.toString() ?: "0",
+                                    style = TextStyle(
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontSize = fontSizes.c
+                                    )
+                                )
                             }
                         }
-                        Box(modifier = Modifier.width(320.dp)) {
-                            Slider(
-                                value = teste.value,
-                                enabled = selectedCompression == CONSTANT_COMPRESSION,
-                                colors = SliderDefaults.colors(activeTrackColor = MaterialTheme.colorScheme.primary, thumbColor = MaterialTheme.colorScheme.primary, inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer),
-                                onValueChange = { teste.value = it.roundToInt().toFloat() },
-                                valueRange = ((if(CONSTANT_COMPRESSION == 0) state.format?.minCrf?.toFloat() else state.format?.minVbr?.toFloat()) ?: 0f)..((if(CONSTANT_COMPRESSION == 1) state.format?.maxCrf?.toFloat() else state.format?.maxVbr?.toFloat()) ?: 1f),
-                            )
-                        }
+                        val minRate = when(state.format) {
+                            MediaFormat.AAC -> state.format.minVbr?.toFloat()
+                            MediaFormat.H265, MediaFormat.AV1 -> state.format.minCrf?.toFloat()
+                            else -> 0f
+                        } ?: 0f
+                        val maxRate = when(state.format) {
+                            MediaFormat.AAC -> state.format.maxVbr?.toFloat()
+                            MediaFormat.H265, MediaFormat.AV1 -> state.format.maxCrf?.toFloat()
+                            else -> 0f
+                        } ?: 0f
+
+                        // TODO
+                        Slider(
+                            value = quality?.toFloat() ?: 0.0f,
+                            modifier = Modifier.width(320.dp),
+                            enabled = state.format != null && selectedCompression == CONSTANT_COMPRESSION,
+                            colors = SliderDefaults.custom(),
+                            onValueChange = { quality = it.roundToInt() },
+                            valueRange = minRate .. maxRate,
+                        )
                     }
 
                     if(isAudio) {
@@ -207,27 +261,44 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                         )
 
                         Column {
+                            var presetText = ""
+
+                            if(state.format == MediaFormat.H265) {
+                                preset?.let {
+                                    presetText = H265Preset.fromId(it)?.value ?: ""
+                                }
+                            }
+                            else if(state.format == MediaFormat.AV1) {
+                                preset?.let {
+                                    presetText = AV1Preset.fromId(it)?.value ?: ""
+                                }
+                            }
+
                             Row {
-                                Text("Preset:", style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Text(text = texts.get(PRESET_INPUT_TXT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
                                 Spacer(modifier = Modifier.width(dimens.d))
                                 Text(
-                                    (if(state.format == MediaFormat.H265) H265Preset.fromId(teste1.value.toInt())?.value else AV1Preset.fromId(teste1.value.toInt())?.value) ?: "",
+                                    presetText,
                                     style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
                             }
+                            val minPreset = when(state.format) {
+                                MediaFormat.H265 -> H265Preset.MIN_ID.toFloat()
+                                MediaFormat.AV1 -> AV1Preset.MIN_ID.toFloat()
+                                else -> 0f
+                            }
+                            val maxPreset = when(state.format) {
+                                MediaFormat.H265 -> H265Preset.MAX_ID.toFloat()
+                                MediaFormat.AV1 -> AV1Preset.MAX_ID.toFloat()
+                                else -> 0f
+                            }
+
                             Slider(
-                                value = teste1.value,
-                                modifier = Modifier.width(300.dp),
+                                value = preset?.toFloat() ?: 0f,
+                                modifier = Modifier.width(320.dp),
                                 enabled = state.format != null,
-                                onValueChange = { teste1.value = it.roundToInt().toFloat() },
-                                valueRange = (when(state.format) {
-                                    MediaFormat.H265 -> H265Preset.MIN_ID
-                                    MediaFormat.AV1 -> AV1Preset.MIN_ID
-                                    else -> 0
-                                }).toFloat() .. (when(state.format) {
-                                    MediaFormat.H265 -> H265Preset.MAX_ID
-                                    MediaFormat.AV1 -> AV1Preset.MAX_ID
-                                    else -> 1
-                                }).toFloat()
+                                colors = SliderDefaults.custom(),
+                                onValueChange = { preset = it.roundToInt() },
+                                valueRange = minPreset .. maxPreset
                             )
                         }
 
@@ -243,7 +314,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                         }
                     }
                 }
-
+                //TODO
                 LogsView(state.logs)
 
                 Progress(status)
