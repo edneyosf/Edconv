@@ -114,7 +114,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     }
     // Preset
     LaunchedEffect(preset) {
-        onEvent(HomeEvent.SetPreset(preset))
+        //onEvent(HomeEvent.SetPreset(preset))
     }
 
     Scaffold { innerPadding ->
