@@ -6,4 +6,7 @@ object Configs {
     var minWindowHeight = 0
     var languageDefault = Languages.EN
     var outputFileDefault = ""
+    var ffmpegPath = ""
+    var ffprobePath = ""
+    var ffmpegLogLevel = ""
 }
