@@ -4,6 +4,7 @@ import app.App
 import core.Configs
 import core.utils.DirUtils
 import core.utils.PropertyUtils
+import edconv.ffmpeg.FFmpegLogLevel
 import java.awt.Dimension
 
 fun main() {
@@ -28,4 +29,7 @@ private fun setConfigs() {
     Configs.minWindowWidth = 1250
     Configs.minWindowHeight = 730
     Configs.outputFileDefault = DirUtils.outputDir
+    Configs.ffmpegPath = "/home/edney/bin/ffmpeg"
+    Configs.ffprobePath = "/home/edney/bin/ffprobe"
+    Configs.ffmpegLogLevel = FFmpegLogLevel.INFO
 }

@@ -7,12 +7,12 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val binDir = File(project.rootDir, "bin")
+//val binDir = File(project.rootDir, "bin")
 val appName = "Edconv"
 val appVersion = "1.0.0"
-val core = "edconv"
-val ffmpeg = "ffmpeg-ed"
-val ffprobe = "ffprobe-ed"
+//val core = "edconv"
+//val ffmpeg = "ffmpeg-ed"
+//val ffprobe = "ffprobe-ed"
 
 group = "com.radiuere"
 version = "${appVersion}-SNAPSHOT"
@@ -30,6 +30,12 @@ dependencies {
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.swing)
     implementation(libs.serialization.json)
+
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 compose.desktop {
@@ -52,7 +58,7 @@ compose.desktop {
     }
 }
 
-afterEvaluate {
+/*afterEvaluate {
     tasks.named("run") {
         doFirst {
             val buildBinDir = file("${layout.buildDirectory.get()}/bin")
@@ -119,4 +125,4 @@ afterEvaluate {
             }
         }
     }
-}
+}*/

@@ -1,11 +1,12 @@
 package features.home.states
 
 import edconv.common.*
+import edconv.core.data.MediaData
 
 data class HomeState(
     val status: HomeStatus,
     val logs: String,
-    val inputFile: String?,
+    val inputFile: MediaData?,
     val outputFile: String?,
     val codec: Codec?,
     val channels: Channels?,

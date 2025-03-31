@@ -11,7 +11,7 @@ enum class Codec(
     AV1(value = "libsvtav1", text = "AV1 (SVT)", isVideo = true, minCrf = 0, maxCrf = 63);
 
     fun toFileExtension() = when(this) {
-        AAC, AAC_FDK -> "aac"
+        AAC, AAC_FDK -> "m4a"
         EAC3 -> "eac3"
         H265, AV1 -> "mkv"
     }

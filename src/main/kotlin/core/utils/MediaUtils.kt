@@ -1,6 +1,7 @@
 package core.utils
 
 import core.Configs
+import edconv.common.MediaType
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -15,7 +16,10 @@ object MediaUtils {
             "-of", "csv=s=x:p=0",
             file.absolutePath
         )
-        val process = ProcessBuilder(*command).start()
+        val process = ProcessBuilder(*command)
+            .redirectErrorStream(true)
+            .start()
+
         val inputStream = InputStreamReader(process.inputStream)
         val reader = BufferedReader(inputStream)
         val data = reader.readLine()?.split("x")
@@ -26,7 +30,7 @@ object MediaUtils {
         return Pair(width, height)
     }
 
-    fun getMediaDuration(file: File): Long {
+    fun getDuration(file: File): Long {
         val command = arrayOf(
             Configs.ffprobePath,
             "-v", "error",
@@ -34,7 +38,10 @@ object MediaUtils {
             "-of", "default=noprint_wrappers=1:nokey=1",
             file.absolutePath
         )
-        val process = ProcessBuilder(*command).start()
+        val process = ProcessBuilder(*command)
+            .redirectErrorStream(true)
+            .start()
+
         val inputStream = InputStreamReader(process.inputStream)
         val reader = BufferedReader(inputStream)
         val durationInSeconds = reader.readLine()?.toDoubleOrNull() ?: 0.0
@@ -42,5 +49,27 @@ object MediaUtils {
         return (durationInSeconds * 1000).toLong()
     }
 
-    fun getFileSize(file: File) = file.length()
+    fun getType(file: File): MediaType {
+        val command = listOf(
+            Configs.ffprobePath,
+            "-v", "error",
+            "-show_entries", "stream=codec_type",
+            "-of", "csv=p=0",
+            file.absolutePath
+        )
+        val process = ProcessBuilder(command)
+            .redirectErrorStream(true)
+            .start()
+
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        val output =  reader.readLines().map { it.trim() }
+
+        return when {
+            "video" in output -> MediaType.VIDEO
+            "audio" in output -> MediaType.AUDIO
+            else -> MediaType.UNKNOWN
+        }
+    }
+
+    fun getSize(file: File) = file.length()
 }
