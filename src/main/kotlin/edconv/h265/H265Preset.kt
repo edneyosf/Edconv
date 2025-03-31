@@ -1,7 +1,5 @@
 package edconv.h265
 
-import edconv.av1.AV1Preset
-
 enum class H265Preset(val id: Int, val value: String) {
     ULTRAFAST(id = 0, value = "ultrafast"),
     SUPERFAST(id = 1, value = "superfast"),
