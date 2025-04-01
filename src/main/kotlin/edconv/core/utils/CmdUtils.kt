@@ -6,7 +6,8 @@ object CmdUtils {
 
         try {
             val cmd = arrayOf("pkill", processName)
-            val process = Runtime.getRuntime().exec(cmd)
+            val runtime = Runtime.getRuntime()
+            val process = runtime.exec(cmd)
 
             process.waitFor()
             isSuccess = process.exitValue() == 0
