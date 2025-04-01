@@ -2,8 +2,7 @@ package edconv.core
 
 import edconv.core.EdconvConfigs.FFMPEG
 import edconv.core.EdconvConfigs.FFPROBE
-import edconv.core.EdconvConfigs.STATUS_COMPLETE
-import edconv.core.EdconvConfigs.STATUS_ERROR
+import edconv.core.EdconvConfigs.TIME_PATTERN
 import edconv.core.data.ProgressData
 import edconv.core.utils.CmdUtils
 import edconv.ffmpeg.FFmpeg
@@ -15,25 +14,24 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 class Edconv(
-    private val scope: CoroutineScope, private val onStdout: (String) -> Unit, private val onStderr: (String) -> Unit,
-    private val onStart: () -> Unit, private val onStop: () -> Unit, private val onProgress: (ProgressData) -> Unit
+    private val scope: CoroutineScope, private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
+    private val onError: (Throwable) -> Unit, private val onProgress: (ProgressData) -> Unit,
+    private val onStop: () -> Unit
 ) {
     private var process: Process? = null
 
     fun run(ffmpeg: FFmpeg) = scope.launch(context = Dispatchers.IO) {
+        notify { onStart() }
         val cmd = ffmpeg.build()
 
-        notify(cmd.joinToString(" "), onStdout)
+        notify { onStdout("Command = { " + cmd.joinToString(" ") + " }\n") }
 
         try {
             process = ProcessBuilder(cmd)
-                .redirectErrorStream(true)
                 .start()
 
-            withContext(context = Dispatchers.Main){ onStart() }
-
             process?.let {
-                val reader = BufferedReader(InputStreamReader(it.inputStream))
+                val reader = BufferedReader(InputStreamReader(it.errorStream))
                 var line: String?
 
                 while (true) {
@@ -43,36 +41,30 @@ class Edconv(
                     if (match != null) {
                         val (size, timeRaw, bitrate, speed) = match.destructured
 
-                        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS")
+                        val formatter = DateTimeFormatter.ofPattern(TIME_PATTERN)
                         val timeDraft = LocalTime.parse(timeRaw, formatter)
                         val time = Duration.between(LocalTime.MIDNIGHT, timeDraft).toMillis()
-                        println("sieze: "+size)
-                        println("timeraw: "+timeRaw)
-                        println("bitrate: "+bitrate)
-                        println("speed: "+speed)
                         val lastProgress = ProgressData(size, time, bitrate, speed)
-                        withContext(context = Dispatchers.Main) {
-                            onProgress(lastProgress)
-                        }
-                    }
 
-                    notify("\r$line", onStdout)
+                        notify { onProgress(lastProgress) }
+                    }
+                    else {
+                        notify { onStdout(line) }
+                    }
                 }
 
-            } ?: run {
-                notify("Process is null", onStderr)
-                notify(STATUS_ERROR, onStdout)
-            }
-
-            process = null
-            withContext(context = Dispatchers.Main){ onStop() }
+            } ?: run { notify { onError(Throwable("Process is null")) } }
         }
         catch (e: Exception) {
             destroyProcess()
-            notify(e.message, onStderr)
-            withContext(context = Dispatchers.Main){ onStop() }
-            notify(STATUS_ERROR, onStdout)
+            notify { onError(e) }
         }
+        finally {
+            process = null
+            notify { onStop() }
+        }
+
+        return@launch
     }
 
     fun destroyProcess() {
@@ -82,7 +74,6 @@ class Edconv(
         process = null
     }
 
-    private suspend fun notify(content: String?, onStd: (String) -> Unit) = content?.let {
-        withContext(context = Dispatchers.Main) { onStd(it) }
-    }
+    private suspend inline fun <T> notify(crossinline block: () -> T): Unit =
+        withContext(context = Dispatchers.Main) { block() }
 }

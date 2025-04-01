@@ -30,7 +30,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         scope = scope,
         onStart = ::onStart,
         onStdout = ::onStdout,
-        onStderr = ::onStderr,
+        onError = ::onError,
         onProgress = ::onProgress,
         onStop = ::onStop
     )
@@ -181,9 +181,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         setLog(it)
     }
 
-    private fun onStderr(it: String) {
-        setStatus(HomeStatus.Error(it))
-        setLog(it)
+    private fun onError(it: Throwable) {
+        setStatus(HomeStatus.Error(it.message))
     }
 
     private fun onProgress(it: ProgressData) {
@@ -192,14 +191,16 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         setStatus(HomeStatus.Progress(percentage))
     }
 
+    infix fun Long.calculateProgress(duration: Long): Float {
+        return if (this > 0) (duration.toFloat() / this.toFloat()) * 100 else 0.0f
+    }
+
     private fun onStop() {
         setStatus(HomeStatus.Complete)
     }
 
     private fun prepareConversion() {
         val output = _state.value.outputFile
-
-        //setStatus(HomeStatus.Loading)
 
         if(output != null) {
             val outputFile = File(output).parentFile
@@ -212,36 +213,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun setLog(it: String) = setLogs(_state.value.logs + "\n$it")
-
-    private fun retrieveMediaInfo(it: String) {
-        val isMediaInfo = it.isMediaInfo()
-
-        if(isMediaInfo) {
-           // mediaInfo = MediaData.fromJsonString(it.retrieveMediaInfoJson())
-        }
-    }
-
-    private fun retrieveProgress(it: String) {
-        val isProgress = it.isProgress()
-        val mediaInfo = this.mediaInfo
-
-        if(isProgress && mediaInfo != null) {
-            val progress = ProgressData.fromJsonString(it.retrieveProgressJson())
-            val duration = mediaInfo.duration
-            val currentDuration = progress.time
-            //val percentage = duration calculateProgress currentDuration
-
-            //setStatus(HomeStatus.Progress(percentage))
-        }
-    }
-
-    private fun retrieveStatus(it: String) {
-        val isComplete = it.isStatusComplete()
-        val isError = it.isStatusError()
-
-        if(isComplete) setStatus(HomeStatus.Complete)
-        else if(isError) setStatus(HomeStatus.Error())
-    }
 
     private fun setFormat(format: Codec?) = _state.update {
         val inputFile = inputFile
@@ -256,38 +227,43 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         else copy(codec = format)
     }
 
-    private fun setInputFile(path: String) = _state.update {
+    private fun setInputFile(path: String) {
         val input = File(path)
         val outputFileName = input.nameWithoutExtension
-        val extension = codec?.toFileExtension() ?: input.extension
+        val extension = _state.value.codec?.toFileExtension() ?: input.extension
         val output = "$outputFileDefault$outputFileName.$extension"
-        val type = MediaUtils.getType(input)
-        val size = MediaUtils.getSize(input)
-        val duration: Long?
-        val resolution: Pair<Int, Int>?
 
-        if(type == MediaType.AUDIO) {
-            duration = MediaUtils.getDuration(input)
-            val media = MediaData(path = path, type = type, duration = duration, size = size)
+        scope.launch(context = Dispatchers.IO) {
+            val type = MediaUtils.getType(input)
+            val size = MediaUtils.getSize(input)
+            val duration: Long?
+            val resolution: Pair<Int, Int>?
 
-            println("Media: $media")
+            if(type == MediaType.AUDIO) {
+                duration = MediaUtils.getDuration(input)
+                val media = MediaData(path = path, type = type, duration = duration!!, size = size)
 
-            return@update copy(inputFile = media, outputFile = output)
+                println("Media: $media")
+
+                withContext(context = Dispatchers.Main) {
+                    _state.value = _state.value.copy(inputFile = media, outputFile = output)
+                }
+            }
+            else if(type == MediaType.VIDEO) {
+                duration = MediaUtils.getDuration(input)
+                resolution = MediaUtils.getVideoResolution(input)
+                val media = MediaData(path = path, type = type, duration = duration!!, resolution = resolution, size = size)
+
+                println("Media: $media")
+
+                withContext(context = Dispatchers.Main) {
+                    _state.value = _state.value.copy(inputFile = media, outputFile = output)
+                }
+            }
+            else {
+                println("Media: desconhecida")
+            }
         }
-        else if(type == MediaType.VIDEO) {
-            duration = MediaUtils.getDuration(input)
-            resolution = MediaUtils.getVideoResolution(input)
-            val media = MediaData(path = path, type = type, duration = duration, resolution = resolution, size = size)
-
-            println("Media: $media")
-
-            return@update copy(inputFile = media, outputFile = output)
-        }
-        else {
-            println("Media: desconhecida")
-        }
-
-        this
     }
 
     private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }

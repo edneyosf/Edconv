@@ -2,8 +2,6 @@ package core.utils
 
 import core.Configs
 import edconv.common.MediaType
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -14,7 +12,7 @@ object MediaUtils {
      * Command: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 <file_path>
      * Result model: "1920,1080"
      */
-    suspend fun getVideoResolution(file: File): Pair<Int, Int>? = withContext(context = Dispatchers.IO) {
+    fun getVideoResolution(file: File): Pair<Int, Int>? {
         var resolution: Pair<Int, Int>? = null
         val command = arrayOf(
             Configs.ffprobePath,
@@ -38,14 +36,14 @@ object MediaUtils {
             e.printStackTrace()
         }
 
-        return@withContext resolution
+        return resolution
     }
 
     /**
      * Command: ffprobe -v error -show_entries format=duration -of csv=p=0 <file_path>
      * Result model: "1382.255000"
      */
-    suspend fun getDuration(file: File): Long? = withContext(context = Dispatchers.IO) {
+    fun getDuration(file: File): Long? {
         var duration: Long? = null
         val command = arrayOf(
             Configs.ffprobePath,
@@ -66,7 +64,7 @@ object MediaUtils {
             e.printStackTrace()
         }
 
-        return@withContext duration
+        return duration
     }
 
     /**
@@ -76,7 +74,7 @@ object MediaUtils {
      *  audio
      *  subtitle"
      */
-    suspend fun getType(file: File): MediaType? = withContext(context = Dispatchers.IO) {
+    fun getType(file: File): MediaType? {
         var type: MediaType? = null
         val command = arrayOf(
             Configs.ffprobePath,
@@ -101,7 +99,7 @@ object MediaUtils {
             e.printStackTrace()
         }
 
-        return@withContext type
+        return type
     }
 
     fun getSize(file: File) = file.length()

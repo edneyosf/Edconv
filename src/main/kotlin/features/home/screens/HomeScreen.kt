@@ -389,7 +389,7 @@ private fun Navigation(selected: Int, hasInputFile: Boolean, onSelected: (Int) -
 private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
     val isLoading = status is HomeStatus.Loading
     val startEnabled = !isLoading && status !is HomeStatus.Progress
-    val stopEnabled = !isLoading
+    val stopEnabled = status is HomeStatus.Progress
     val modifier =  Modifier
         .fillMaxWidth()
         .padding(bottom = dimens.f)
