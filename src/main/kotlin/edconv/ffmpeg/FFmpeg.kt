@@ -92,6 +92,7 @@ class FFmpeg private constructor(
         data.addCmd(FFmpegArgs.VBR, vbr)
         data.addCmd(FFmpegArgs.SAMPLE_RATE, sampleRate)
         data.addCmd(FFmpegArgs.CHANNELS, channels)
+        data.addCmd(FFmpegArgs.PRESET, preset)
         data.addCmd(FFmpegArgs.CRF, crf)
         data.addCmd(profileArg(), profile)
         data.addCmd(FFmpegArgs.PIXEL_FORMAT, pixelFormat)
