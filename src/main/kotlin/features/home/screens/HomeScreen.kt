@@ -23,6 +23,8 @@ import edconv.h265.H265Preset
 import features.home.events.HomeEvent
 import features.home.events.HomeEvent.OnStart
 import features.home.events.HomeEvent.OnStop
+import features.home.events.HomeEvent.SetStatus
+import features.home.events.HomeEvent.SetInputFile
 import features.home.events.HomeEvent.SetOutputFile
 import features.home.events.HomeEvent.SetCodec
 import features.home.events.HomeEvent.SetChannels
@@ -55,6 +57,7 @@ import features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TXT
 import features.home.texts.HomeTexts.Companion.VIDEO_MEDIA_TYPE_TXT
 import features.home.texts.homeTexts
 import ui.components.Selector
+import ui.components.SimpleDialog
 import ui.compositions.*
 import ui.theme.AppTheme
 import ui.components.extensions.custom
@@ -62,8 +65,6 @@ import java.awt.FileDialog
 import java.awt.Frame
 import kotlin.math.roundToInt
 
-private const val AUDIO_MEDIA = 0
-private const val VIDEO_MEDIA = 1
 private const val CONSTANT_COMPRESSION = 0
 private const val VARIABLE_COMPRESSION = 1
 
@@ -84,9 +85,7 @@ fun HomeScreen() {
 private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val isDarkTheme = isSystemInDarkTheme()
     val status = state.status
-    var selectedMediaType by remember { mutableStateOf(value = AUDIO_MEDIA) }
-    val isAudio = selectedMediaType == AUDIO_MEDIA
-    val isVideo = selectedMediaType == VIDEO_MEDIA
+    var mediaType by remember { mutableStateOf(value = MediaType.AUDIO) }
     val titlePickFile = texts.get(TITLE_PICK_FILE_TXT)
     val compressions = listOf(texts.get(QUALITY_INPUT_TXT), texts.get(BIT_RATE_INPUT_TXT))
     var compression by remember { mutableStateOf<Int?>(value = null) }
@@ -94,7 +93,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     var preset by remember { mutableStateOf<Int?>(value = null) }
 
     // Media Type
-    LaunchedEffect(selectedMediaType) {
+    LaunchedEffect(mediaType) {
         onEvent(SetCodec(null))
     }
     // Format
@@ -110,8 +109,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     }
     // Quality
     LaunchedEffect(quality) {
-        if(isAudio) onEvent(SetVbr(quality))
-        else if(isVideo) quality?.let { onEvent(SetCrf(it)) }
+        if(mediaType == MediaType.AUDIO) onEvent(SetVbr(quality))
+        else quality?.let { onEvent(SetCrf(it)) }
     }
     // Preset
     LaunchedEffect(preset) {
@@ -138,13 +137,40 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
         }
     }
 
+    if(status is HomeStatus.Error) {
+        SimpleDialog(
+            title = "Error", //TODO
+            description = status.message ?: "",
+            icon = Icons.Rounded.Error,
+            onConfirmation = {
+                onEvent(SetStatus(HomeStatus.Initial))
+            },
+            onDismissRequest = {
+                onEvent(SetStatus(HomeStatus.Initial))
+            }
+        )
+    }
+    else if(status is HomeStatus.Complete) {
+        SimpleDialog(
+            title = "Finalizado", //TODO
+            description = "Duração: "+status.duration,
+            icon = Icons.Rounded.Check,
+            onConfirmation = {
+                onEvent(SetStatus(HomeStatus.Initial))
+            },
+            onDismissRequest = {
+                onEvent(SetStatus(HomeStatus.Initial))
+            }
+        )
+    }
+
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
             Navigation(
-                selected = selectedMediaType,
-                onSelected = { selectedMediaType = it },
+                selected = mediaType,
+                onSelected = { mediaType = it },
                 hasInputFile = state.inputFile != null,
-                onPickFile = { pickFile(titlePickFile)?.let { onEvent(HomeEvent.SetInputFile(it)) } }
+                onPickFile = { pickFile(titlePickFile)?.let { onEvent(SetInputFile(it)) } }
             )
 
             VerticalDivider(
@@ -171,12 +197,12 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 ) {
                     FormatInput(
                         value = state.codec,
-                        isVideo = isVideo,
+                        mediaType = mediaType,
                         onValueChange = { onEvent(SetCodec(it)) }
                     )
 
                     Column {
-                        if(isAudio) {
+                        if(mediaType == MediaType.AUDIO) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 RadioButton(
                                     selected = CONSTANT_COMPRESSION == compression,
@@ -199,7 +225,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                 )
                             }
                         }
-                        else if(isVideo) {
+                        else {
                             Row {
                                 Text(
                                     text = compressions[CONSTANT_COMPRESSION],
@@ -239,7 +265,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                         )
                     }
 
-                    if(isAudio) {
+                    if(mediaType == MediaType.AUDIO) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(
                                 selected = VARIABLE_COMPRESSION == compression,
@@ -255,7 +281,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 }
 
                 // Audio Settings
-                if(isAudio) {
+                if(mediaType == MediaType.AUDIO) {
                     Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
                         ChannelsInput(
                             value = state.channels,
@@ -269,7 +295,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     }
                 }
                 // Video Settings
-                else if(isVideo) {
+                else {
                     Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
                         ResolutionInput(
                             value = state.resolution,
@@ -354,7 +380,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 }
 
 @Composable
-private fun Navigation(selected: Int, hasInputFile: Boolean, onSelected: (Int) -> Unit, onPickFile: () -> Unit) {
+private fun Navigation(selected: MediaType, hasInputFile: Boolean, onSelected: (MediaType) -> Unit, onPickFile: () -> Unit) {
     val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE_TXT), texts.get(VIDEO_MEDIA_TYPE_TXT))
     val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
 
@@ -378,8 +404,12 @@ private fun Navigation(selected: Int, hasInputFile: Boolean, onSelected: (Int) -
             NavigationRailItem(
                 icon = { Icon(icons[index], contentDescription = item) },
                 label = { Text(item) },
-                selected = selected == index,
-                onClick = { onSelected(index) }
+                selected = selected.index == index,
+                onClick = {
+                    MediaType.fromIndex(index)?.let {
+                        onSelected(it)
+                    }
+                }
             )
         }
     }
@@ -437,9 +467,9 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
 }
 
 @Composable
-private fun FormatInput(value: Codec?, isVideo: Boolean, onValueChange: (Codec) -> Unit) {
+private fun FormatInput(value: Codec?, mediaType: MediaType, onValueChange: (Codec) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    val medias = Codec.getAll().filter { it.isVideo == isVideo }
+    val medias = Codec.getAll().filter { it.mediaType == mediaType }
 
     Selector(
         text = value?.text ?: "",
@@ -633,7 +663,7 @@ private fun pickFile(title: String): String? {
 private fun HomeScreenPreview(language: String, darkTheme: Boolean) {
     CompositionLocalProvider(textsComp provides HomeTexts(language)) {
         AppTheme(darkTheme = darkTheme) {
-            HomeView(state = HomeManager.defaultState(), onEvent = {})
+            HomeView(state = HomeState.default(), onEvent = {})
         }
     }
 }
