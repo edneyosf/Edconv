@@ -102,6 +102,33 @@ object MediaUtils {
         return type
     }
 
+    /**
+     * Command: ffprobe -v error -select_streams a:0 -show_entries stream=channels -of csv=p=0 <file_path>
+     * Result model: "6"
+     */
+    fun getAudioChannels(file: File): Int? {
+        var channels: Int? = null
+        val command = arrayOf(
+            Configs.ffprobePath,
+            "-v", "error",
+            "-select_streams", "a:0",
+            "-show_entries", "stream=channels",
+            "-of", "csv=p=0",
+            file.absolutePath
+        )
+
+        try {
+            val reader = getReader(command)
+            val line = reader.readLine()!! // 6
+            channels = line.trim().toInt()
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return channels
+    }
+
     fun getSize(file: File) = file.length()
 
     private fun getReader(command: Array<String>): BufferedReader {
