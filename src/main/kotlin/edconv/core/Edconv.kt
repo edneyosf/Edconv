@@ -1,10 +1,8 @@
 package edconv.core
 
-import edconv.core.EdconvConfigs.FFMPEG
-import edconv.core.EdconvConfigs.FFPROBE
+import edconv.core.EdconvConfigs.PROGRESS_PATTERN
 import edconv.core.EdconvConfigs.TIME_PATTERN
 import edconv.core.data.ProgressData
-import edconv.core.utils.CmdUtils
 import edconv.ffmpeg.FFmpeg
 import kotlinx.coroutines.*
 import java.io.BufferedReader
@@ -36,21 +34,12 @@ class Edconv(
 
                 while (true) {
                     line = reader.readLine() ?: break
-                    val regex = Regex("size=\\s*(\\d+KiB)\\s+time=(\\d+:\\d+:\\d+\\.\\d+)\\s+bitrate=\\s*([\\d.]+kbits/s)\\s+speed=\\s*([\\d.]+x)")
-                    val match = regex.find(line)
-                    if (match != null) {
-                        val (size, timeRaw, bitrate, speed) = match.destructured
+                    val progress = line.getProgressData()
 
-                        val formatter = DateTimeFormatter.ofPattern(TIME_PATTERN)
-                        val timeDraft = LocalTime.parse(timeRaw, formatter)
-                        val time = Duration.between(LocalTime.MIDNIGHT, timeDraft).toMillis()
-                        val lastProgress = ProgressData(size, time, bitrate, speed)
-
-                        notify { onProgress(lastProgress) }
-                    }
-                    else {
+                    if (progress != null)
+                        notify { onProgress(progress) }
+                    else
                         notify { onStdout(line) }
-                    }
                 }
 
             } ?: run { notify { onError(Throwable("Process is null")) } }
@@ -67,11 +56,44 @@ class Edconv(
         return@launch
     }
 
+    private fun String.getProgressData(): ProgressData? {
+        var progress: ProgressData? = null
+
+        try {
+            val regex = Regex(pattern = PROGRESS_PATTERN)
+            val match = regex.find(input = this)
+
+            if(match != null) {
+                val (size, rawTime, bitrate, speed) = match.destructured
+                val time = rawTime.toLongTime()
+
+                progress = ProgressData(
+                    size = size,
+                    time = time,
+                    bitrate = bitrate,
+                    speed = speed
+                )
+            }
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            onStdout("Error = { " + e.message + " }")
+        }
+
+        return progress
+    }
+
     fun destroyProcess() {
-        CmdUtils.killProcess(FFPROBE)
-        CmdUtils.killProcess(FFMPEG)
         process?.destroyForcibly()
         process = null
+    }
+
+    private fun String.toLongTime(): Long {
+        val formatter = DateTimeFormatter.ofPattern(TIME_PATTERN)
+        val timeDraft = LocalTime.parse(this, formatter)
+        val duration = Duration.between(LocalTime.MIDNIGHT, timeDraft)
+
+        return duration.toMillis()
     }
 
     private suspend inline fun <T> notify(crossinline block: () -> T): Unit =
