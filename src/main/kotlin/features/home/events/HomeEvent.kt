@@ -1,8 +1,10 @@
 package features.home.events
 
 import edconv.common.*
+import features.home.states.HomeStatus
 
 sealed interface HomeEvent {
+    data class SetStatus(val status: HomeStatus): HomeEvent
     data class SetInputFile(val inputFile: String): HomeEvent
     data class SetOutputFile(val outputFile: String): HomeEvent
     data class SetCodec(val codec: Codec?): HomeEvent
