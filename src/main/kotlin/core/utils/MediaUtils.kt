@@ -92,7 +92,7 @@ object MediaUtils {
             type = when {
                 "video" in output -> MediaType.VIDEO
                 "audio" in output -> MediaType.AUDIO
-                else -> MediaType.UNKNOWN
+                else -> null
             }
         }
         catch (e: Exception) {
