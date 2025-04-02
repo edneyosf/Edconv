@@ -11,21 +11,22 @@ import edconv.common.*
 import edconv.core.Edconv
 import edconv.core.data.MediaData
 import edconv.core.data.ProgressData
-import edconv.core.utils.*
 import edconv.ffmpeg.FFmpeg
 import features.home.events.HomeEvent
 import features.home.states.HomeState
 import features.home.states.HomeStatus
 import kotlinx.coroutines.*
 import java.io.File
+import java.time.Duration
+import java.time.Instant
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
-    private val _state = mutableStateOf(defaultState())
+    private val _state = mutableStateOf(HomeState.default())
     val state: State<HomeState> = _state
 
-    private var conversionJob: Job? = null
-    private var mediaInfo: MediaData? = null
+    private var startTime: Instant? = null
+    private var conversion: Job? = null
     private val converter = Edconv(
         scope = scope,
         onStart = ::onStart,
@@ -37,12 +38,13 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     fun onEvent(event: HomeEvent) = event.run {
         when(this) {
+            is HomeEvent.SetStatus -> setStatus(status)
             is HomeEvent.SetInputFile -> setInputFile(inputFile)
             is HomeEvent.SetOutputFile -> setOutputFile(outputFile)
-            is HomeEvent.SetCodec -> setFormat(codec)
+            is HomeEvent.SetCodec -> setCodec(codec)
             is HomeEvent.SetChannels -> setChannels(channels)
             is HomeEvent.SetVbr -> setVbr(vbr)
-            is HomeEvent.SetBitrate -> setKbps(bitrate)
+            is HomeEvent.SetBitrate -> setBitrate(bitrate)
             is HomeEvent.SetSampleRate -> setSampleRate(sampleRate)
             is HomeEvent.SetPreset -> setPreset(preset)
             is HomeEvent.SetCrf -> setCrf(crf)
@@ -60,241 +62,217 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         val codec = state.value.codec
 
         if(inputFile != null && codec != null && outputFile != null) {
-            prepareConversion()
-
             when(codec) {
-                Codec.AAC -> convertToAAC(inputFile, outputFile, codec)
-                Codec.AAC_FDK -> convertToAAC(inputFile, outputFile, codec)
-                Codec.EAC3 -> convertToEAC3(inputFile, outputFile, codec)
-                Codec.H265 -> convertToH265(inputFile, outputFile, codec)
-                Codec.AV1 -> convertToAV1(inputFile, outputFile, codec)
+                Codec.MP3, Codec.AAC, Codec.AAC_FDK,
+                Codec.OPUS, Codec.AC3, Codec.EAC3, Codec.FLAC -> {
+                    convertToAudio(inputFile, outputFile, codec)
+                }
+                Codec.H264, Codec.H265,
+                Codec.VP9, Codec.AV1 -> {
+                    convertToVideo(inputFile, outputFile, codec)
+                }
             }
+        }
+        else {
+            onError(Throwable("Input file, codec or output file is null"))
         }
     }
 
     private fun stopConversion() = scope.launch(context = Dispatchers.IO) {
         withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Loading) }
         converter.destroyProcess()
-        conversionJob?.cancelAndJoin()
-        conversionJob = null
+        conversion?.cancelAndJoin()
+        conversion = null
         withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Initial) }
     }
 
-    private fun convertToAAC(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
-        var ffmpeg: FFmpeg? = null
+    private fun convertToAudio(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
+        val ffmpeg = FFmpeg.createAudio(
+            source = Configs.ffmpegPath,
+            logLevel = Configs.ffmpegLogLevel,
+            input = inputFile.path,
+            output = outputFile,
+            codec = codec.value,
+            sampleRate = sampleRate?.value,
+            channels = channels?.value,
+            filter = channels?.downmixingFilter
+        )
 
-        vbr?.let {
-            ffmpeg = FFmpeg.createVariableAudio(
-                source = Configs.ffmpegPath,
-                logLevel = Configs.ffmpegLogLevel,
-                input = inputFile.path,
-                output = outputFile,
-                codec = codec.value,
-                vbr = it.toString(),
-                sampleRate = sampleRate?.value,
-                channels = channels?.value,
-                filter = channels?.downmixingFilter
-            )
-        }
-        bitrate?.let {
-            ffmpeg = FFmpeg.createConstantAudio(
-                source = Configs.ffmpegPath,
-                logLevel = Configs.ffmpegLogLevel,
-                input = inputFile.path,
-                output = outputFile,
-                codec = codec.value,
-                bitRate = it.value,
-                sampleRate = sampleRate?.value,
-                channels = channels?.value,
-                filter = channels?.downmixingFilter
-            )
-        }
+        vbr?.let { ffmpeg.vbr = it.toString() }
+        bitrate?.let { ffmpeg.bitRate = bitrate.value }
 
-        ffmpeg?.let { conversionJob = converter.run(it) }
+        conversion = converter.run(ffmpeg)
     }
 
-    private fun convertToEAC3(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
-        bitrate?.let {
-            val ffmpeg = FFmpeg.createConstantAudio(
+    private fun convertToVideo(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
+        val preset = preset
+        val sourceResolution = inputFile.resolution
+        val ffmpeg: FFmpeg
+
+        if(preset != null && sourceResolution != null) {
+            val width = sourceResolution.first
+            val height = sourceResolution.second
+
+            //TODO profile
+            ffmpeg = FFmpeg.createVideo(
                 source = Configs.ffmpegPath,
                 logLevel = Configs.ffmpegLogLevel,
                 input = inputFile.path,
                 output = outputFile,
                 codec = codec.value,
-                bitRate = it.value,
-                sampleRate = sampleRate?.value,
-                channels = channels?.value,
-                filter = null
-            )
-
-            conversionJob = converter.run(ffmpeg)
-        }
-    }
-
-    private fun convertToH265(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
-        preset?.let {
-            /*val ffmpeg = FFmpeg.createVariableVideo(
-                source = Configs.ffmpegPath,
-                logLevel = Configs.ffmpegLogLevel,
-                input = inputFile,
-                output = outputFile,
-                codec = codec.value,
-                preset = it,
-                crf = crf,
-                filter = resolution?.preserveAspectRatioFilter()
-            )
-
-            conversionJob = converter.toH265(
-                inputFile = inputFile,
-                outputFile = outputFile,
-                preset = it,
-                crf = crf,
-                resolution = resolution,
-                pixelFormat = pixelFormat,
+                preset = preset,
+                crf = crf.toString(),
+                pixelFormat = pixelFormat?.value,
+                filter = resolution?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height),
                 noAudio = noAudio
-            )*/
+            )
         }
+        else if(sourceResolution == null) {
+            onError(Throwable("Source resolution is null"))
+            return@run
+        }
+        else {
+            onError(Throwable("Preset is null"))
+            return@run
+        }
+
+        conversion = converter.run(ffmpeg)
     }
 
-    private fun convertToAV1(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
-        preset?.let {
-            /*conversionJob = converter.toAV1(
-                inputFile = inputFile,
-                outputFile = outputFile,
-                preset = it,
-                crf = crf,
-                resolution = resolution,
-                pixelFormat = pixelFormat,
-                noAudio = noAudio
-            )*/
+    private fun createOutputDirIfNotExist() {
+        _state.value.outputFile?.let {
+            try { File(it).parentFile.mkdirs() }
+            catch (e: Exception) {
+                e.printStackTrace()
+                onError(Throwable(e))
+            }
         }
     }
 
     private fun onStart() {
+        startTime = Instant.now()
         setStatus(HomeStatus.Loading)
+        createOutputDirIfNotExist()
+        setLogs("")
     }
 
-    private fun onStdout(it: String) {
-        //retrieveStatus(it)
-        //retrieveMediaInfo(it)
-        //retrieveProgress(it)
-        setLog(it)
-    }
+    private fun onStdout(it: String) { setLogs(_state.value.logs + "$it\n") }
 
     private fun onError(it: Throwable) {
+        println("onError: "+it.message)
         setStatus(HomeStatus.Error(it.message))
     }
 
     private fun onProgress(it: ProgressData) {
-        val percentage = (_state.value.inputFile?.duration ?: 0) calculateProgress it.time
+        val inputFile = _state.value.inputFile
+        val duration = inputFile?.duration ?: 0
+        val percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
 
         setStatus(HomeStatus.Progress(percentage))
     }
 
-    infix fun Long.calculateProgress(duration: Long): Float {
-        return if (this > 0) (duration.toFloat() / this.toFloat()) * 100 else 0.0f
-    }
-
     private fun onStop() {
-        setStatus(HomeStatus.Complete)
-    }
+        val finishTime = Instant.now()
+        val duration = Duration.between(startTime, finishTime)
+        val dias = duration.toDays()
+        val horas = duration.toHours() % 24
+        val minutos = duration.toMinutes() % 60
+        val segundos = duration.seconds % 60
+        val milissegundos = duration.toMillis() % 1000
 
-    private fun prepareConversion() {
-        val output = _state.value.outputFile
-
-        if(output != null) {
-            val outputFile = File(output).parentFile
-
-            if(!outputFile.exists()) outputFile.mkdirs()
-        }
-
-        setLogs("")
-        mediaInfo = null
-    }
-
-    private fun setLog(it: String) = setLogs(_state.value.logs + "\n$it")
-
-    private fun setFormat(format: Codec?) = _state.update {
-        val inputFile = inputFile
-
-        if(inputFile != null && format != null) {
-            val outputFileName = File(inputFile.path).nameWithoutExtension
-            val extension = format.toFileExtension()
-            val output = "$outputFileDefault$outputFileName.$extension"
-
-            copy(codec = format, outputFile = output)
-        }
-        else copy(codec = format)
+        setStatus(HomeStatus.Complete("startTime", "finishTime", "$dias dias, $horas:$minutos:$segundos.$milissegundos"))
+        startTime = null
     }
 
     private fun setInputFile(path: String) {
-        val input = File(path)
-        val outputFileName = input.nameWithoutExtension
-        val extension = _state.value.codec?.toFileExtension() ?: input.extension
+        val inputFile = File(path)
+        val outputFileName = inputFile.nameWithoutExtension
+        val codec = _state.value.codec
+        val extension = codec?.toFileExtension() ?: inputFile.extension
         val output = "$outputFileDefault$outputFileName.$extension"
 
         scope.launch(context = Dispatchers.IO) {
-            val type = MediaUtils.getType(input)
-            val size = MediaUtils.getSize(input)
-            val duration: Long?
+            val type = MediaUtils.getType(inputFile)
+            val size = MediaUtils.getSize(inputFile)
             val resolution: Pair<Int, Int>?
+            val duration: Long?
 
-            if(type == MediaType.AUDIO) {
-                duration = MediaUtils.getDuration(input)
-                val media = MediaData(path = path, type = type, duration = duration!!, size = size)
+            when (type) {
+                MediaType.AUDIO -> {
+                    duration = MediaUtils.getDuration(inputFile)
 
-                println("Media: $media")
+                    if(duration != null) {
+                        val media = MediaData(path = path, type = type, duration = duration, size = size)
 
-                withContext(context = Dispatchers.Main) {
-                    _state.value = _state.value.copy(inputFile = media, outputFile = output)
+                        withContext(context = Dispatchers.Main) {
+                            _state.value = _state.value.copy(inputFile = media, outputFile = output)
+                        }
+                    }
+                    else {
+                        onError(Throwable("Could not retrieve the audio duration"))
+                    }
                 }
-            }
-            else if(type == MediaType.VIDEO) {
-                duration = MediaUtils.getDuration(input)
-                resolution = MediaUtils.getVideoResolution(input)
-                val media = MediaData(path = path, type = type, duration = duration!!, resolution = resolution, size = size)
+                MediaType.VIDEO -> {
+                    duration = MediaUtils.getDuration(inputFile)
+                    resolution = MediaUtils.getVideoResolution(inputFile)
 
-                println("Media: $media")
+                    if(duration != null && resolution != null) {
+                        val media = MediaData(
+                            path = path,
+                            type = type,
+                            duration = duration,
+                            resolution = resolution,
+                            size = size
+                        )
 
-                withContext(context = Dispatchers.Main) {
-                    _state.value = _state.value.copy(inputFile = media, outputFile = output)
+                        withContext(context = Dispatchers.Main) {
+                            _state.value = _state.value.copy(inputFile = media, outputFile = output)
+                        }
+                    }
+                    else {
+                        onError(Throwable("Could not retrieve the video duration or resolution"))
+                    }
                 }
-            }
-            else {
-                println("Media: desconhecida")
+                else -> {
+                    withContext(context = Dispatchers.Main) {
+                        onError(Throwable("Could not identify media type"))
+                    }
+                }
             }
         }
     }
 
+    private fun setCodec(codec: Codec?) {
+        val inputFile = _state.value.inputFile
+
+        if(inputFile != null && codec != null) {
+            try {
+                val outputName = File(inputFile.path).nameWithoutExtension
+                val outputExtension = codec.toFileExtension()
+                val output = "$outputFileDefault$outputName.$outputExtension"
+
+                _state.value = _state.value.copy(codec = codec, outputFile = output)
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+                onError(Throwable(e))
+            }
+        }
+        else {
+            _state.value = _state.value.copy(codec = codec)
+        }
+    }
+
+    private fun setLogs(log: String) = _state.update { copy(logs = log) }
     private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }
     private fun setOutputFile(outputFile: String) = _state.update { copy(outputFile = outputFile) }
     private fun setChannels(channels: Channels?) = _state.update { copy(channels = channels) }
     private fun setVbr(vbr: Int?) = _state.update { copy(vbr = vbr) }
-    private fun setKbps(bitrate: Bitrate) = _state.update { copy(bitrate = bitrate) }
+    private fun setBitrate(bitrate: Bitrate) = _state.update { copy(bitrate = bitrate) }
     private fun setSampleRate(sampleRate: SampleRate?) = _state.update { copy(sampleRate = sampleRate) }
     private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
     private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
-    private fun setLogs(logs: String) = _state.update { copy(logs = logs) }
-
-    companion object {
-        fun defaultState() = HomeState(
-            status = HomeStatus.Initial,
-            logs = "",
-            inputFile = null,
-            outputFile = null,
-            codec = null,
-            channels = null,
-            vbr = null,
-            bitrate = null,
-            sampleRate = null,
-            preset = null,
-            crf = 0,
-            resolution = null,
-            pixelFormat = null,
-            noAudio = false
-        )
-    }
 }
