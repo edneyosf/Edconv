@@ -9,21 +9,21 @@ class FFmpeg private constructor(
     val input: String,
     val output: String,
     val codec: String,
-    val bitRate: String? = null,
-    val vbr: String? = null,
+    var bitRate: String? = null,
+    var vbr: String? = null,
     val sampleRate: String? = null,
     val channels: String? = null,
     val preset: String? = null,
     val crf: String? = null,
-    val profile: String? = null,
+    var profile: String? = null,
     val pixelFormat: String? = null,
     val filter: String? = null,
     val noAudio: Boolean = false
 ) {
 
     companion object {
-        fun createConstantAudio(
-            source: String, logLevel: String, input: String, output: String, codec: String, bitRate: String,
+        fun createAudio(
+            source: String, logLevel: String, input: String, output: String, codec: String,
             sampleRate: String? = null, channels: String? = null, filter: String? = null): FFmpeg {
 
             return FFmpeg(
@@ -33,34 +33,15 @@ class FFmpeg private constructor(
                 input = input,
                 output = output,
                 codec = codec,
-                bitRate = bitRate,
                 sampleRate = sampleRate,
                 channels = channels,
                 filter = filter,
             )
         }
 
-        fun createVariableAudio(
-            source: String, logLevel: String, input: String, output: String, codec: String, vbr: String,
-            sampleRate: String? = null, channels: String? = null, filter: String? = null): FFmpeg {
-
-            return FFmpeg(
-                source = source,
-                logLevel = logLevel,
-                mediaType = MediaType.AUDIO,
-                input = input,
-                output = output,
-                codec = codec,
-                vbr = vbr,
-                sampleRate = sampleRate,
-                channels = channels,
-                filter = filter,
-            )
-        }
-
-        fun createVariableVideo(
+        fun createVideo(
             source: String, logLevel: String, input: String, output: String, codec: String, preset: String,
-            crf: String, profile: String? = null, pixelFormat: String? = null, filter: String? = null,
+            crf: String, pixelFormat: String? = null, filter: String? = null,
             noAudio: Boolean = false): FFmpeg {
 
             return FFmpeg(
@@ -72,7 +53,6 @@ class FFmpeg private constructor(
                 codec = codec,
                 preset = preset,
                 crf = crf,
-                profile = profile,
                 pixelFormat = pixelFormat,
                 filter = filter,
                 noAudio = noAudio,
