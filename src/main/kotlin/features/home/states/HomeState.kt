@@ -2,13 +2,13 @@ package features.home.states
 
 import edconv.common.*
 import edconv.core.data.MediaData
-import java.time.Instant
 
 data class HomeState(
     val status: HomeStatus,
     val logs: String,
-    val inputFile: MediaData?,
-    val outputFile: String?,
+    val cmd: String,
+    val input: MediaData?,
+    val output: String?,
     val codec: Codec?,
     val channels: Channels?,
     val vbr: Int?,
@@ -24,8 +24,9 @@ data class HomeState(
         fun default() = HomeState(
             status = HomeStatus.Initial,
             logs = "",
-            inputFile = null,
-            outputFile = null,
+            cmd = "",
+            input = null,
+            output = null,
             codec = null,
             channels = null,
             vbr = null,
