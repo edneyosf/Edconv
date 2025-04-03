@@ -25,8 +25,9 @@ import features.home.events.HomeEvent
 import features.home.events.HomeEvent.OnStart
 import features.home.events.HomeEvent.OnStop
 import features.home.events.HomeEvent.SetStatus
-import features.home.events.HomeEvent.SetInputFile
-import features.home.events.HomeEvent.SetOutputFile
+import features.home.events.HomeEvent.SetCmd
+import features.home.events.HomeEvent.SetInput
+import features.home.events.HomeEvent.SetOutput
 import features.home.events.HomeEvent.SetCodec
 import features.home.events.HomeEvent.SetChannels
 import features.home.events.HomeEvent.SetSampleRate
@@ -64,7 +65,6 @@ import ui.theme.AppTheme
 import ui.components.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
-import java.io.File
 import kotlin.math.roundToInt
 
 private const val CONSTANT_COMPRESSION = 0
@@ -95,8 +95,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     var preset by remember { mutableStateOf<Int?>(value = null) }
 
     // Input
-    LaunchedEffect(state.inputFile) {
-        state.inputFile?.let {
+    LaunchedEffect(state.input) {
+        state.input?.let {
             mediaType = it.type
         }
     }
@@ -191,10 +191,10 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
             Navigation(
-                selected = state.inputFile?.type,
+                selected = state.input?.type,
                 onSelected = { mediaType = it },
-                input = state.inputFile,
-                onPickFile = { pickFile(titlePickFile)?.let { onEvent(SetInputFile(it)) } }
+                input = state.input,
+                onPickFile = { pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } }
             )
 
             VerticalDivider(
@@ -209,7 +209,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             ) {
                 Actions(
                     status = status,
-                    enabled = state.inputFile != null && !state.outputFile.isNullOrBlank() && state.codec != null,
+                    enabled = state.input != null && !state.output.isNullOrBlank() && state.codec != null,
                     onStart = {
                         onEvent(OnStart())
                     },
@@ -388,16 +388,26 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     }
                 }
                 //TODO
-                LogsView(state.logs)
+                Row(modifier = Modifier.weight(1f)) {
+                    LogsView(state.logs)
+
+                    TextField(
+                        value = state.cmd,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        colors = TextFieldDefaults.colors().custom(),
+                        onValueChange = { onEvent(SetCmd(it)) },
+                        label = { Text(text = "Comando") }
+                    )
+                }
 
                 Progress(status)
 
                 TextField(
-                    value = state.outputFile ?: "",
+                    value = state.output ?: "",
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = state.inputFile != null,
+                    enabled = state.input != null,
                     colors = TextFieldDefaults.colors().custom(),
-                    onValueChange = { onEvent(SetOutputFile(it)) },
+                    onValueChange = { onEvent(SetOutput(it)) },
                     label = { Text(text = texts.get(OUTPUT_FILE_TXT)) }
                 )
             }
@@ -637,19 +647,23 @@ private fun VariableCompressionInput(value: Bitrate?, enabled: Boolean = true, o
 }
 
 @Composable
-private fun ColumnScope.LogsView(text: String) {
+private fun RowScope.LogsView(text: String) {
     val logsScroll = rememberScrollState()
     val modifier = Modifier
         .fillMaxWidth()
-        .weight(1f)
+        .fillMaxHeight()
         .padding(dimens.i)
         .verticalScroll(state = logsScroll)
 
     LaunchedEffect(text) { logsScroll.animateScrollTo(logsScroll.maxValue) }
 
-    Card(modifier = modifier) {
-        SelectionContainer {
-            Text(text)
+    Column(modifier = Modifier
+        .weight(2f)) {
+        Text("Logs")
+        Card(modifier = modifier) {
+            SelectionContainer {
+                Text(text, fontSize = fontSizes.a)
+            }
         }
     }
 }
