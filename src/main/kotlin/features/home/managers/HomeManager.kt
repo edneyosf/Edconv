@@ -19,6 +19,8 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
@@ -51,26 +53,36 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetResolution -> setResolution(resolution)
             is HomeEvent.SetPixelFormat -> setPixelFormat(pixelFormat)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
-            is HomeEvent.OnStart -> startConversion()
+            is HomeEvent.OnStart -> startConversion(overwrite)
             is HomeEvent.OnStop -> stopConversion()
         }
     }
 
-    private fun startConversion() {
-        val inputFile = state.value.inputFile
-        val outputFile = state.value.outputFile
+    private fun startConversion(overwrite: Boolean) {
+        val input = state.value.inputFile
+        val output = state.value.outputFile
         val codec = state.value.codec
 
-        if(inputFile != null && codec != null && outputFile != null) {
-            when(codec) {
-                Codec.MP3, Codec.AAC, Codec.AAC_FDK,
-                Codec.OPUS, Codec.AC3, Codec.EAC3, Codec.FLAC -> {
-                    convertToAudio(inputFile, outputFile, codec)
+        if(input != null && codec != null && output != null) {
+            try {
+                val outputFile = File(output)
+                val outputExists = outputFile.exists()
+
+                if(!overwrite && outputExists) {
+                    setStatus(HomeStatus.FileExists)
+                    return
                 }
-                Codec.H264, Codec.H265,
-                Codec.VP9, Codec.AV1 -> {
-                    convertToVideo(inputFile, outputFile, codec)
+
+                setLogs("MediaInfo = { $input }\n")
+
+                when(codec.mediaType) {
+                    MediaType.AUDIO -> convertToAudio(input, output, codec)
+                    MediaType.VIDEO -> convertToVideo(input, output, codec)
                 }
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+                onError(e)
             }
         }
         else {
@@ -86,12 +98,13 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Initial) }
     }
 
-    private fun convertToAudio(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
+    private fun convertToAudio(inputFile: MediaData, output: String, codec: Codec) = _state.value.run {
+        val outputFile = File(output)
         val ffmpeg = FFmpeg.createAudio(
             source = Configs.ffmpegPath,
             logLevel = Configs.ffmpegLogLevel,
             input = inputFile.path,
-            output = outputFile,
+            output = output,
             codec = codec.value,
             sampleRate = sampleRate?.value,
             channels = channels?.value,
@@ -101,10 +114,13 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         vbr?.let { ffmpeg.vbr = it.toString() }
         bitrate?.let { ffmpeg.bitRate = bitrate.value }
 
-        conversion = converter.run(ffmpeg)
+        println("FFmpeg: ${ffmpeg.build().joinToString(" ")}")
+
+        conversion = converter.run(ffmpeg, outputFile)
     }
 
-    private fun convertToVideo(inputFile: MediaData, outputFile: String, codec: Codec) = _state.value.run {
+    private fun convertToVideo(inputFile: MediaData, output: String, codec: Codec) = _state.value.run {
+        val outputFile = File(output)
         val preset = preset
         val sourceResolution = inputFile.resolution
         val ffmpeg: FFmpeg
@@ -118,7 +134,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 source = Configs.ffmpegPath,
                 logLevel = Configs.ffmpegLogLevel,
                 input = inputFile.path,
-                output = outputFile,
+                output = output,
                 codec = codec.value,
                 preset = preset,
                 crf = crf.toString(),
@@ -136,7 +152,9 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             return@run
         }
 
-        conversion = converter.run(ffmpeg)
+        println("FFmpeg: ${ffmpeg.build().joinToString(" ")}")
+
+        conversion = converter.run(ffmpeg, outputFile)
     }
 
     private fun createOutputDirIfNotExist() {
@@ -168,19 +186,25 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         val duration = inputFile?.duration ?: 0
         val percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
 
-        setStatus(HomeStatus.Progress(percentage))
+        setStatus(HomeStatus.Progress(percentage, it.speed))
     }
 
     private fun onStop() {
         val finishTime = Instant.now()
+        val systemZone = ZoneId.systemDefault()
+        val start = startTime?.atZone(systemZone)?.toLocalTime()
+        val finish = finishTime?.atZone(systemZone)?.toLocalTime()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+        val startText = start?.format(formatter)
+        val finishText = finish?.format(formatter)
         val duration = Duration.between(startTime, finishTime)
-        val dias = duration.toDays()
-        val horas = duration.toHours() % 24
-        val minutos = duration.toMinutes() % 60
-        val segundos = duration.seconds % 60
-        val milissegundos = duration.toMillis() % 1000
+        val horas = (duration.toHours() % 24).toString().padStart(2, '0')
+        val minutos = (duration.toMinutes() % 60).toString().padStart(2, '0')
+        val segundos = (duration.seconds % 60).toString().padStart(2, '0')
 
-        setStatus(HomeStatus.Complete("startTime", "finishTime", "$dias dias, $horas:$minutos:$segundos.$milissegundos"))
+        if(_state.value.status !is HomeStatus.Error) {
+            setStatus(HomeStatus.Complete(startText ?: "", finishText ?: "", "$horas:$minutos:$segundos"))
+        }
         startTime = null
     }
 
@@ -194,27 +218,35 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         scope.launch(context = Dispatchers.IO) {
             val type = MediaUtils.getType(inputFile)
             val size = MediaUtils.getSize(inputFile)
-            val resolution: Pair<Int, Int>?
             val duration: Long?
 
             when (type) {
                 MediaType.AUDIO -> {
+                    val channels = MediaUtils.getAudioChannels(inputFile)
                     duration = MediaUtils.getDuration(inputFile)
 
-                    if(duration != null) {
-                        val media = MediaData(path = path, type = type, duration = duration, size = size)
+                    if(duration != null && channels != null) {
+                        val media = MediaData(
+                            path = path,
+                            type = type,
+                            duration = duration,
+                            channels = channels,
+                            size = size
+                        )
+
+                        println("MediaInfo: $media")
 
                         withContext(context = Dispatchers.Main) {
                             _state.value = _state.value.copy(inputFile = media, outputFile = output)
                         }
                     }
                     else {
-                        onError(Throwable("Could not retrieve the audio duration"))
+                        onError(Throwable("Could not retrieve the audio duration or channels"))
                     }
                 }
                 MediaType.VIDEO -> {
+                    val resolution = MediaUtils.getVideoResolution(inputFile)
                     duration = MediaUtils.getDuration(inputFile)
-                    resolution = MediaUtils.getVideoResolution(inputFile)
 
                     if(duration != null && resolution != null) {
                         val media = MediaData(
@@ -224,6 +256,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                             resolution = resolution,
                             size = size
                         )
+
+                        println("MediaInfo: $media")
 
                         withContext(context = Dispatchers.Main) {
                             _state.value = _state.value.copy(inputFile = media, outputFile = output)

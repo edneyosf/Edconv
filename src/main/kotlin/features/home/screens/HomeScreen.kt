@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import core.Languages
 import edconv.av1.AV1Preset
 import edconv.common.*
+import edconv.core.data.MediaData
 import edconv.h265.H265Preset
 import features.home.events.HomeEvent
 import features.home.events.HomeEvent.OnStart
@@ -63,6 +64,7 @@ import ui.theme.AppTheme
 import ui.components.extensions.custom
 import java.awt.FileDialog
 import java.awt.Frame
+import java.io.File
 import kotlin.math.roundToInt
 
 private const val CONSTANT_COMPRESSION = 0
@@ -92,6 +94,12 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     var quality by remember { mutableStateOf<Int?>(value = null) }
     var preset by remember { mutableStateOf<Int?>(value = null) }
 
+    // Input
+    LaunchedEffect(state.inputFile) {
+        state.inputFile?.let {
+            mediaType = it.type
+        }
+    }
     // Media Type
     LaunchedEffect(mediaType) {
         onEvent(SetCodec(null))
@@ -153,10 +161,26 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     else if(status is HomeStatus.Complete) {
         SimpleDialog(
             title = "Finalizado", //TODO
-            description = "Duração: "+status.duration,
+            description = "Inicio: ${status.startTime}" + "\nFinalizado: ${status.finishTime}" + "\n\nDuração: "+status.duration,
             icon = Icons.Rounded.Check,
             onConfirmation = {
                 onEvent(SetStatus(HomeStatus.Initial))
+            },
+            onDismissRequest = {
+                onEvent(SetStatus(HomeStatus.Initial))
+            }
+        )
+    }
+    else if(status is HomeStatus.FileExists) {
+        SimpleDialog(
+            title = "Aviso", //TODO
+            description = "O arquivo existe, deseja sobrescrever?",
+            icon = Icons.Rounded.Warning,
+            onCancel = {
+                onEvent(SetStatus(HomeStatus.Initial))
+            },
+            onConfirmation = {
+                onEvent(OnStart(overwrite = true))
             },
             onDismissRequest = {
                 onEvent(SetStatus(HomeStatus.Initial))
@@ -167,9 +191,9 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
             Navigation(
-                selected = mediaType,
+                selected = state.inputFile?.type,
                 onSelected = { mediaType = it },
-                hasInputFile = state.inputFile != null,
+                input = state.inputFile,
                 onPickFile = { pickFile(titlePickFile)?.let { onEvent(SetInputFile(it)) } }
             )
 
@@ -185,8 +209,10 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             ) {
                 Actions(
                     status = status,
-                    enabled = state.inputFile != null,
-                    onStart = { onEvent(OnStart) },
+                    enabled = state.inputFile != null && !state.outputFile.isNullOrBlank() && state.codec != null,
+                    onStart = {
+                        onEvent(OnStart())
+                    },
                     onStop = { onEvent(OnStop) }
                 )
 
@@ -380,7 +406,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 }
 
 @Composable
-private fun Navigation(selected: MediaType, hasInputFile: Boolean, onSelected: (MediaType) -> Unit, onPickFile: () -> Unit) {
+private fun Navigation(selected: MediaType?, input: MediaData?, onSelected: (MediaType) -> Unit, onPickFile: () -> Unit) {
     val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE_TXT), texts.get(VIDEO_MEDIA_TYPE_TXT))
     val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
 
@@ -391,7 +417,7 @@ private fun Navigation(selected: MediaType, hasInputFile: Boolean, onSelected: (
         ) {
             BadgedBox(
                 badge = {
-                    if(hasInputFile) Badge()
+                    if(input != null) Badge()
                 }
             ) {
                 Icon(Icons.Rounded.FileOpen, contentDescription = texts.get(TITLE_PICK_FILE_TXT))
@@ -400,18 +426,28 @@ private fun Navigation(selected: MediaType, hasInputFile: Boolean, onSelected: (
 
         Spacer(modifier = Modifier.height(dimens.m))
 
-        mediaTypes.forEachIndexed { index, item ->
-            NavigationRailItem(
-                icon = { Icon(icons[index], contentDescription = item) },
-                label = { Text(item) },
-                selected = selected.index == index,
-                onClick = {
-                    MediaType.fromIndex(index)?.let {
-                        onSelected(it)
-                    }
+        NavigationRailItem(
+            icon = { Icon(icons[0], contentDescription = mediaTypes[0]) },
+            label = { Text(mediaTypes[0]) },
+            enabled = input?.type == MediaType.AUDIO,
+            selected = selected?.index == 0,
+            onClick = {
+                MediaType.fromIndex(0)?.let {
+                    onSelected(it)
                 }
-            )
-        }
+            }
+        )
+        NavigationRailItem(
+            icon = { Icon(icons[1], contentDescription = mediaTypes[1]) },
+            label = { Text(mediaTypes[1]) },
+            enabled = input?.type == MediaType.VIDEO,
+            selected = selected?.index == 1,
+            onClick = {
+                MediaType.fromIndex(1)?.let {
+                    onSelected(it)
+                }
+            }
+        )
     }
 }
 
@@ -632,7 +668,7 @@ private fun Progress(status: HomeStatus) {
             LinearProgress()
         }
         else if(status is HomeStatus.Progress) {
-            val text = "${String.format("%.2f", status.percentage)}%"
+            val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
             LinearProgress(status.percentage)
             Spacer(modifier = Modifier.height(dimens.d))
