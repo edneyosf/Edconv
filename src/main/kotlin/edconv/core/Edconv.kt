@@ -3,7 +3,7 @@ package edconv.core
 import edconv.core.EdconvConfigs.PROGRESS_PATTERN
 import edconv.core.EdconvConfigs.TIME_PATTERN
 import edconv.core.data.ProgressData
-import edconv.ffmpeg.FFmpeg
+import edconv.ffmpeg.FFmpegArgs
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File
@@ -19,17 +19,28 @@ class Edconv(
 ) {
     private var process: Process? = null
 
-    fun run(ffmpeg: FFmpeg, outputFile: File) = scope.launch(context = Dispatchers.IO) {
+    fun run(source: String, inputFile: File, cmd: String, outputFile: File) = scope.launch(context = Dispatchers.IO) {
         notify { onStart() }
-        val cmd = ffmpeg.build()
-
-        notify { onStdout("Command = { " + cmd.joinToString(" ") + " }\n") }
+        notify { onStdout("Command = { $cmd }") }
 
         try {
-            if(outputFile.isFile && outputFile.exists()) outputFile.delete()
+            if(outputFile.exists() && outputFile.isFile) outputFile.delete()
 
-            process = ProcessBuilder(cmd)
-                .start()
+            if(!inputFile.exists()) {
+                notify { onError(Throwable("Input file does not exist")) }
+                return@launch
+            }
+            else if(!inputFile.isFile) {
+                notify { onError(Throwable("Input is not a file")) }
+                return@launch
+            }
+
+            process = ProcessBuilder(
+                source,
+                FFmpegArgs.INPUT, inputFile.absolutePath,
+                *cmd.normalize(),
+                outputFile.absolutePath
+            ).start()
 
             process?.let {
                 val reader = BufferedReader(InputStreamReader(it.errorStream))
@@ -59,7 +70,7 @@ class Edconv(
         return@launch
     }
 
-    private fun String.getProgressData(): ProgressData? {
+    private suspend fun String.getProgressData(): ProgressData? {
         var progress: ProgressData? = null
 
         try {
@@ -80,7 +91,7 @@ class Edconv(
         }
         catch (e: Exception) {
             e.printStackTrace()
-            onStdout("Error = { " + e.message + " }")
+            notify { onStdout("Error = { " + e.message + " }") }
         }
 
         return progress
@@ -89,6 +100,14 @@ class Edconv(
     fun destroyProcess() {
         process?.destroyForcibly()
         process = null
+    }
+
+    private fun String.normalize(): Array<String> {
+        val regex = Regex("\\s+")
+        val data = this.split(regex)
+        val filtered = data.filter { it.isNotBlank() }
+
+        return filtered.toTypedArray()
     }
 
     private fun String.toLongTime(): Long {
