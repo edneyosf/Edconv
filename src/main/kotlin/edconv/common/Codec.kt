@@ -4,7 +4,6 @@ enum class Codec(
     val value: String, val text: String, val mediaType: MediaType, val minCrf: Int? = null, val maxCrf: Int? = null,
     val minVbr: Int? = null, val maxVbr: Int? = null
 ) {
-    MP3(value = "libmp3lame", text = "MP3", mediaType = MediaType.AUDIO),
     AAC(value = "aac", text = "AAC", mediaType = MediaType.AUDIO),
     AAC_FDK(value = "libfdk_aac", text = "AAC (FDK)", mediaType = MediaType.AUDIO, minVbr = 1, maxVbr = 5),
     OPUS(value = "libopus", text = "Opus", mediaType = MediaType.AUDIO),
@@ -18,7 +17,6 @@ enum class Codec(
     AV1(value = "libsvtav1", text = "AV1 (SVT)", mediaType = MediaType.VIDEO, minCrf = 0, maxCrf = 63);
 
     fun toFileExtension() = when(this) {
-        MP3 -> "mp3"
         AAC, AAC_FDK -> "m4a"
         OPUS -> "opus"
         AC3 -> "ac3"
