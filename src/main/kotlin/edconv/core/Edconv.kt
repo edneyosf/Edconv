@@ -6,6 +6,7 @@ import edconv.core.data.ProgressData
 import edconv.ffmpeg.FFmpeg
 import kotlinx.coroutines.*
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.time.Duration
 import java.time.LocalTime
@@ -18,13 +19,15 @@ class Edconv(
 ) {
     private var process: Process? = null
 
-    fun run(ffmpeg: FFmpeg) = scope.launch(context = Dispatchers.IO) {
+    fun run(ffmpeg: FFmpeg, outputFile: File) = scope.launch(context = Dispatchers.IO) {
         notify { onStart() }
         val cmd = ffmpeg.build()
 
         notify { onStdout("Command = { " + cmd.joinToString(" ") + " }\n") }
 
         try {
+            if(outputFile.isFile && outputFile.exists()) outputFile.delete()
+
             process = ProcessBuilder(cmd)
                 .start()
 

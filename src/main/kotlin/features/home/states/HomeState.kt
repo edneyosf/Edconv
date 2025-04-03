@@ -43,7 +43,8 @@ data class HomeState(
 sealed interface HomeStatus {
     data object Initial: HomeStatus
     data object Loading: HomeStatus
-    data class Progress(val percentage: Float): HomeStatus
+    data object FileExists: HomeStatus
+    data class Progress(val percentage: Float, val speed: String): HomeStatus
     data class Complete(val startTime: String, val finishTime: String, val duration: String): HomeStatus
     data class Error(val message: String? = null): HomeStatus
 }
