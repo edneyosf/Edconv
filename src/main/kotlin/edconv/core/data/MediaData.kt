@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class MediaData(
     val path: String,
     val type: MediaType,
+    val contentType: ContentTypeData,
     val duration: Long,
     val channels: Int? = null,
     val resolution: Pair<Int, Int>? = null,
