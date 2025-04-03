@@ -3,11 +3,8 @@ package edconv.ffmpeg
 import edconv.common.MediaType
 
 class FFmpeg private constructor(
-    val source: String,
     val logLevel: String,
     val mediaType: MediaType,
-    val input: String,
-    val output: String,
     val codec: String,
     var bitRate: String? = null,
     var vbr: String? = null,
@@ -23,15 +20,12 @@ class FFmpeg private constructor(
 
     companion object {
         fun createAudio(
-            source: String, logLevel: String, input: String, output: String, codec: String,
-            sampleRate: String? = null, channels: String? = null, filter: String? = null): FFmpeg {
+            logLevel: String, codec: String, sampleRate: String? = null, channels: String? = null,
+            filter: String? = null): FFmpeg {
 
             return FFmpeg(
-                source = source,
                 logLevel = logLevel,
                 mediaType = MediaType.AUDIO,
-                input = input,
-                output = output,
                 codec = codec,
                 sampleRate = sampleRate,
                 channels = channels,
@@ -40,16 +34,12 @@ class FFmpeg private constructor(
         }
 
         fun createVideo(
-            source: String, logLevel: String, input: String, output: String, codec: String, preset: String,
-            crf: String, pixelFormat: String? = null, filter: String? = null,
-            noAudio: Boolean = false): FFmpeg {
+            logLevel: String, codec: String, preset: String, crf: String, pixelFormat: String? = null,
+            filter: String? = null, noAudio: Boolean = false): FFmpeg {
 
             return FFmpeg(
-                source = source,
                 logLevel = logLevel,
                 mediaType = MediaType.VIDEO,
-                input = input,
-                output = output,
                 codec = codec,
                 preset = preset,
                 crf = crf,
@@ -60,11 +50,9 @@ class FFmpeg private constructor(
         }
     }
 
-    fun build(): List<String> {
+    fun build(): String {
         val data = mutableListOf(
-            source,
             FFmpegArgs.LOG_LEVEL, logLevel,
-            FFmpegArgs.INPUT, input,
             codecArg(), codec
         )
 
@@ -80,9 +68,7 @@ class FFmpeg private constructor(
 
         if(noAudio) data.add(FFmpegArgs.NO_AUDIO_VIDEO)
 
-        data.add(output)
-
-        return data
+        return data.joinToString(separator = " ")
     }
 
     private fun codecArg() = if(isAudio()) FFmpegArgs.CODEC_AUDIO else FFmpegArgs.CODEC_VIDEO
