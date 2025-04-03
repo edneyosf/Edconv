@@ -8,6 +8,7 @@ data class MediaData(
     val path: String,
     val type: MediaType,
     val duration: Long,
+    val channels: Int? = null,
     val resolution: Pair<Int, Int>? = null,
     val size: Long
 )
