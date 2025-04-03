@@ -1,12 +1,16 @@
 package core.utils
 
 import core.Configs
-import edconv.common.MediaType
+import edconv.core.data.ContentTypeData
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
 object MediaUtils {
+
+    private const val AUDIO_TYPE = "audio"
+    private const val VIDEO_TYPE = "video"
+    private const val SUBTITLE_TYPE = "subtitle"
 
     /**
      * Command: ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 <file_path>
@@ -74,8 +78,8 @@ object MediaUtils {
      *  audio
      *  subtitle"
      */
-    fun getType(file: File): MediaType? {
-        var type: MediaType? = null
+    fun getContentType(file: File): ContentTypeData {
+        var contentType = ContentTypeData()
         val command = arrayOf(
             Configs.ffprobePath,
             "-v", "error",
@@ -89,17 +93,17 @@ object MediaUtils {
             val lines = reader.readLines()
             val output =  lines.map { it.trim() }
 
-            type = when {
-                "video" in output -> MediaType.VIDEO
-                "audio" in output -> MediaType.AUDIO
-                else -> null
-            }
+            contentType = contentType.copy(
+                audio = AUDIO_TYPE in output,
+                video = VIDEO_TYPE in output,
+                subtitle = SUBTITLE_TYPE in output
+            )
         }
         catch (e: Exception) {
             e.printStackTrace()
         }
 
-        return type
+        return contentType
     }
 
     /**
