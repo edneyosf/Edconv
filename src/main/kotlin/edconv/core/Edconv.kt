@@ -39,20 +39,21 @@ class Edconv(
             ).start()
 
             process?.let {
-                val reader = BufferedReader(InputStreamReader(it.errorStream))
-                var line: String?
+                BufferedReader(InputStreamReader(it.errorStream)).useLines { lines ->
+                    lines.forEach { line ->
+                        val progress = line.getProgressData()
 
-                while (true) {
-                    line = reader.readLine() ?: break
-                    val progress = line.getProgressData()
-
-                    if (progress != null)
-                        notify { onProgress(progress) }
-                    else
-                        notify { onStdout(line) }
+                        if (progress != null) notify { onProgress(progress) }
+                        else notify { onStdout(line) }
+                    }
                 }
 
-            } ?: run { notify { onError(Throwable("Process is null")) } }
+                val exitCode = it.waitFor()
+                if (exitCode != 0) notify { onError(Throwable("Process exited with code $exitCode")) }
+
+            } ?: run {
+                notify { onError(Throwable("Process is null")) }
+            }
         }
         catch (e: Exception) {
             destroyProcess()
