@@ -1,16 +1,12 @@
 package edconv.core
 
-import edconv.core.EdconvConfigs.PROGRESS_PATTERN
-import edconv.core.EdconvConfigs.TIME_PATTERN
+import core.utils.DateTimeUtils
 import edconv.core.data.ProgressData
 import edconv.ffmpeg.FFmpegArgs
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
-import java.time.Duration
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 class Edconv(
     private val scope: CoroutineScope, private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
@@ -74,12 +70,12 @@ class Edconv(
         var progress: ProgressData? = null
 
         try {
-            val regex = Regex(pattern = PROGRESS_PATTERN)
+            val regex = Regex(pattern = EdconvPattern.PROGRESS)
             val match = regex.find(input = this)
 
             if(match != null) {
                 val (size, rawTime, bitrate, speed) = match.destructured
-                val time = rawTime.toLongTime()
+                val time = DateTimeUtils.timeToLong(time = rawTime, pattern = EdconvPattern.TIME)
 
                 progress = ProgressData(
                     size = size,
@@ -103,19 +99,11 @@ class Edconv(
     }
 
     private fun String.normalize(): Array<String> {
-        val regex = Regex("\\s+")
+        val regex = Regex(pattern = EdconvPattern.COMMAND)
         val data = this.split(regex)
         val filtered = data.filter { it.isNotBlank() }
 
         return filtered.toTypedArray()
-    }
-
-    private fun String.toLongTime(): Long {
-        val formatter = DateTimeFormatter.ofPattern(TIME_PATTERN)
-        val timeDraft = LocalTime.parse(this, formatter)
-        val duration = Duration.between(LocalTime.MIDNIGHT, timeDraft)
-
-        return duration.toMillis()
     }
 
     private suspend inline fun <T> notify(crossinline block: () -> T): Unit =
