@@ -34,8 +34,8 @@ class FFmpeg private constructor(
         }
 
         fun createVideo(
-            logLevel: String, codec: String, preset: String, crf: String, pixelFormat: String? = null,
-            filter: String? = null, noAudio: Boolean = false): FFmpeg {
+            logLevel: String, codec: String, preset: String, crf: String, profile: String? = null,
+            pixelFormat: String? = null, filter: String? = null, noAudio: Boolean = false): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
@@ -44,6 +44,7 @@ class FFmpeg private constructor(
                 preset = preset,
                 crf = crf,
                 pixelFormat = pixelFormat,
+                profile = profile,
                 filter = filter,
                 noAudio = noAudio,
             )
