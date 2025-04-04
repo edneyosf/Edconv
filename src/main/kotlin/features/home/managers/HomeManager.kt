@@ -228,7 +228,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
-    //TODO
     private fun setInput(path: String) {
         setStatus(HomeStatus.Loading)
         val inputFile = File(path)
