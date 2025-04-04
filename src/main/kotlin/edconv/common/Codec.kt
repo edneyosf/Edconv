@@ -16,6 +16,19 @@ enum class Codec(
     VP9(value = "libvpx-vp9", text = "VP9", mediaType = MediaType.VIDEO, minCrf = 0, maxCrf = 63),
     AV1(value = "libsvtav1", text = "AV1 (SVT)", mediaType = MediaType.VIDEO, minCrf = 0, maxCrf = 63);
 
+    fun getVideoProfile(pixelFormat: PixelFormat) = when(this) {
+        H264 -> {
+            if(pixelFormat == PixelFormat.BIT_8) "high"
+            else "high10"
+        }
+        H265 -> {
+            if(pixelFormat == PixelFormat.BIT_8) "main"
+            else "main10"
+        }
+        AV1 -> "0"
+        else -> null
+    }
+
     fun toFileExtension() = when(this) {
         AAC, AAC_FDK -> "m4a"
         OPUS -> "opus"

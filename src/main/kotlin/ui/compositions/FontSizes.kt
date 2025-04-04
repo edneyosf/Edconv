@@ -6,6 +6,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
+//@Deprecated("Pare de usar", level = DeprecationLevel.ERROR, replaceWith = ReplaceWith(""))
 inline val fontSizes: FontSizes
     @Composable
     @ReadOnlyComposable
