@@ -29,7 +29,7 @@ object MediaUtils {
 
         try {
             val reader = getReader(command)
-            val line = reader.readLine()!!
+            val line = reader.readLine()
             val data = line.trim().split(",")
             val width = data.first().toInt()
             val height = data.last().toInt()
@@ -59,7 +59,7 @@ object MediaUtils {
 
         try {
             val reader = getReader(command)
-            val line = reader.readLine()!! // 1382.255000
+            val line = reader.readLine()
             val durationInSeconds = line.trim().toDouble()
 
             duration = (durationInSeconds * 1000).toLong()
@@ -123,7 +123,7 @@ object MediaUtils {
 
         try {
             val reader = getReader(command)
-            val line = reader.readLine()!! // 6
+            val line = reader.readLine()
             channels = line.trim().toInt()
         }
         catch (e: Exception) {
