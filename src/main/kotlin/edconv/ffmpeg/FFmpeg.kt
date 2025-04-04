@@ -11,7 +11,7 @@ class FFmpeg private constructor(
     val sampleRate: String? = null,
     val channels: String? = null,
     val preset: String? = null,
-    val crf: String? = null,
+    val crf: Int? = null,
     var profile: String? = null,
     val pixelFormat: String? = null,
     val filter: String? = null,
@@ -36,7 +36,7 @@ class FFmpeg private constructor(
         }
 
         fun createVideo(
-            logLevel: String, codec: String, preset: String, crf: String, profile: String? = null,
+            logLevel: String, codec: String, preset: String, crf: Int, profile: String? = null,
             pixelFormat: String? = null, filter: String? = null, noAudio: Boolean = false): FFmpeg {
 
             return FFmpeg(
@@ -64,7 +64,7 @@ class FFmpeg private constructor(
         data.addCmd(FFmpegArgs.SAMPLE_RATE, sampleRate)
         data.addCmd(FFmpegArgs.CHANNELS, channels)
         data.addCmd(FFmpegArgs.PRESET, preset)
-        data.addCmd(FFmpegArgs.CRF, crf)
+        data.addCmd(FFmpegArgs.CRF, crf?.toString())
         data.addCmd(profileArg(), profile)
         data.addCmd(FFmpegArgs.PIXEL_FORMAT, pixelFormat)
         data.addCmd(filterArg(), filter)
