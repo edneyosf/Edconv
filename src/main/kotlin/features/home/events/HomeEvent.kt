@@ -12,7 +12,7 @@ sealed interface HomeEvent {
     data class SetCompression(val compression: CompressionType?): HomeEvent
     data class SetChannels(val channels: Channels?): HomeEvent
     data class SetVbr(val vbr: Int?): HomeEvent
-    data class SetBitrate(val bitrate: Bitrate): HomeEvent
+    data class SetBitrate(val bitrate: Bitrate?): HomeEvent
     data class SetSampleRate(val sampleRate: SampleRate?): HomeEvent
     data class SetPreset(val preset: String): HomeEvent
     data class SetCrf(val crf: Int): HomeEvent
