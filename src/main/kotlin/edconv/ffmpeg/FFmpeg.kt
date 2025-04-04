@@ -15,13 +15,14 @@ class FFmpeg private constructor(
     var profile: String? = null,
     val pixelFormat: String? = null,
     val filter: String? = null,
-    val noAudio: Boolean = false
+    val noAudio: Boolean = false,
+    val noVideo: Boolean = false
 ) {
 
     companion object {
         fun createAudio(
             logLevel: String, codec: String, sampleRate: String? = null, channels: String? = null,
-            filter: String? = null): FFmpeg {
+            filter: String? = null, noVideo: Boolean = false): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
@@ -30,6 +31,7 @@ class FFmpeg private constructor(
                 sampleRate = sampleRate,
                 channels = channels,
                 filter = filter,
+                noVideo = noVideo,
             )
         }
 
@@ -67,7 +69,8 @@ class FFmpeg private constructor(
         data.addCmd(FFmpegArgs.PIXEL_FORMAT, pixelFormat)
         data.addCmd(filterArg(), filter)
 
-        if(noAudio) data.add(FFmpegArgs.NO_AUDIO_VIDEO)
+        if(noAudio) data.add(FFmpegArgs.NO_AUDIO)
+        if(noVideo) data.add(FFmpegArgs.NO_VIDEO)
 
         return data.joinToString(separator = " ")
     }
