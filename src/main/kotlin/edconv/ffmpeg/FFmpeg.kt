@@ -6,7 +6,7 @@ class FFmpeg private constructor(
     val logLevel: String,
     val mediaType: MediaType,
     val codec: String,
-    var bitRate: String? = null,
+    var bitrate: String? = null,
     var vbr: String? = null,
     val sampleRate: String? = null,
     val channels: String? = null,
@@ -21,13 +21,15 @@ class FFmpeg private constructor(
 
     companion object {
         fun createAudio(
-            logLevel: String, codec: String, sampleRate: String? = null, channels: String? = null,
-            filter: String? = null, noVideo: Boolean = false): FFmpeg {
+            logLevel: String, codec: String, sampleRate: String? = null, vbr: String?, bitrate: String?,
+            channels: String? = null, filter: String? = null, noVideo: Boolean = false): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
                 mediaType = MediaType.AUDIO,
                 codec = codec,
+                vbr = vbr,
+                bitrate = bitrate,
                 sampleRate = sampleRate,
                 channels = channels,
                 filter = filter,
@@ -59,7 +61,7 @@ class FFmpeg private constructor(
             codecArg(), codec
         )
 
-        data.addCmd(bitRateArg(), bitRate)
+        data.addCmd(bitRateArg(), bitrate)
         data.addCmd(FFmpegArgs.VBR, vbr)
         data.addCmd(FFmpegArgs.SAMPLE_RATE, sampleRate)
         data.addCmd(FFmpegArgs.CHANNELS, channels)
