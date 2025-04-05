@@ -16,8 +16,9 @@ import ui.compositions.textsComp
 @Composable
 fun SimpleDialog(
     title: String,
-    description: String,
+    content: @Composable (() -> Unit),
     icon: ImageVector,
+    confirmationButtonEnabled: Boolean = true,
     onConfirmation: () -> Unit,
     onCancel: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
@@ -26,7 +27,7 @@ fun SimpleDialog(
         AlertDialog(
             icon = { Icon(icon, contentDescription = null) },
             title = { Text(text = title) },
-            text = { Text(text = description) },
+            text = content,
             onDismissRequest = { onDismissRequest() },
             dismissButton = {
                 onCancel?.let {
@@ -39,6 +40,7 @@ fun SimpleDialog(
             },
             confirmButton = {
                 TextButton(
+                    enabled = confirmationButtonEnabled,
                     onClick = { onConfirmation() }
                 ) {
                     Text(texts.get(CONFIRMATION_BUTTON_TXT))

@@ -43,6 +43,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     fun onEvent(event: HomeEvent) = event.run {
+        setNoConfigStatusIfNecessary()
+
         when(this) {
             is HomeEvent.SetFfmpegProbePath -> setFfmpegProbePath(ffmpegPath, ffprobePath)
             is HomeEvent.SetStatus -> setStatus(status)
@@ -67,8 +69,17 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         buildCommand(event = this)
     }
 
+    private fun setNoConfigStatusIfNecessary() {
+        if(ConfigManager.getFFmpegPath().isBlank() || ConfigManager.getFFprobePath().isBlank()) {
+            setStatus(HomeStatus.NoConfigs)
+        }
+    }
+
     private fun loadConfigs() {
-        try { ConfigManager.load(AppConfigs.NAME) }
+        try {
+            ConfigManager.load(AppConfigs.NAME)
+            setNoConfigStatusIfNecessary()
+        }
         catch (e: Exception) {
             e.printStackTrace()
             onError(e)
