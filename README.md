@@ -17,7 +17,8 @@
 
 ## ⚠️ Requirements
 
-- [FFmpeg](https://ffmpeg.org/download.html) installed and accessible
+- [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system
+- On first launch, Edconv will prompt you to select your local FFmpeg binary
 
 ---
 
