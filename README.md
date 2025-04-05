@@ -26,7 +26,7 @@
 
 Download the latest release for your system from the [Releases page](https://github.com/seu-usuario/edconv/releases):
 
-For Debian-based systems:  
+### For Debian-based systems:  
 ```bash
 sudo dpkg -i edconv_x.x.x.deb
 ```
