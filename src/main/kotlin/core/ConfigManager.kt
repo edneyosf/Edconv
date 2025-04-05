@@ -24,7 +24,7 @@ object ConfigManager {
 
     suspend fun setFFprobePath(path: String) {
         val newConfig = config.copy(ffprobePath = path)
-        save(config)
+        save(newConfig)
         config = newConfig
     }
 
