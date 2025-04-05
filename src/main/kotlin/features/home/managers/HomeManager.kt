@@ -2,8 +2,8 @@ package features.home.managers
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import core.Configs
-import core.Configs.outputFileDefault
+import app.AppConfigs
+import core.ConfigManager
 import core.common.DateTimePattern
 import core.common.Manager
 import core.extensions.update
@@ -31,6 +31,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     val state: State<HomeState> = _state
 
     init {
+        loadConfigs()
         converter = Edconv(
             scope = scope,
             onStart = ::onStart,
@@ -43,6 +44,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     fun onEvent(event: HomeEvent) = event.run {
         when(this) {
+            is HomeEvent.SetFfmpegProbePath -> setFfmpegProbePath(ffmpegPath, ffprobePath)
             is HomeEvent.SetStatus -> setStatus(status)
             is HomeEvent.SetCmd -> setCmd(cmd)
             is HomeEvent.SetInput -> setInput(path)
@@ -65,8 +67,28 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         buildCommand(event = this)
     }
 
+    private fun loadConfigs() {
+        try { ConfigManager.load(AppConfigs.NAME) }
+        catch (e: Exception) {
+            e.printStackTrace()
+            onError(e)
+        }
+    }
+
+    private fun setFfmpegProbePath(ffmpegPath: String, ffprobePath: String) = scope.launch {
+        try {
+            ConfigManager.setFFmpegPath(ffmpegPath)
+            ConfigManager.setFFprobePath(ffprobePath)
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            onError(e)
+        }
+    }
+
     private fun buildCommand(event: HomeEvent) = _state.value.run {
         val canBuild = when (event) {
+            is HomeEvent.SetFfmpegProbePath,
             is HomeEvent.SetCmd,
             is HomeEvent.OnStart,
             is HomeEvent.OnStop,
@@ -98,7 +120,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 val filter = channels?.downmixingFilter(inputChannels)
 
                 FFmpeg.createAudio(
-                    logLevel = Configs.ffmpegLogLevel,
+                    logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
                     codec = codec.value,
                     sampleRate = sampleRate?.value,
                     channels = channels?.value,
@@ -121,7 +143,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 val filter = resolution?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height)
 
                 FFmpeg.createVideo(
-                    logLevel = Configs.ffmpegLogLevel,
+                    logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
                     codec = codec.value,
                     preset = preset,
                     crf = crf,
@@ -152,7 +174,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 setLogs("MediaInfo = { $input }\n")
 
                 conversion = converter.run(
-                    source = Configs.ffmpegPath,
+                    source = ConfigManager.getFFmpegPath(),
                     inputFile = File(inputPath),
                     cmd = cmd,
                     outputFile = outputFile
@@ -234,7 +256,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         val outputFileName = inputFile.nameWithoutExtension
         val codec = _state.value.codec
         val extension = codec?.toFileExtension() ?: inputFile.extension
-        val output = "$outputFileDefault$outputFileName.$extension"
+        val output = "${AppConfigs.outputDefault}$outputFileName.$extension"
 
         setLogs("")
 
@@ -321,7 +343,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         if(!inputPath.isNullOrBlank() && codec != null) {
             val outputName = File(inputPath).nameWithoutExtension
             val outputExtension = codec.toFileExtension()
-            val output = "$outputFileDefault$outputName.$outputExtension"
+            val output = "${AppConfigs.outputDefault}$outputName.$outputExtension"
 
             _state.update { copy(codec = codec, output = output) }
         }

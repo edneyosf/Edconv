@@ -1,6 +1,6 @@
 package core.utils
 
-import core.Configs
+import core.ConfigManager
 import edconv.core.data.ContentTypeData
 import java.io.BufferedReader
 import java.io.File
@@ -19,7 +19,7 @@ object MediaUtils {
     fun getVideoResolution(file: File): Pair<Int, Int>? {
         var resolution: Pair<Int, Int>? = null
         val command = arrayOf(
-            Configs.ffprobePath,
+            ConfigManager.getFFprobePath(),
             "-v", "error",
             "-select_streams", "v:0",
             "-show_entries", "stream=width,height",
@@ -50,7 +50,7 @@ object MediaUtils {
     fun getDuration(file: File): Long? {
         var duration: Long? = null
         val command = arrayOf(
-            Configs.ffprobePath,
+            ConfigManager.getFFprobePath(),
             "-v", "error",
             "-show_entries", "format=duration",
             "-of", "csv=p=0",
@@ -81,7 +81,7 @@ object MediaUtils {
     fun getContentType(file: File): ContentTypeData {
         var contentType = ContentTypeData()
         val command = arrayOf(
-            Configs.ffprobePath,
+            ConfigManager.getFFprobePath(),
             "-v", "error",
             "-show_entries", "stream=codec_type",
             "-of", "csv=p=0",
@@ -113,7 +113,7 @@ object MediaUtils {
     fun getAudioChannels(file: File): Int? {
         var channels: Int? = null
         val command = arrayOf(
-            Configs.ffprobePath,
+            ConfigManager.getFFprobePath(),
             "-v", "error",
             "-select_streams", "a:0",
             "-show_entries", "stream=channels",

@@ -4,6 +4,7 @@ import edconv.common.*
 import features.home.states.HomeStatus
 
 sealed interface HomeEvent {
+    data class SetFfmpegProbePath(val ffmpegPath: String, val ffprobePath: String): HomeEvent
     data class SetStatus(val status: HomeStatus): HomeEvent
     data class SetCmd(val cmd: String): HomeEvent
     data class SetInput(val path: String): HomeEvent

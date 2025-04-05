@@ -1,10 +1,11 @@
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import app.App
-import core.Configs
+import app.AppConfigs
+import app.AppConfigs.MIN_WINDOW_WIDTH
+import app.AppConfigs.MIN_WINDOW_HEIGHT
 import core.utils.DirUtils
 import core.utils.PropertyUtils
-import edconv.ffmpeg.FFmpegLogLevel
 import java.awt.Dimension
 
 fun main() {
@@ -12,10 +13,10 @@ fun main() {
 
     application {
         Window(
-            title = Configs.title,
+            title = AppConfigs.title,
             onCloseRequest = ::exitApplication,
             content = {
-                window.minimumSize = Dimension(Configs.minWindowWidth, Configs.minWindowHeight)
+                window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
                 App()
             }
         )
@@ -25,11 +26,6 @@ fun main() {
 private fun setConfigs() {
     val version = PropertyUtils.version
 
-    Configs.title = "Edconv ${if(version != null) "v$version" else "- Dev"}"
-    Configs.minWindowWidth = 1250
-    Configs.minWindowHeight = 730
-    Configs.outputFileDefault = DirUtils.outputDir
-    Configs.ffmpegPath = "/home/edney/bin/ffmpeg"
-    Configs.ffprobePath = "/home/edney/bin/ffprobe"
-    Configs.ffmpegLogLevel = FFmpegLogLevel.INFO
+    AppConfigs.title = "${AppConfigs.NAME} ${if(version != null) "v$version" else "- Dev"}"
+    AppConfigs.outputDefault = DirUtils.outputDir
 }
