@@ -26,12 +26,12 @@
 
 Download the latest release for your system from the [Releases page](https://github.com/seu-usuario/edconv/releases):
 
-### For Debian-based systems:  
+#### Debian-based systems:  
 ```bash
 sudo dpkg -i edconv_x.x.x.deb
 ```
 
-For Windows:  
+#### Windows:  
 
 Run the installer as administrator and follow the installation steps.
 
