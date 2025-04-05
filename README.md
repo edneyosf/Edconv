@@ -15,7 +15,7 @@
 
 ---
 
-## 📦 Requirements
+## ⚠️ Requirements
 
 - [FFmpeg](https://ffmpeg.org/download.html) installed and accessible
 
