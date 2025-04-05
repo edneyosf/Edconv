@@ -17,14 +17,18 @@
 
 ## 📦 Requirements
 
-- [FFmpeg](https://ffmpeg.org/download.html) installed and accessible.
+- [FFmpeg](https://ffmpeg.org/download.html) installed and accessible
 
 ---
 
 ## 🔧 Installation
 
-Clone the repository:
+Download the latest release for your system from the [Releases page](https://github.com/seu-usuario/edconv/releases):
 
+For Debian-based systems:  
 ```bash
-git clone https://github.com/seu-usuario/edconv.git
-cd edconv
+sudo dpkg -i edconv_x.x.x.deb
+```
+
+For Windows:  
+Run the installer as administrator and follow the installation steps.
