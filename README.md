@@ -1,4 +1,4 @@
-# 🎬 Edconv
+# Edconv
 
 **An intuitive FFmpeg front-end for converting movies, shows and music.**
 
