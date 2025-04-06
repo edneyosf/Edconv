@@ -14,14 +14,13 @@ group = "com.radiuere"
 version = "${appVersion}-SNAPSHOT"
 
 publishing {
-    publications {
+    /*publications {
         create<MavenPublication>("gpr") {
-            from(components["java"])
             groupId = "com.radiuere"
             artifactId = "edconv"
             version = appVersion
         }
-    }
+    }*/
     repositories {
         maven {
             name = "github"
