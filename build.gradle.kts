@@ -5,7 +5,7 @@ plugins {
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("maven-publish")
+    `maven-publish`
 }
 
 val appVersion = "1.0.0"
@@ -16,8 +16,7 @@ version = "${appVersion}-SNAPSHOT"
 publishing {
     publications {
         create<MavenPublication>("gpr") {
-            from(components["java"])
-            groupId = "com.radiuere" // Substitua com seu usuário ou org
+            groupId = "com.radiuere"
             artifactId = "edconv"
             version = appVersion
         }
