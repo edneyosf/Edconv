@@ -1,8 +1,6 @@
 # Edconv
 
-**An intuitive FFmpeg front-end for converting movies, shows and music.**
-
-**Edconv** is a lightweight and user-friendly interface that simplifies the power of FFmpeg. It's designed for fast and efficient conversion of video and audio files.
+**Edconv** is a lightweight and user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
 
 ---
 
