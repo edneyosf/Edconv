@@ -24,9 +24,16 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew packageExe
-      
+
+    - name: Find .exe file
+      id: find_file
+      shell: pwsh
+      run: |
+        $exe = Get-ChildItem -Path build\compose\binaries\main\exe -Filter *.exe | Select-Object -First 1
+        echo "exe_path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: exe-package
-        path: build/compose/binaries/main/exe/*.exe
+        path: ${{ steps.find_file.outputs.exe_path }}
