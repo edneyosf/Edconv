@@ -16,6 +16,14 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
+    maven {
+        name = "github"
+        url = uri("https://maven.pkg.github.com/edneyosf/Edconv")
+        credentials {
+            username = System.getenv("USERNAME")
+            password = System.getenv("TOKEN")
+        }
+    }
 }
 
 dependencies {
