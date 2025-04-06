@@ -23,18 +23,11 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew packageDeb
 
-    - name: Locate .deb file
-      id: find_deb
-      run: |
-        FILE=$(find build/compose/binaries/main/deb -type f -name "*.deb" | head -n 1)
-        echo "deb_path=$FILE" >> $GITHUB_OUTPUT
-
-    - name: Upload .deb to GitHub Release
-      uses: softprops/action-gh-release@v1
+    - name: Upload .deb
+      uses: actions/upload-artifact@v3
       with:
-        files: ${{ steps.find_deb.outputs.deb_path }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: meu-pacote-deb
+        path: build/compose/binaries/main/deb/*.deb
 
   dependency-submission:
 
