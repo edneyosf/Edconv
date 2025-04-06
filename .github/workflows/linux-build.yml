@@ -1,8 +1,9 @@
 name: Linux Build
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
