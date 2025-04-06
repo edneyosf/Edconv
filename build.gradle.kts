@@ -16,16 +16,13 @@ version = "${appVersion}-SNAPSHOT"
 publishing {
     publications {
         create<MavenPublication>("gpr") {
+            from(components["java"])
             groupId = "com.radiuere"
             artifactId = "edconv"
             version = appVersion
         }
     }
-
     repositories {
-        mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        google()
         maven {
             name = "github"
             url = uri("https://maven.pkg.github.com/edneyosf/Edconv")
@@ -35,6 +32,12 @@ publishing {
             }
         }
     }
+}
+
+repositories {
+    mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    google()
 }
 
 dependencies {
