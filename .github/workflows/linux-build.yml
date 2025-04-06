@@ -2,9 +2,7 @@ name: Linux Build
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags: '*'
 
 jobs:
   build:
@@ -30,7 +28,7 @@ jobs:
     - name: Locate .deb file
       id: find_deb
       run: |
-        FILE=$(find build/distributions -type f -name "*.deb" | head -n 1)
+        FILE=$(find build/compose/binaries/main/deb -type f -name "*.deb" | head -n 1)
         echo "deb_path=$FILE" >> $GITHUB_OUTPUT
 
     - name: Upload .deb to GitHub Release
