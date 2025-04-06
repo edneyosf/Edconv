@@ -28,4 +28,4 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        path: build/compose/binaries/main/deb/*.exe
+        path: build/compose/binaries/main/exe/*.exe
