@@ -25,16 +25,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew packageDeb
 
-    - name: Find .deb file
-      id: find_file
-      shell: bash
-      run: |
-        DEB_PATH=$(find build/compose/binaries/main/deb -name '*.deb' -print -quit)
-        echo "deb_path=$DEB_PATH" >> "$GITHUB_OUTPUT"
-        echo "Found DEB: $DEB_PATH"
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        path: ${{ steps.find_file.outputs.deb_path }}
-        if-no-files-found: error
+        path: build/compose/binaries/main/deb/*.deb
