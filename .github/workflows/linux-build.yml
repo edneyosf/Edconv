@@ -28,4 +28,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
+        name: linux-release
         path: build/compose/binaries/main/deb/*.deb
