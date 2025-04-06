@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    `maven-publish`
 }
 
 val appVersion = "1.0.0"
@@ -12,16 +13,18 @@ val appVersion = "1.0.0"
 group = "com.radiuere"
 version = "${appVersion}-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    google()
-    maven {
-        name = "github"
-        url = uri("https://maven.pkg.github.com/edneyosf/Edconv")
-        credentials {
-            username = System.getenv("USERNAME")
-            password = System.getenv("TOKEN")
+publishing {
+    repositories {
+        mavenCentral()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        google()
+        maven {
+            name = "github"
+            url = uri("https://maven.pkg.github.com/edneyosf/Edconv")
+            credentials {
+                username = System.getenv("USERNAME")
+                password = System.getenv("TOKEN")
+            }
         }
     }
 }
