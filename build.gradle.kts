@@ -14,6 +14,15 @@ group = "com.radiuere"
 version = "${appVersion}-SNAPSHOT"
 
 publishing {
+    publications {
+        create<MavenPublication>("gpr") {
+            from(components["java"])
+            groupId = "com.radiuere" // Substitua com seu usuário ou org
+            artifactId = "edconv"
+            version = appVersion
+        }
+    }
+
     repositories {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
