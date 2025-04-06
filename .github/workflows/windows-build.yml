@@ -28,4 +28,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
+        name: windows-release
         path: build\compose\binaries\main\exe\*.exe
