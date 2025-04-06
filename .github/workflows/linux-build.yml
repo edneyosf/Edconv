@@ -29,4 +29,5 @@ jobs:
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
+        token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         files: build/compose/binaries/main/deb/*.deb
