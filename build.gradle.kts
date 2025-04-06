@@ -5,7 +5,7 @@ plugins {
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
-    `maven-publish`
+    id("maven-publish")
 }
 
 val appVersion = "1.0.0"
