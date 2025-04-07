@@ -21,10 +21,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.Languages
+import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.edconv.av1.AV1Preset
 import edneyosf.edconv.edconv.common.*
 import edneyosf.edconv.edconv.core.data.MediaData
 import edneyosf.edconv.edconv.h265.H265Preset
+import edneyosf.edconv.features.home.dialogs.SettingsDialog
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.events.HomeEvent.SetFfmpegProbePath
 import edneyosf.edconv.features.home.events.HomeEvent.OnStart
@@ -144,11 +146,16 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     }
 
     if (status is HomeStatus.NoConfigs) {
-        val ffmpeg = remember { mutableStateOf<String?>(ConfigManager.getFFmpegPath()) }
-        val ffprobe = remember { mutableStateOf<String?>(ConfigManager.getFFprobePath()) }
-        val noPath = ffmpeg.value.isNullOrBlank() || ffprobe.value.isNullOrBlank()
+        SettingsDialog(
+            ffmpegPathDefault = ConfigManager.getFFmpegPath(),
+            ffprobePathDefault = ConfigManager.getFFprobePath(),
+            onConfirmation = { ffmpegPath, ffprobePath ->
+                onEvent(SetFfmpegProbePath(ffmpegPath, ffprobePath))
+                onEvent(SetStatus(HomeStatus.Initial))
+            }
+        )
 
-        SimpleDialog(
+        /*SimpleDialog(
             title = "Configuracoes", //TODO
             content = {
                 Column {
@@ -164,7 +171,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     Row {
                         Button(
                             onClick = {
-                                val file = pickFile("Selecionar FFmpeg")
+                                val file = FileUtils.pickFile("Selecionar FFmpeg")
 
                                 file?.let { ffmpeg.value = it }
                             }
@@ -173,7 +180,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                         }
                         Button(
                             onClick = {
-                                val file = pickFile("Selecionar FFprobe")
+                                val file = FileUtils.pickFile("Selecionar FFprobe")
 
                                 file?.let { ffprobe.value = it }
                             }
@@ -198,7 +205,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             },
             onDismissRequest = {
             }
-        )
+        )*/
     }
     else if(status is HomeStatus.Error) {
         SimpleDialog(
@@ -249,7 +256,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                 selected = state.input?.type,
                 onSelected = { mediaType = it },
                 input = state.input,
-                onPickFile = { pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
+                onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = {
                     onEvent(SetStatus(HomeStatus.NoConfigs))
                 }
@@ -771,18 +778,11 @@ private fun LinearProgress(percentage: Float = 0f) {
     )
 }
 
-private fun pickFile(title: String): String? {
-    val dialog = FileDialog(Frame(), title, FileDialog.LOAD).apply { isVisible = true }
-    val file = dialog.files.firstOrNull()
-
-    return file?.absolutePath
-}
-
 // Previews
 
 @Composable
 private fun HomeScreenPreview(language: String, darkTheme: Boolean) {
-    CompositionLocalProvider(textsComp provides HomeTexts(language)) {
+    CompositionLocalProvider(languagesComp provides language) {
         AppTheme(darkTheme = darkTheme) {
             HomeView(state = HomeState.default(), onEvent = {})
         }
