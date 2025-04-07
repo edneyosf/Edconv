@@ -5,33 +5,12 @@ plugins {
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
-    `maven-publish`
 }
 
 val appVersion = "1.0.0"
 
 group = "com.radiuere"
 version = "${appVersion}-SNAPSHOT"
-
-publishing {
-    publications {
-        create<MavenPublication>("gpr") {
-            groupId = "com.radiuere"
-            artifactId = "edconv"
-            version = appVersion
-        }
-    }
-    repositories {
-        maven {
-            name = "github"
-            url = uri("https://maven.pkg.github.com/edneyosf/Edconv")
-            credentials {
-                username = System.getenv("USERNAME")
-                password = System.getenv("TOKEN")
-            }
-        }
-    }
-}
 
 repositories {
     mavenCentral()
