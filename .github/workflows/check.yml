@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
     steps:
     
@@ -22,4 +22,4 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Check with Gradle Wrapper
-      run: ./gradlew check
+      run: ./gradlew check --no-build-cache
