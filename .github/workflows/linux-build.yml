@@ -20,7 +20,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-    - name: Build with Gradle
+    - name: Build .deb with Gradle
       run: ./gradlew createDeb
 
     - name: Upload Artifact

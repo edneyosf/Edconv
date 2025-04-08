@@ -43,7 +43,7 @@ compose.desktop {
         nativeDistributions {
             val resourceDir = File("resources")
 
-            targetFormats(TargetFormat.Exe, TargetFormat.Deb)
+            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
