@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  linux-build:
+  build:
     runs-on: windows-latest
 
     steps:
