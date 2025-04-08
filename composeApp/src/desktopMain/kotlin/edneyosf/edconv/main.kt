@@ -7,7 +7,6 @@ import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.app.AppConfigs.MIN_WINDOW_WIDTH
 import edneyosf.edconv.app.AppConfigs.MIN_WINDOW_HEIGHT
 import edneyosf.edconv.core.utils.DirUtils
-import edneyosf.edconv.core.utils.PropertyUtils
 import java.awt.Dimension
 
 fun main() {
@@ -15,7 +14,7 @@ fun main() {
 
     application {
         Window(
-            title = AppConfigs.title,
+            title = AppConfigs.NAME,
             onCloseRequest = ::exitApplication,
             content = {
                 window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
@@ -26,8 +25,5 @@ fun main() {
 }
 
 private fun setConfigs() {
-    val version = PropertyUtils.version
-
-    AppConfigs.title = "${AppConfigs.NAME} ${if(version != null) "v$version" else "- Dev"}"
     AppConfigs.outputDefault = DirUtils.outputDir
 }
