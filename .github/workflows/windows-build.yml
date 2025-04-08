@@ -23,7 +23,8 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Clean Gradle Cache
-      run: rm -rf ~/.gradle/caches/
+      run: Remove-Item -Path "$env:USERPROFILE\.gradle\caches" -Recurse -Force
+      shell: powershell
 
     - name: Build .exe with Gradle
       run: ./gradlew packageReleaseExe --no-build-cache
