@@ -1,5 +1,9 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import java.io.ByteArrayOutputStream
+
+val appName: String by project
+val appVersion: String by project
+val appDescriptionEn: String by project
+val appDescriptionPt: String by project
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -32,94 +36,90 @@ kotlin {
     }
 }
 
-val appName = "edconv"
-val version = "1.0.0"
-
 compose.desktop {
     application {
         mainClass = "edneyosf.edconv.MainKt"
 
         nativeDistributions {
+            val resourceDir = File("resources")
+
             targetFormats(TargetFormat.Exe, TargetFormat.Deb)
             packageName = appName
-            packageVersion = version
-            description = "A multimedia converter for movies, tv shows and music"
-            copyright = "© 2025 Radiuere. All rights reserved."
+            packageVersion = appVersion
+            description = appDescriptionEn
 
-            linux {
-                iconFile.set(File("resources/icon.png"))
-            }
-
-            windows {
-                iconFile.set(File("resources/icon.ico"))
-            }
+            linux { iconFile.set(resourceDir.resolve("icon.png")) }
+            windows { iconFile.set(resourceDir.resolve("icon.ico")) }
         }
     }
 }
 
-val createCustomDeb by tasks.registering {
+tasks.register("createDeb") {
     dependsOn("createDistributable")
 
     val arch = "amd64"
-    val buildDirDeb = file("$buildDir/compose/binaries/main/deb")
-    val outputDeb = file("$buildDir/$appName-$version.deb")
+    val build = layout.buildDirectory.dir("createDeb")
+    val output = layout.buildDirectory.dir("compose/binaries/main/deb")
+    val dist = layout.buildDirectory.dir("compose/binaries/main/app")
 
     doLast {
-        // Limpa diretório
-        buildDirDeb.deleteRecursively()
-        buildDirDeb.mkdirs()
+        val buildDir = build.get().asFile
+        val outputDir = output.get().asFile
+        val distDir = dist.get().asFile
+        val outputDeb = outputDir.resolve("$appName-$appVersion.deb")
+        val targetDir = buildDir.resolve("opt")
+        val shareDir = buildDir.resolve("usr/share/applications")
+        val desktopFile = shareDir.resolve("$appName.desktop")
+        val debianDir = buildDir.resolve("DEBIAN")
+        val controlFile = debianDir.resolve("control")
+        val binFile = targetDir.resolve("$appName/bin/$appName")
 
-        // Copia binários gerados
-        val appDist = file("$buildDir/compose/binaries/main/app")
-        val targetAppDir = buildDirDeb.resolve("opt")
-        appDist.copyRecursively(targetAppDir, overwrite = true)
+        buildDir.run {
+            deleteRecursively()
+            mkdirs()
+        }
+        outputDir.run {
+            deleteRecursively()
+            mkdirs()
+        }
 
-        // Cria ícone e .desktop
-        val shareAppDir = buildDirDeb.resolve("usr/share/applications").apply { mkdirs() }
-        val shareIconDir = buildDirDeb.resolve("usr/share/icons/hicolor/128x128/apps").apply { mkdirs() }
-
-        // Ícone (ajuste o caminho se necessário)
-        file("resources/icon.png").copyTo(shareIconDir.resolve("$appName.png"))
+        distDir.copyRecursively(targetDir, overwrite = true)
+        shareDir.mkdirs()
 
         // .desktop
-        shareAppDir.resolve("$appName.desktop").writeText("""
+        desktopFile.writeText(
+            """
             [Desktop Entry]
-            Name=Edconv
-            Comment=A multimedia converter for movies, tv shows and music
+            Name=${appName.replaceFirstChar { it.uppercase() }}
+            Comment=$appDescriptionEn
+            Comment[pt_BR]=$appDescriptionPt
             Exec=/opt/$appName/bin/$appName
             Icon=/opt/$appName/lib/$appName.png
             Terminal=false
             Type=Application
-            Categories=Utility;
+            Categories=AudioVideo;Utility;
             StartupWMClass=edneyosf-edconv-MainKt
-        """.trimIndent())
+            """.trimIndent()
+        )
 
         // DEBIAN/control
-        val debianDir = buildDirDeb.resolve("DEBIAN").apply { mkdirs() }
-        debianDir.resolve("control").writeText("""
+        debianDir.mkdirs()
+        controlFile.writeText(
+            """
             Package: $appName
-            Version: $version
-            Section: base
+            Version: $appVersion
+            Section: video
             Priority: optional
             Architecture: $arch
-            Maintainer: Edney Osf - edney.osf@gmail.com
-            Description: A multimedia converter for movies, tv shows and music
+            Maintainer: Edney Osf <edney.osf@gmail.com>
+            Description: $appDescriptionEn
             
-        """.trimIndent())
+            """.trimIndent()
+        )
 
-        exec {
-            commandLine("chmod", "+x", targetAppDir.resolve("$appName/bin/$appName").absolutePath)
-        }
+        exec { commandLine("chmod", "+x", binFile.absolutePath) }
+        exec { commandLine("fakeroot", "dpkg-deb", "--build", buildDir.absolutePath, outputDeb.absolutePath) }
 
-        // Cria o pacote .deb
-        val output = ByteArrayOutputStream()
-        exec {
-            commandLine("fakeroot", "dpkg-deb", "--build", buildDirDeb.absolutePath, outputDeb.absolutePath)
-            standardOutput = output
-            errorOutput = output
-            isIgnoreExitValue = false
-        }
-
-        println("✅ .deb gerado em: ${outputDeb.absolutePath}")
+        println(".deb generated at: ${outputDeb.absolutePath}")
     }
 }
