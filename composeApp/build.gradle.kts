@@ -47,8 +47,8 @@ compose.desktop {
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
-            copyright = "© 2024 My Name. All rights reserved."
-            vendor = "Example vendor"
+            copyright = "© 2024 Edconv. All rights reserved."
+            vendor = "Edney Osf"
 
             linux { iconFile.set(resourceDir.resolve("icon.png")) }
             windows { iconFile.set(resourceDir.resolve("icon.ico")) }
