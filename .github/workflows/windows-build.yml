@@ -21,10 +21,10 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Build .exe with Gradle
-      run: ./gradlew packageReleaseExe
+      run: ./gradlew packageReleaseExe --no-build-cache
 
     - name: Build .msi with Gradle
-      run: ./gradlew packageReleaseMsi
+      run: ./gradlew packageReleaseMsi --no-build-cache
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
