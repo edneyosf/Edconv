@@ -61,8 +61,8 @@ tasks.register("createDeb") {
 
     val arch = "amd64"
     val build = layout.buildDirectory.dir("createDeb")
-    val output = layout.buildDirectory.dir("compose/binaries/main/deb")
-    val dist = layout.buildDirectory.dir("compose/binaries/main/app")
+    val output = layout.buildDirectory.dir("compose/binaries/main-release/deb")
+    val dist = layout.buildDirectory.dir("compose/binaries/main-release/app")
 
     doLast {
         val buildDir = build.get().asFile
