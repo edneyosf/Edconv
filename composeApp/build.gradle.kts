@@ -47,6 +47,8 @@ compose.desktop {
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
+            copyright = "© 2024 My Name. All rights reserved."
+            vendor = "Example vendor"
 
             linux { iconFile.set(resourceDir.resolve("icon.png")) }
             windows { iconFile.set(resourceDir.resolve("icon.ico")) }
@@ -55,7 +57,7 @@ compose.desktop {
 }
 
 tasks.register("createDeb") {
-    dependsOn("createDistributable")
+    dependsOn("createReleaseDistributable")
 
     val arch = "amd64"
     val build = layout.buildDirectory.dir("createDeb")

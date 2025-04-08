@@ -23,8 +23,13 @@ jobs:
     - name: Build .deb with Gradle
       run: ./gradlew createDeb
 
+    - name: Build .rpm with Gradle
+      run: ./gradlew packageReleaseRpm
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: linux-release
-        path: composeApp/build/compose/binaries/main/deb/*.deb
+        path: |
+          composeApp/build/compose/binaries/main-release/deb/*.deb
+          composeApp/build/compose/binaries/main-release/rpm/*.rpm
