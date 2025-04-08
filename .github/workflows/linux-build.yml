@@ -9,8 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
     
-    - uses: actions/checkout@v4
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
@@ -19,6 +21,9 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+    - name: Clean Gradle Cache
+      run: rm -rf ~/.gradle/caches/
 
     - name: Build .deb with Gradle
       run: ./gradlew createDeb --no-build-cache
