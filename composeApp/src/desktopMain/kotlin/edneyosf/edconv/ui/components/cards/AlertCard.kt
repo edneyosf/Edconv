@@ -1,10 +1,7 @@
 package edneyosf.edconv.ui.components.cards
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Info
@@ -42,8 +39,13 @@ fun WarningAlertCard(text: String) {
 @Composable
 fun AlertCard(icon: ImageVector, containerColor: Color, contentColor: Color, text: String) {
     Card(colors = CardDefaults.cardColors().copy(containerColor = containerColor)) {
-        Row (modifier = Modifier.padding(dimens.md), verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, tint = contentColor, contentDescription = null)
+        Row (modifier = Modifier.padding(dimens.sm), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                modifier = Modifier.height(dimens.lg),
+                imageVector = icon,
+                tint = contentColor,
+                contentDescription = null
+            )
             Spacer(modifier = Modifier.width(dimens.xs))
             Text(text = text, style = TextStyle(color = contentColor))
         }
