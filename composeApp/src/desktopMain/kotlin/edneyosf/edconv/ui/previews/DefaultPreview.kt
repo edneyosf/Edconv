@@ -1,11 +1,14 @@
 package edneyosf.edconv.ui.previews
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import edneyosf.edconv.core.Languages
+import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.language
 import edneyosf.edconv.ui.compositions.languageComp
 import edneyosf.edconv.ui.theme.AppTheme
@@ -68,7 +71,9 @@ fun PortugueseDarkPreview(content: @Composable (() -> Unit)) {
 private fun DefaultPreview(language: String, darkTheme: Boolean, content: @Composable (() -> Unit)) {
     CompositionLocalProvider(languageComp provides language) {
         AppTheme(darkTheme = darkTheme) {
-            Surface(modifier = Modifier.fillMaxSize(), content = content)
+            Surface(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.padding(dimens.md)) { content() }
+            }
         }
     }
 }
