@@ -1,6 +1,5 @@
 package edneyosf.edconv.ui.previews
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -27,7 +26,7 @@ fun EnglishLightPreview(content: @Composable (() -> Unit)) {
         content = content
     )
 }
-@Preview
+
 @Composable
 fun EnglishDarkPreview(content: @Composable (() -> Unit)) {
     DefaultPreview(
@@ -36,7 +35,7 @@ fun EnglishDarkPreview(content: @Composable (() -> Unit)) {
         content = content
     )
 }
-@Preview
+
 @Composable
 fun PortugueseLightPreview(content: @Composable (() -> Unit)) {
     DefaultPreview(
@@ -46,7 +45,6 @@ fun PortugueseLightPreview(content: @Composable (() -> Unit)) {
     )
 }
 
-@Preview
 @Composable
 fun PortugueseDarkPreview(content: @Composable (() -> Unit)) {
     DefaultPreview(
