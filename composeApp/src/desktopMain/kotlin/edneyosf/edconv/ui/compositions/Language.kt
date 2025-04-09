@@ -5,9 +5,9 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import edneyosf.edconv.core.Languages
 
-inline val languages: String
+inline val language: String
     @Composable
     @ReadOnlyComposable
-    get() = languagesComp.current
+    get() = languageComp.current
 
-val languagesComp = compositionLocalOf { Languages.EN }
+val languageComp = compositionLocalOf { Languages.EN }

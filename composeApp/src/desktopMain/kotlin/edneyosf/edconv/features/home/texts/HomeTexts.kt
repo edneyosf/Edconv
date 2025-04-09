@@ -5,12 +5,12 @@ import androidx.compose.runtime.ReadOnlyComposable
 import edneyosf.edconv.core.Languages.EN
 import edneyosf.edconv.core.Languages.PT
 import edneyosf.edconv.core.common.Texts
-import edneyosf.edconv.ui.compositions.languages
+import edneyosf.edconv.ui.compositions.language
 
 inline val homeTexts: HomeTexts
     @ReadOnlyComposable
     @Composable
-    get() = HomeTexts(languages)
+    get() = HomeTexts(language)
 
 class HomeTexts(override val language: String): Texts(language) {
 
