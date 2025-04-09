@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val appName: String by project
 val appVersion: String by project
+val appAuthor: String by project
 val appDescriptionEn: String by project
 val appDescriptionPt: String by project
 
@@ -47,8 +48,8 @@ compose.desktop {
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
-            copyright = "© 2024 Edconv. All rights reserved."
-            vendor = "Edney Osf"
+            copyright = "© 2025 $appAuthor. All rights reserved."
+            vendor = appAuthor
 
             linux { iconFile.set(resourceDir.resolve("icon.png")) }
             windows { iconFile.set(resourceDir.resolve("icon.ico")) }
@@ -113,7 +114,7 @@ tasks.register("createDeb") {
             Section: video
             Priority: optional
             Architecture: $arch
-            Maintainer: Edney Osf <edney.osf@gmail.com>
+            Maintainer: $appAuthor <edney.osf@gmail.com>
             Description: $appDescriptionEn
             
             """.trimIndent()
