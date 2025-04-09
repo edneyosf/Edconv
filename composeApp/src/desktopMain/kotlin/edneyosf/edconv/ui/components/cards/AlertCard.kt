@@ -44,7 +44,7 @@ fun AlertCard(icon: ImageVector, containerColor: Color, contentColor: Color, tex
     Card(colors = CardDefaults.cardColors().copy(containerColor = containerColor)) {
         Row (modifier = Modifier.padding(dimens.md), verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = icon, tint = contentColor, contentDescription = null)
-            Spacer(modifier = Modifier.width(dimens.md))
+            Spacer(modifier = Modifier.width(dimens.xs))
             Text(text = text, style = TextStyle(color = contentColor))
         }
     }
