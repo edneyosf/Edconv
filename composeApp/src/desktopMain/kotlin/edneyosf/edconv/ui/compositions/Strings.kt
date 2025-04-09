@@ -3,11 +3,11 @@ package edneyosf.edconv.ui.compositions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
-import edneyosf.edconv.core.common.Texts
+import edneyosf.edconv.core.common.Strings
 
-val texts: Texts
+val strings: Strings
     @Composable
     @ReadOnlyComposable
-    get() = textsComp.current
+    get() = stringsComp.current
 
-val textsComp = compositionLocalOf<Texts> { error("No value provided for texts") }
+val stringsComp = compositionLocalOf<Strings> { error("No value provided for texts") }

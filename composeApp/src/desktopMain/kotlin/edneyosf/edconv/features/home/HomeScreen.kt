@@ -1,7 +1,6 @@
-package edneyosf.edconv.features.home.screens
+package edneyosf.edconv.features.home
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,20 +14,16 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
-import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.Languages
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.edconv.av1.AV1Preset
 import edneyosf.edconv.edconv.common.*
 import edneyosf.edconv.edconv.core.data.MediaData
 import edneyosf.edconv.edconv.h265.H265Preset
-import edneyosf.edconv.features.home.dialogs.SettingsDialog
+import edneyosf.edconv.features.settings.SettingsDialog
 import edneyosf.edconv.features.home.events.HomeEvent
-import edneyosf.edconv.features.home.events.HomeEvent.SetFfmpegProbePath
 import edneyosf.edconv.features.home.events.HomeEvent.OnStart
 import edneyosf.edconv.features.home.events.HomeEvent.OnStop
 import edneyosf.edconv.features.home.events.HomeEvent.SetStatus
@@ -49,30 +44,27 @@ import edneyosf.edconv.features.home.events.HomeEvent.SetPreset
 import edneyosf.edconv.features.home.managers.HomeManager
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.states.HomeStatus
-import edneyosf.edconv.features.home.texts.HomeTexts
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.AUDIO_MEDIA_TYPE_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.BIT_RATE_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.CHANNELS_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.FORMAT_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.NO_AUDIO_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.OUTPUT_FILE_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.PIXEL_FORMAT_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.PRESET_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.QUALITY_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.RESOLUTION_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.SAMPLE_RATE_INPUT_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.START_CONVERSION_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.STOP_CONVERSION_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.TITLE_PICK_FILE_TXT
-import edneyosf.edconv.features.home.texts.HomeTexts.Companion.VIDEO_MEDIA_TYPE_TXT
-import edneyosf.edconv.features.home.texts.homeTexts
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.AUDIO_MEDIA_TYPE_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.BIT_RATE_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.CHANNELS_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.FORMAT_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.NO_AUDIO_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.OUTPUT_FILE_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.PIXEL_FORMAT_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.PRESET_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.QUALITY_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.RESOLUTION_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.SAMPLE_RATE_INPUT_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.START_CONVERSION_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.STOP_CONVERSION_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.TITLE_PICK_FILE_TXT
+import edneyosf.edconv.features.home.texts.HomeScreenStrings.Companion.VIDEO_MEDIA_TYPE_TXT
+import edneyosf.edconv.features.home.texts.homeScreenTexts
 import edneyosf.edconv.ui.components.Selector
-import edneyosf.edconv.ui.components.SimpleDialog
+import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.theme.AppTheme
 import edneyosf.edconv.ui.components.extensions.custom
-import java.awt.FileDialog
-import java.awt.Frame
 import kotlin.math.roundToInt
 
 @Composable
@@ -80,7 +72,7 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val manager = remember { HomeManager(scope) }
 
-    CompositionLocalProvider(textsComp provides homeTexts) {
+    CompositionLocalProvider(stringsComp provides homeScreenTexts) {
         HomeView(
             state = manager.state.value,
             onEvent = manager::onEvent
@@ -94,8 +86,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
     val isDarkTheme = isSystemInDarkTheme()
     val status = state.status
     var mediaType by remember { mutableStateOf(value = MediaType.AUDIO) }
-    val titlePickFile = texts.get(TITLE_PICK_FILE_TXT)
-    val compressions = listOf(texts.get(QUALITY_INPUT_TXT), texts.get(BIT_RATE_INPUT_TXT))
+    val titlePickFile = strings.get(TITLE_PICK_FILE_TXT)
+    val compressions = listOf(strings.get(QUALITY_INPUT_TXT), strings.get(BIT_RATE_INPUT_TXT))
     var quality by remember { mutableStateOf<Int?>(value = null) }
     var preset by remember { mutableStateOf<Int?>(value = null) }
 
@@ -147,10 +139,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 
     if (status is HomeStatus.NoConfigs) {
         SettingsDialog(
-            ffmpegPathDefault = ConfigManager.getFFmpegPath(),
-            ffprobePathDefault = ConfigManager.getFFprobePath(),
-            onConfirmation = { ffmpegPath, ffprobePath ->
-                onEvent(SetFfmpegProbePath(ffmpegPath, ffprobePath))
+            onComplete = {
                 onEvent(SetStatus(HomeStatus.Initial))
             }
         )
@@ -215,6 +204,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             onConfirmation = {
                 onEvent(SetStatus(HomeStatus.Initial))
             },
+            confirmationText = "",
+            cancelText = "",
             onDismissRequest = {
                 onEvent(SetStatus(HomeStatus.Initial))
             }
@@ -228,6 +219,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             onConfirmation = {
                 onEvent(SetStatus(HomeStatus.Initial))
             },
+            confirmationText = "",
+            cancelText = "",
             onDismissRequest = {
                 onEvent(SetStatus(HomeStatus.Initial))
             }
@@ -244,6 +237,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
             onConfirmation = {
                 onEvent(OnStart(overwrite = true))
             },
+            confirmationText = "",
+            cancelText = "",
             onDismissRequest = {
                 onEvent(SetStatus(HomeStatus.Initial))
             }
@@ -373,7 +368,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 
                 // Audio Settings
                 if(mediaType == MediaType.AUDIO) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         ChannelsInput(
                             value = state.channels,
                             onValueChange = { onEvent(SetChannels(it)) }
@@ -413,8 +408,8 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                             }
 
                             Row {
-                                Text(text = texts.get(PRESET_INPUT_TXT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
-                                Spacer(modifier = Modifier.width(dimens.d))
+                                Text(text = strings.get(PRESET_INPUT_TXT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                //Spacer(modifier = Modifier.width(dimens.d))
                                 Text(
                                     presetText,
                                     style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
@@ -448,7 +443,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                                 }
                             )
                             Spacer(modifier = Modifier.width(dimens.f))
-                            Text(texts.get(NO_AUDIO_INPUT_TXT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                            Text(strings.get(NO_AUDIO_INPUT_TXT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
                         }
                     }
                 }
@@ -473,7 +468,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
                     enabled = state.input != null,
                     colors = TextFieldDefaults.colors().custom(),
                     onValueChange = { onEvent(SetOutput(it)) },
-                    label = { Text(text = texts.get(OUTPUT_FILE_TXT)) }
+                    label = { Text(text = strings.get(OUTPUT_FILE_TXT)) }
                 )
             }
         }
@@ -483,7 +478,7 @@ private fun HomeView(state: HomeState, onEvent: (HomeEvent) -> Unit) {
 //TODO
 @Composable
 private fun Navigation(selected: MediaType?, input: MediaData?, onSelected: (MediaType) -> Unit, onPickFile: () -> Unit, onSettings: () -> Unit) {
-    val mediaTypes = listOf(texts.get(AUDIO_MEDIA_TYPE_TXT), texts.get(VIDEO_MEDIA_TYPE_TXT))
+    val mediaTypes = listOf(strings.get(AUDIO_MEDIA_TYPE_TXT), strings.get(VIDEO_MEDIA_TYPE_TXT))
     val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
 
     NavigationRail {
@@ -497,7 +492,7 @@ private fun Navigation(selected: MediaType?, input: MediaData?, onSelected: (Med
                     if(input != null) Badge()
                 }
             ) {
-                Icon(Icons.Rounded.FileOpen, contentDescription = texts.get(TITLE_PICK_FILE_TXT))
+                Icon(Icons.Rounded.FileOpen, contentDescription = strings.get(TITLE_PICK_FILE_TXT))
             }
         }
 
@@ -559,12 +554,12 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
             ) {
                 Icon(
                     imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = texts.get(START_CONVERSION_TXT)
+                    contentDescription = strings.get(START_CONVERSION_TXT)
                 )
             }
 
             Text(
-                text = texts.get(START_CONVERSION_TXT),
+                text = strings.get(START_CONVERSION_TXT),
                 style = TextStyle(fontSize = fontSizes.a)
             )
         }
@@ -578,12 +573,12 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
             ){
                 Icon(
                     imageVector = Icons.Rounded.Stop,
-                    contentDescription = texts.get(STOP_CONVERSION_TXT)
+                    contentDescription = strings.get(STOP_CONVERSION_TXT)
                 )
             }
 
             Text(
-                text = texts.get(STOP_CONVERSION_TXT),
+                text = strings.get(STOP_CONVERSION_TXT),
                 style = TextStyle(fontSize = fontSizes.a)
             )
         }
@@ -597,7 +592,7 @@ private fun FormatInput(value: Codec?, mediaType: MediaType, onValueChange: (Cod
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(FORMAT_INPUT_TXT),
+        label = strings.get(FORMAT_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -619,7 +614,7 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(CHANNELS_INPUT_TXT),
+        label = strings.get(CHANNELS_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -641,7 +636,7 @@ private fun SampleRateInput(value: SampleRate?, onValueChange: (SampleRate) -> U
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(SAMPLE_RATE_INPUT_TXT),
+        label = strings.get(SAMPLE_RATE_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -663,7 +658,7 @@ private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(PIXEL_FORMAT_INPUT_TXT),
+        label = strings.get(PIXEL_FORMAT_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -685,7 +680,7 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(RESOLUTION_INPUT_TXT),
+        label = strings.get(RESOLUTION_INPUT_TXT),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -708,7 +703,7 @@ private fun VariableCompressionInput(value: Bitrate?, enabled: Boolean = true, o
 
     Selector(
         text = value?.text ?: "",
-        label = texts.get(BIT_RATE_INPUT_TXT),
+        label = strings.get(BIT_RATE_INPUT_TXT),
         enabled = enabled,
         expanded = expanded,
         onExpanded = { expanded = it }
@@ -782,7 +777,7 @@ private fun LinearProgress(percentage: Float = 0f) {
 
 @Composable
 private fun HomeScreenPreview(language: String, darkTheme: Boolean) {
-    CompositionLocalProvider(languagesComp provides language) {
+    CompositionLocalProvider(languageComp provides language) {
         AppTheme(darkTheme = darkTheme) {
             HomeView(state = HomeState.default(), onEvent = {})
         }

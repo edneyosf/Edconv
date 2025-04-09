@@ -4,15 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import edneyosf.edconv.core.Languages.EN
 import edneyosf.edconv.core.Languages.PT
-import edneyosf.edconv.core.common.Texts
+import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
 
-inline val homeTexts: HomeTexts
+inline val homeScreenTexts: HomeScreenStrings
     @ReadOnlyComposable
     @Composable
-    get() = HomeTexts(language)
+    get() = HomeScreenStrings(language)
 
-class HomeTexts(override val language: String): Texts(language) {
+class HomeScreenStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
         TITLE_PICK_FILE_TXT to "Escolha um arquivo",

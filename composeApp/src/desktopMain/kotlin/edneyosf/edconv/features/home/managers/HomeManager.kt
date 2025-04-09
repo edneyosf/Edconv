@@ -46,7 +46,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         setNoConfigStatusIfNecessary()
 
         when(this) {
-            is HomeEvent.SetFfmpegProbePath -> setFfmpegProbePath(ffmpegPath, ffprobePath)
             is HomeEvent.SetStatus -> setStatus(status)
             is HomeEvent.SetCmd -> setCmd(cmd)
             is HomeEvent.SetInput -> setInput(path)
@@ -70,12 +69,14 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun setNoConfigStatusIfNecessary() {
+        //TODO verificar se arquivo existe
         if(ConfigManager.getFFmpegPath().isBlank() || ConfigManager.getFFprobePath().isBlank()) {
             setStatus(HomeStatus.NoConfigs)
         }
     }
 
     private fun loadConfigs() {
+        setStatus(HomeStatus.Loading)
         try {
             ConfigManager.load(AppConfigs.NAME)
             setNoConfigStatusIfNecessary()
@@ -86,20 +87,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
-    private fun setFfmpegProbePath(ffmpegPath: String, ffprobePath: String) = scope.launch {
-        try {
-            ConfigManager.setFFmpegPath(ffmpegPath)
-            ConfigManager.setFFprobePath(ffprobePath)
-        }
-        catch (e: Exception) {
-            e.printStackTrace()
-            onError(e)
-        }
-    }
-
     private fun buildCommand(event: HomeEvent) = _state.value.run {
         val canBuild = when (event) {
-            is HomeEvent.SetFfmpegProbePath,
             is HomeEvent.SetCmd,
             is HomeEvent.OnStart,
             is HomeEvent.OnStop,
@@ -217,7 +206,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     private fun createOutputDirIfNotExist() {
         _state.value.output?.let {
-            try { File(it).parentFile.mkdirs() }
+            try { File(it).parentFile.mkdirs() } //TODO
             catch (e: Exception) {
                 e.printStackTrace()
                 onError(e)
