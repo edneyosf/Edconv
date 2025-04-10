@@ -19,7 +19,7 @@ fun SimpleDialog(
     content: @Composable (() -> Unit),
     confirmationButtonEnabled: Boolean = true,
     confirmationText: String,
-    cancelText: String,
+    cancelText: String? = null,
     onConfirmation: () -> Unit,
     onCancel: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
@@ -30,10 +30,10 @@ fun SimpleDialog(
         text = content,
         onDismissRequest = { onDismissRequest() },
         dismissButton = {
-            onCancel?.let {
+            cancelText?.let {
                 TextButton(
-                    onClick = { it() },
-                    content = { Text(cancelText) }
+                    onClick = { onCancel?.invoke() },
+                    content = { Text(it) }
                 )
             }
         },
