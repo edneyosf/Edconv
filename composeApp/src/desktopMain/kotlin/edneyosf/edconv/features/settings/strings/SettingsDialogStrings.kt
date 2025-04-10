@@ -16,7 +16,8 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
         TITLE to "Configuração",
-        DESCRIPTION to "FFmpeg e FFprobe não foram encontrados. Para continuar, indique os caminhos onde esses arquivos estão localizados.",
+        NO_DEFINED to "FFmpeg ou FFprobe não foram encontrados. Para continuar, indique os caminhos onde esses arquivos estão localizados.",
+        DEFINED to "Informe os caminhos onde estão os arquivos do FFmpeg e do FFprobe.",
         SELECT_FFMPEG to "Selecionar FFmpeg",
         SELECT_FFPROBE to "Selecionar FFprobe",
         CONFIRMATION_BUTTON to "Confirmar",
@@ -28,7 +29,8 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
 
     override val en = mapOf(
         TITLE to "Settings",
-        DESCRIPTION to "FFmpeg and FFprobe were not found. To continue, please specify the paths where these files are located.",
+        NO_DEFINED to "FFmpeg or FFprobe were not found. To continue, please specify the paths where these files are located.",
+        DEFINED to "Please provide the paths to the FFmpeg and FFprobe files.",
         SELECT_FFMPEG to "Select FFmpeg",
         SELECT_FFPROBE to "Select FFprobe",
         CONFIRMATION_BUTTON to "Confirm",
@@ -42,13 +44,14 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
 
     companion object Key {
         const val TITLE = 1L
-        const val DESCRIPTION = 2L
-        const val SELECT_FFMPEG = 3L
-        const val SELECT_FFPROBE = 4L
-        const val CONFIRMATION_BUTTON = 5L
-        const val CANCEL_BUTTON = 6L
-        const val PICK_FFMPEG_TITLE = 7L
-        const val PICK_FFPROBE_TITLE = 8L
-        const val DEFAULT_ERROR = 9L
+        const val NO_DEFINED = 2L
+        const val DEFINED = 3L
+        const val SELECT_FFMPEG = 4L
+        const val SELECT_FFPROBE = 5L
+        const val CONFIRMATION_BUTTON = 6L
+        const val CANCEL_BUTTON = 7L
+        const val PICK_FFMPEG_TITLE = 8L
+        const val PICK_FFPROBE_TITLE = 9L
+        const val DEFAULT_ERROR = 10L
     }
 }
