@@ -4,7 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Error
-import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +28,7 @@ fun ErrorAlertText(text: String) {
 @Composable
 fun WarningAlertText(text: String) {
     AlertText(
-        icon = Icons.Rounded.Info,
+        icon = Icons.Rounded.Warning,
         color = MaterialTheme.colorScheme.tertiary,
         text = text
     )
