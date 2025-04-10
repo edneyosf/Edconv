@@ -23,6 +23,7 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CANCEL_BUTTON to "Cancelar",
         PICK_FFMPEG_TITLE to "Selecione o arquivo FFmpeg",
         PICK_FFPROBE_TITLE to "Selecione o arquivo FFprobe",
+        DEFAULT_ERROR to "Oops! Something went wrong.",
     )
 
     override val en = mapOf(
@@ -34,6 +35,7 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CANCEL_BUTTON to "Cancel",
         PICK_FFMPEG_TITLE to "Select FFmpeg file",
         PICK_FFPROBE_TITLE to "Select FFprobe file",
+        DEFAULT_ERROR to "Opa! Algo deu errado.",
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -47,5 +49,6 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         const val CANCEL_BUTTON = 6L
         const val PICK_FFMPEG_TITLE = 7L
         const val PICK_FFPROBE_TITLE = 8L
+        const val DEFAULT_ERROR = 9L
     }
 }

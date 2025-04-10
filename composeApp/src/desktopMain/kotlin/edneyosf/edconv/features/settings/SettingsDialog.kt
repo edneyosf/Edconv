@@ -22,10 +22,11 @@ import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.SELEC
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.SELECT_FFPROBE
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.CANCEL_BUTTON
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.CONFIRMATION_BUTTON
+import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.DEFAULT_ERROR
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.PICK_FFMPEG_TITLE
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.PICK_FFPROBE_TITLE
+import edneyosf.edconv.ui.components.alerts.ErrorAlertText
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
-import edneyosf.edconv.ui.components.cards.WarningAlertCard
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
@@ -88,7 +89,7 @@ private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
                 }
                 if(status is SettingsStatus.Error) {
                     Spacer(modifier = Modifier.height(dimens.md))
-                    WarningAlertCard("Falha ao jogar lol!")
+                    ErrorAlertText(text = status.message ?: strings[DEFAULT_ERROR])
                 }
             }
         },
@@ -103,7 +104,8 @@ private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
 @Composable
 private fun DefaultPreview() {
     CompositionLocalProvider(stringsComp provides settingsDialogStrings) {
-        SettingsState.default().copy(ffmpegPath = "ffmpeg")
+        SettingsState.default()
+            .copy(ffmpegPath = "ffmpeg", status = SettingsStatus.Error())
             .Content(onEvent = {})
     }
 }
