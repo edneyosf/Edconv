@@ -80,7 +80,7 @@ fun CompleteDialog(startTime: String, finishTime: String, duration: String, onFi
                     }
                     Spacer(modifier = Modifier.height(dimens.xs))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        val color = MaterialTheme.colorScheme.onSurface
+                        val color = MaterialTheme.colorScheme.tertiary
 
                         Text(strings[DURATION_TIME], style = MaterialTheme.typography.bodyLarge.copy(color = color))
                         Spacer(modifier = Modifier.width(dimens.xxs))
