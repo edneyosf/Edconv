@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.home.texts
+package edneyosf.edconv.features.home.strings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
