@@ -20,7 +20,8 @@ class Edconv(
         notify { onStdout("Command = { $cmd }") }
 
         try {
-            if(outputFile.exists() && outputFile.isFile) outputFile.delete()
+            if (outputFile.exists() && outputFile.isFile) outputFile.delete()
+            outputFile.parentFile?.mkdirs()
 
             if(!inputFile.exists()) {
                 notify { onError(Throwable("Input file does not exist")) }
