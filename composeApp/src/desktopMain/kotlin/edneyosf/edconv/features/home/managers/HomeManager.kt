@@ -204,20 +204,9 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
-    private fun createOutputDirIfNotExist() {
-        _state.value.output?.let {
-            try { File(it).parentFile.mkdirs() } //TODO
-            catch (e: Exception) {
-                e.printStackTrace()
-                onError(e)
-            }
-        }
-    }
-
     private fun onStart() {
         startTime = Instant.now()
         setStatus(HomeStatus.Loading)
-        createOutputDirIfNotExist()
         setLogs("")
     }
 
