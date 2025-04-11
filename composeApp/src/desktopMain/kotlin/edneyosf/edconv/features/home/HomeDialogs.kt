@@ -39,8 +39,7 @@ fun ErrorDialog(message: String, onFinish: () -> Unit) {
             title = strings[ERROR_TITLE],
             content = { Text(message) },
             onConfirmation = onFinish,
-            confirmationText = strings[CONFIRMATION_BUTTON],
-            onDismissRequest = onFinish
+            confirmationText = strings[CONFIRMATION_BUTTON]
         )
     }
 }
@@ -55,8 +54,7 @@ fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
             confirmationText = strings[CONFIRMATION_BUTTON],
             onConfirmation = onConfirmation,
             cancelText = strings[CANCEL_BUTTON],
-            onCancel = onCancel,
-            onDismissRequest = onCancel
+            onCancel = onCancel
         )
     }
 }
@@ -90,8 +88,7 @@ fun CompleteDialog(startTime: String, finishTime: String, duration: String, onFi
             },
             icon = Icons.Rounded.CheckCircle,
             onConfirmation = onFinish,
-            confirmationText = strings[CONFIRMATION_BUTTON],
-            onDismissRequest = onFinish
+            confirmationText = strings[CONFIRMATION_BUTTON]
         )
     }
 }

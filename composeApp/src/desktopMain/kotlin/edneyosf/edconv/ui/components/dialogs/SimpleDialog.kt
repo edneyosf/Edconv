@@ -23,13 +23,13 @@ fun SimpleDialog(
     cancelText: String? = null,
     onConfirmation: () -> Unit,
     onCancel: (() -> Unit)? = null,
-    onDismissRequest: () -> Unit
+    onDismissRequest: (() -> Unit)? = null
 ) {
     AlertDialog(
         icon = { Icon(icon, contentDescription = null) },
         title = { Text(text = title) },
         text = content,
-        onDismissRequest = { onDismissRequest() },
+        onDismissRequest = { onDismissRequest?.invoke() },
         dismissButton = {
             cancelText?.let {
                 TextButton(
