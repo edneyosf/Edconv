@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -14,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.edconv.av1.AV1Preset
 import edneyosf.edconv.edconv.common.*
@@ -45,7 +42,6 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
-import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen() {
@@ -120,7 +116,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
 
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
-            Navigation(
+            HomeNavigation(
                 selected = input?.type,
                 onSelected = { mediaType = it },
                 input = input,

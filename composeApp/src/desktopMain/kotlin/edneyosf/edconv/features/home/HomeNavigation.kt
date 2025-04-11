@@ -19,7 +19,7 @@ import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 
 @Composable
-fun Navigation(
+fun HomeNavigation(
     selected: MediaType?, input: MediaData?, onSelected: (MediaType) -> Unit, pickFileEnabled: Boolean = true,
     onPickFile: () -> Unit, onSettings: () -> Unit) {
 
