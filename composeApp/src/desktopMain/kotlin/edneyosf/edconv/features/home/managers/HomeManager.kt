@@ -69,8 +69,19 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun setNoConfigStatusIfNecessary() {
-        //TODO verificar se arquivo existe
-        if(ConfigManager.getFFmpegPath().isBlank() || ConfigManager.getFFprobePath().isBlank()) {
+        val ffmpegPath = ConfigManager.getFFmpegPath()
+        val ffprobePath = ConfigManager.getFFprobePath()
+
+        if (ffmpegPath.isBlank() || ffprobePath.isBlank()) {
+            setStatus(HomeStatus.Settings)
+            return
+        }
+
+        val ffmpegFile = File(ffmpegPath)
+        val ffprobeFile = File(ffprobePath)
+
+        if (!ffmpegFile.exists() || !ffmpegFile.isFile ||
+            !ffprobeFile.exists() || !ffprobeFile.isFile) {
             setStatus(HomeStatus.Settings)
         }
     }
