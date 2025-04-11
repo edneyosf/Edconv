@@ -29,7 +29,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun HomeNavigation(
-    selected: MediaType?, onSelected: (MediaType) -> Unit, pickFileEnabled: Boolean = true,
+    selected: MediaType?, inputMediaType: MediaType?, onSelected: (MediaType) -> Unit, pickFileEnabled: Boolean = true,
     onPickFile: () -> Unit, onSettings: () -> Unit) {
 
     val mediaTypes = listOf(strings[AUDIO_MEDIA_TYPE], strings[VIDEO_MEDIA_TYPE])
@@ -46,13 +46,20 @@ fun HomeNavigation(
                 }
             }
             Spacer(modifier = Modifier.height(dimens.xl))
-            mediaTypes.forEachIndexed { index, item ->
+            mediaTypes.forEachIndexed { index, string ->
+                val item = MediaType.fromIndex(index)
+                val enabled = when (inputMediaType) {
+                    MediaType.AUDIO -> item == MediaType.AUDIO
+                    MediaType.VIDEO -> true
+                    else -> false
+                }
+
                 NavigationRailItem(
                     icon = { Icon(icons[index], contentDescription = null) },
-                    label = { Text(item) },
-                    enabled = selected?.index == index,
+                    label = { Text(string) },
+                    enabled = enabled,
                     selected = selected?.index == index,
-                    onClick = { MediaType.fromIndex(index)?.let { onSelected(it) } }
+                    onClick = { item?.let { onSelected(it) } }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -69,6 +76,7 @@ private fun DefaultPreview() {
     CompositionLocalProvider(stringsComp provides homeScreenStrings) {
         HomeNavigation(
             selected = MediaType.AUDIO,
+            inputMediaType = MediaType.AUDIO,
             onSelected = {},
             pickFileEnabled = true,
             onPickFile = {},
