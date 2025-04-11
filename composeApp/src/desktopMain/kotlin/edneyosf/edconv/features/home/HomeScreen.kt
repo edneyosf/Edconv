@@ -58,44 +58,8 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val manager = remember { HomeManager(scope) }
     val state by manager.state
-    val status = state.status
 
-    when (status) {
-        is HomeStatus.NoConfigs -> {
-            SettingsDialog(
-                onComplete = {
-                    manager.onEvent(SetStatus(HomeStatus.Initial))
-                }
-            )
-        }
-
-        is HomeStatus.Error -> {
-            ErrorDialog(
-                message = status.message ?: strings[DEFAULT_ERROR],
-                onFinish = { manager.onEvent(SetStatus(HomeStatus.Initial)) }
-            )
-        }
-
-        is HomeStatus.Complete -> {
-            CompleteDialog(
-                startTime = status.startTime,
-                finishTime = status.finishTime,
-                duration = status.duration,
-                onFinish = {
-                    manager.onEvent(SetStatus(HomeStatus.Initial))
-                }
-            )
-        }
-
-        is HomeStatus.FileExists -> {
-            OverwriteFileDialog(
-                onCancel = { manager.onEvent(SetStatus(HomeStatus.Initial)) },
-                onConfirmation = { manager.onEvent(OnStart(overwrite = true)) }
-            )
-        }
-
-        else -> Unit
-    }
+    state.Dialogs(onEvent = manager::onEvent)
 
     CompositionLocalProvider(stringsComp provides homeScreenStrings) {
         state.Content(onEvent = manager::onEvent)
@@ -166,7 +130,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 input = input,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = {
-                    onEvent(SetStatus(HomeStatus.NoConfigs))
+                    onEvent(SetStatus(HomeStatus.Settings))
                 }
             )
 
@@ -385,6 +349,38 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun HomeState.Dialogs(onEvent: (HomeEvent) -> Unit) {
+    when (this.status) {
+        is HomeStatus.Settings -> SettingsDialog { onEvent(SetStatus(HomeStatus.Initial)) }
+
+        is HomeStatus.Error -> {
+            ErrorDialog(
+                message = status.message ?: strings[DEFAULT_ERROR],
+                onFinish = { onEvent(SetStatus(HomeStatus.Initial)) }
+            )
+        }
+
+        is HomeStatus.Complete -> {
+            CompleteDialog(
+                startTime = status.startTime,
+                finishTime = status.finishTime,
+                duration = status.duration,
+                onFinish = { onEvent(SetStatus(HomeStatus.Initial)) }
+            )
+        }
+
+        is HomeStatus.FileExists -> {
+            OverwriteFileDialog(
+                onCancel = { onEvent(SetStatus(HomeStatus.Initial)) },
+                onConfirmation = { onEvent(OnStart(overwrite = true)) }
+            )
+        }
+
+        else -> Unit
     }
 }
 

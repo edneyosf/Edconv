@@ -71,7 +71,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setNoConfigStatusIfNecessary() {
         //TODO verificar se arquivo existe
         if(ConfigManager.getFFmpegPath().isBlank() || ConfigManager.getFFprobePath().isBlank()) {
-            setStatus(HomeStatus.NoConfigs)
+            setStatus(HomeStatus.Settings)
         }
     }
 
@@ -192,15 +192,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     private fun stopConversion() = scope.launch(context = Dispatchers.IO) {
         try {
-            withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Loading) }
+            notifyMain { setStatus(HomeStatus.Loading) }
             converter.destroyProcess()
             conversion?.cancelAndJoin()
             conversion = null
-            withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Initial) }
+            notifyMain { setStatus(HomeStatus.Initial) }
         }
         catch (e: Exception) {
             e.printStackTrace()
-            withContext(context = Dispatchers.Main) { onError(e) }
+            notifyMain { onError(e) }
         }
     }
 
@@ -270,7 +270,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 else -> null
             }
 
-            when (type) {
+            val newState = when (type) {
                 MediaType.AUDIO -> {
                     val channels = MediaUtils.getAudioChannels(inputFile)
                     duration = MediaUtils.getDuration(inputFile)
@@ -287,15 +287,18 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
                         println("MediaInfo: $media")
 
-                        withContext(context = Dispatchers.Main) {
-                            _state.update { copy(input = media, output = output) }
-                        }
+                        _state.value.copy(
+                            input = media,
+                            output = output,
+                            status = HomeStatus.Initial
+                        )
                     }
                     else {
-                        withContext(context = Dispatchers.Main) {
-                            onError(Throwable("Could not retrieve the audio duration or channels"))
-                            _state.update { copy(input = null, output = null) }
-                        }
+                        _state.value.copy(
+                            input = null,
+                            output = null,
+                            status = HomeStatus.Error("Could not retrieve the audio duration or channels")
+                        )
                     }
                 }
                 MediaType.VIDEO -> {
@@ -314,26 +317,30 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
                         println("MediaInfo: $media")
 
-                        withContext(context = Dispatchers.Main) {
-                            _state.update { copy(input = media, output = output) }
-                        }
+                        _state.value.copy(
+                            input = media,
+                            output = output,
+                            status = HomeStatus.Initial
+                        )
                     }
                     else {
-                        withContext(context = Dispatchers.Main) {
-                            onError(Throwable("Could not retrieve the video duration or resolution"))
-                            _state.update { copy(input = null, output = null) }
-                        }
+                        _state.value.copy(
+                            input = null,
+                            output = null,
+                            status = HomeStatus.Error("Could not retrieve the video duration or resolution")
+                        )
                     }
                 }
                 else -> {
-                    withContext(context = Dispatchers.Main) {
-                        onError(Throwable("Could not identify media type"))
-                        _state.update { copy(input = null, output = null) }
-                    }
+                    _state.value.copy(
+                        input = null,
+                        output = null,
+                        status = HomeStatus.Error("Could not identify media type")
+                    )
                 }
             }
 
-            withContext(context = Dispatchers.Main) { setStatus(HomeStatus.Initial) }
+            notifyMain { _state.value = newState }
         }
     }
 
@@ -370,4 +377,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
+
+    private suspend inline fun <T> notifyMain(crossinline block: () -> T): Unit =
+        withContext(context = Dispatchers.Main) { block() }
 }

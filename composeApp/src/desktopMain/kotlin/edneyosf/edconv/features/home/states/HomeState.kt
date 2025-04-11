@@ -47,7 +47,7 @@ sealed interface HomeStatus {
     data object Initial: HomeStatus
     data object Loading: HomeStatus
     data object FileExists: HomeStatus
-    data object NoConfigs: HomeStatus
+    data object Settings: HomeStatus
     data class Progress(val percentage: Float, val speed: String): HomeStatus
     data class Complete(val startTime: String, val finishTime: String, val duration: String): HomeStatus
     data class Error(val message: String? = null): HomeStatus
