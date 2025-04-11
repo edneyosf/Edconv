@@ -17,8 +17,9 @@ fun SimpleDialog(
     icon: ImageVector,
     title: String,
     content: @Composable (() -> Unit),
-    confirmationButtonEnabled: Boolean = true,
+    confirmationEnabled: Boolean = true,
     confirmationText: String,
+    cancelEnabled: Boolean = true,
     cancelText: String? = null,
     onConfirmation: () -> Unit,
     onCancel: (() -> Unit)? = null,
@@ -32,6 +33,7 @@ fun SimpleDialog(
         dismissButton = {
             cancelText?.let {
                 TextButton(
+                    enabled = cancelEnabled,
                     onClick = { onCancel?.invoke() },
                     content = { Text(it) }
                 )
@@ -39,7 +41,7 @@ fun SimpleDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = confirmationButtonEnabled,
+                enabled = confirmationEnabled,
                 onClick = { onConfirmation() },
                 content = { Text(confirmationText) }
             )

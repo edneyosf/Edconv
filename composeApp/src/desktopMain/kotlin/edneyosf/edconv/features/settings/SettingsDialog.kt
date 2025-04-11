@@ -19,7 +19,6 @@ import edneyosf.edconv.features.settings.strings.settingsDialogStrings
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.TITLE
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.SELECT_FFMPEG
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.SELECT_FFPROBE
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.CANCEL_BUTTON
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.CONFIRMATION_BUTTON
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.DEFAULT_ERROR
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.DEFINED
@@ -97,9 +96,8 @@ private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
                 }
             }
         },
-        confirmationButtonEnabled = defined && !isLoading,
+        confirmationEnabled = defined && !isLoading,
         confirmationText = settingsDialogStrings[CONFIRMATION_BUTTON],
-        cancelText = settingsDialogStrings[CANCEL_BUTTON],
         onConfirmation = { onEvent(SettingsEvent.OnSave) },
         onDismissRequest = { }
     )
