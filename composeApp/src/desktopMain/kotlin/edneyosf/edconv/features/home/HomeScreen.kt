@@ -119,15 +119,13 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
             HomeNavigation(
                 selected = input?.type,
                 onSelected = { mediaType = it },
-                input = input,
+                inputMediaType = input?.type,
                 pickFileEnabled = status !is HomeStatus.Loading,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = {
                     onEvent(SetStatus(HomeStatus.Settings))
                 }
             )
-
-            VerticalDivider(color = DividerDefaults.customColor())
 
             Column(
                 modifier = Modifier.padding(dimens.i),
