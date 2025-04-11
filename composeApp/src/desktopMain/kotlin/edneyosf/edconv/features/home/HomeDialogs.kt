@@ -12,6 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import edneyosf.edconv.features.home.events.HomeEvent
+import edneyosf.edconv.features.home.events.HomeEvent.OnStart
+import edneyosf.edconv.features.home.events.HomeEvent.SetStatus
+import edneyosf.edconv.features.home.states.HomeState
+import edneyosf.edconv.features.home.states.HomeStatus
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.CANCEL_BUTTON
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.COMPLETE_TITLE
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.CONFIRMATION_BUTTON
@@ -21,7 +26,9 @@ import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.ERROR_TITLE
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.OVERWRITE_FILE
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.START_TIME
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Key.WARNING_TITLE
+import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.DEFAULT_ERROR
 import edneyosf.edconv.features.home.strings.homeDialogStrings
+import edneyosf.edconv.features.settings.SettingsDialog
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
@@ -30,6 +37,38 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+
+@Composable
+fun HomeState.Dialogs(onEvent: (HomeEvent) -> Unit) {
+    when (this.status) {
+        is HomeStatus.Settings -> SettingsDialog { onEvent(SetStatus(HomeStatus.Initial)) }
+
+        is HomeStatus.Error -> {
+            ErrorDialog(
+                message = status.message ?: strings[DEFAULT_ERROR],
+                onFinish = { onEvent(SetStatus(HomeStatus.Initial)) }
+            )
+        }
+
+        is HomeStatus.Complete -> {
+            CompleteDialog(
+                startTime = status.startTime,
+                finishTime = status.finishTime,
+                duration = status.duration,
+                onFinish = { onEvent(SetStatus(HomeStatus.Initial)) }
+            )
+        }
+
+        is HomeStatus.FileExists -> {
+            OverwriteFileDialog(
+                onCancel = { onEvent(SetStatus(HomeStatus.Initial)) },
+                onConfirmation = { onEvent(OnStart(overwrite = true)) }
+            )
+        }
+
+        else -> Unit
+    }
+}
 
 @Composable
 fun ErrorDialog(message: String, onFinish: () -> Unit) {

@@ -76,7 +76,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     }
 
     private fun loadConfigs() {
-        setStatus(HomeStatus.Loading)
         try {
             ConfigManager.load(AppConfigs.NAME)
             setNoConfigStatusIfNecessary()

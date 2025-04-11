@@ -18,31 +18,25 @@ import androidx.compose.ui.unit.dp
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.edconv.av1.AV1Preset
 import edneyosf.edconv.edconv.common.*
-import edneyosf.edconv.edconv.core.data.MediaData
 import edneyosf.edconv.edconv.h265.H265Preset
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.events.HomeEvent.*
 import edneyosf.edconv.features.home.managers.HomeManager
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.states.HomeStatus
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.AUDIO_MEDIA_TYPE
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.BIT_RATE_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.CHANNELS_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.DEFAULT_ERROR
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.FORMAT_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.NO_AUDIO_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.OUTPUT_FILE
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.PIXEL_FORMAT_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.PRESET_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.QUALITY_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.RESOLUTION_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.SAMPLE_RATE_INPUT
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.START_CONVERSION
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.STOP_CONVERSION
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.TITLE_PICK_FILE
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.VIDEO_MEDIA_TYPE
 import edneyosf.edconv.features.home.strings.homeScreenStrings
-import edneyosf.edconv.features.settings.SettingsDialog
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.components.extensions.customColor
@@ -69,14 +63,14 @@ fun HomeScreen() {
 //TODO
 @Composable
 private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
-    var mediaType by remember { mutableStateOf(value = MediaType.AUDIO) }
-    val titlePickFile = strings.get(TITLE_PICK_FILE)
-    val compressions = listOf(strings.get(QUALITY_INPUT), strings.get(BIT_RATE_INPUT))
+    val titlePickFile = strings[TITLE_PICK_FILE]
+    var mediaType by remember { mutableStateOf<MediaType?>(value = null) }
+    /*val compressions = listOf(strings[QUALITY_INPUT], strings[BIT_RATE_INPUT])
     var quality by remember { mutableStateOf<Int?>(value = null) }
-    var preset by remember { mutableStateOf<Int?>(value = null) }
+    var preset by remember { mutableStateOf<Int?>(value = null) }*/
 
     // Input
-    LaunchedEffect(input) {
+    /*LaunchedEffect(input) {
         input?.let {
             mediaType = it.type
         }
@@ -86,10 +80,11 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
         onEvent(SetCodec(null))
     }
     // Format
-    LaunchedEffect(codec) { codec.let {
+    LaunchedEffect(codec) {
+        /*codec.let {
             quality = 0
             preset = 0
-        }
+        }*/
     }
     // Quality
     LaunchedEffect(quality) {
@@ -119,7 +114,9 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 onEvent(SetBitrate(null))
             }
         }
-    }
+    }*/
+
+    println(status)
 
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
@@ -127,6 +124,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 selected = input?.type,
                 onSelected = { mediaType = it },
                 input = input,
+                pickFileEnabled = status !is HomeStatus.Loading,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = {
                     onEvent(SetStatus(HomeStatus.Settings))
@@ -168,24 +166,24 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                                     onClick = { onEvent(SetCompression(CompressionType.CONSTANT)) }
                                 )
 
-                                Text(
+                                /*Text(
                                     text = compressions[CompressionType.CONSTANT.index],
                                     style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                )
+                                )*/
 
                                 Spacer(modifier = Modifier.width(dimens.d))
 
-                                Text(
+                                /*Text(
                                     text = quality?.toString() ?: "0",
                                     style = TextStyle(
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = fontSizes.c
                                     )
-                                )
+                                )*/
                             }
                         }
                         else {
-                            Row {
+                            /*Row {
                                 Text(
                                     text = compressions[CompressionType.CONSTANT.index],
                                     style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -200,7 +198,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                                         fontSize = fontSizes.c
                                     )
                                 )
-                            }
+                            }*/
                         }
                         val minRate = when(codec) {
                             Codec.AAC_FDK -> codec.minVbr?.toFloat()
@@ -214,14 +212,14 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         } ?: 0f
 
                         // TODO
-                        Slider(
+                        /*Slider(
                             value = quality?.toFloat() ?: 0.0f,
                             modifier = Modifier.width(320.dp),
                             enabled = codec != null && compression == CompressionType.CONSTANT,
                             colors = SliderDefaults.custom(),
                             onValueChange = { quality = it.roundToInt() },
                             valueRange = minRate .. maxRate,
-                        )
+                        )*/
                     }
 
                     if(mediaType == MediaType.AUDIO) {
@@ -269,7 +267,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         Column {
                             var presetText = ""
 
-                            if(codec == Codec.H265) {
+                            /*if(codec == Codec.H265) {
                                 preset?.let {
                                     presetText = H265Preset.fromId(it)?.value ?: ""
                                 }
@@ -278,7 +276,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                                 preset?.let {
                                     presetText = AV1Preset.fromId(it)?.value ?: ""
                                 }
-                            }
+                            }*/
 
                             Row {
                                 Text(text = strings.get(PRESET_INPUT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
@@ -298,14 +296,14 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                                 else -> 0f
                             }
 
-                            Slider(
+                            /*Slider(
                                 value = preset?.toFloat() ?: 0f,
                                 modifier = Modifier.width(320.dp),
                                 enabled = codec != null,
                                 colors = SliderDefaults.custom(),
                                 onValueChange = { preset = it.roundToInt() },
                                 valueRange = minPreset .. maxPreset
-                            )
+                            )*/
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -344,96 +342,6 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     label = { Text(text = strings.get(OUTPUT_FILE)) }
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun HomeState.Dialogs(onEvent: (HomeEvent) -> Unit) {
-    when (this.status) {
-        is HomeStatus.Settings -> SettingsDialog { onEvent(SetStatus(HomeStatus.Initial)) }
-
-        is HomeStatus.Error -> {
-            ErrorDialog(
-                message = status.message ?: strings[DEFAULT_ERROR],
-                onFinish = { onEvent(SetStatus(HomeStatus.Initial)) }
-            )
-        }
-
-        is HomeStatus.Complete -> {
-            CompleteDialog(
-                startTime = status.startTime,
-                finishTime = status.finishTime,
-                duration = status.duration,
-                onFinish = { onEvent(SetStatus(HomeStatus.Initial)) }
-            )
-        }
-
-        is HomeStatus.FileExists -> {
-            OverwriteFileDialog(
-                onCancel = { onEvent(SetStatus(HomeStatus.Initial)) },
-                onConfirmation = { onEvent(OnStart(overwrite = true)) }
-            )
-        }
-
-        else -> Unit
-    }
-}
-
-//TODO
-@Composable
-private fun Navigation(selected: MediaType?, input: MediaData?, onSelected: (MediaType) -> Unit, onPickFile: () -> Unit, onSettings: () -> Unit) {
-    val mediaTypes = listOf(strings.get(AUDIO_MEDIA_TYPE), strings.get(VIDEO_MEDIA_TYPE))
-    val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
-
-    NavigationRail {
-        //TODO desabiliar carregando
-        FloatingActionButton(
-            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp, focusedElevation = 0.dp),
-            onClick = onPickFile
-        ) {
-            BadgedBox(
-                badge = {
-                    if(input != null) Badge()
-                }
-            ) {
-                Icon(Icons.Rounded.FileOpen, contentDescription = strings.get(TITLE_PICK_FILE))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(dimens.m))
-
-        NavigationRailItem(
-            icon = { Icon(icons[0], contentDescription = mediaTypes[0]) },
-            label = { Text(mediaTypes[0]) },
-            enabled = input?.type == MediaType.AUDIO,
-            selected = selected?.index == 0,
-            onClick = {
-                MediaType.fromIndex(0)?.let {
-                    onSelected(it)
-                }
-            }
-        )
-        NavigationRailItem(
-            icon = { Icon(icons[1], contentDescription = mediaTypes[1]) },
-            label = { Text(mediaTypes[1]) },
-            enabled = input?.type == MediaType.VIDEO,
-            selected = selected?.index == 1,
-            onClick = {
-                MediaType.fromIndex(1)?.let {
-                    onSelected(it)
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        IconButton(
-            onClick = {
-                onSettings()
-            }
-        ) {
-            Icon(Icons.Rounded.Settings, contentDescription = null)
         }
     }
 }
@@ -491,13 +399,14 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
 }
 
 @Composable
-private fun FormatInput(value: Codec?, mediaType: MediaType, onValueChange: (Codec) -> Unit) {
+private fun FormatInput(value: Codec?, mediaType: MediaType?, onValueChange: (Codec) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
     val medias = Codec.getAll().filter { it.mediaType == mediaType }
 
     Selector(
         text = value?.text ?: "",
-        label = strings.get(FORMAT_INPUT),
+        label = strings[FORMAT_INPUT],
+        enabled = medias.isNotEmpty(),
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
