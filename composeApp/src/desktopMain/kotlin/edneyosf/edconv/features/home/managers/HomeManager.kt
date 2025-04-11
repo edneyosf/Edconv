@@ -358,11 +358,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
-    private fun setCmd(cmd: String) = _state.update {
-        println("Updating FFmpeg command: $cmd")
-        copy(cmd = cmd)
-    }
-
+    private fun setCmd(cmd: String) = _state.update { copy(cmd = cmd) }
     private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }
     private fun setOutput(path: String) = _state.update { copy(output = path) }
     private fun setLogs(log: String) = _state.update { copy(logs = log) }
