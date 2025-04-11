@@ -36,7 +36,6 @@ import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.TITLE_P
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.extensions.custom
-import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
@@ -112,14 +111,11 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
         }
     }*/
 
-    println(status)
-
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
             HomeNavigation(
                 selected = input?.type,
                 onSelected = { mediaType = it },
-                inputMediaType = input?.type,
                 pickFileEnabled = status !is HomeStatus.Loading,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = {

@@ -29,7 +29,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun HomeNavigation(
-    selected: MediaType?, inputMediaType: MediaType?, onSelected: (MediaType) -> Unit, pickFileEnabled: Boolean = true,
+    selected: MediaType?, onSelected: (MediaType) -> Unit, pickFileEnabled: Boolean = true,
     onPickFile: () -> Unit, onSettings: () -> Unit) {
 
     val mediaTypes = listOf(strings[AUDIO_MEDIA_TYPE], strings[VIDEO_MEDIA_TYPE])
@@ -41,7 +41,7 @@ fun HomeNavigation(
                 enabled = pickFileEnabled,
                 onClick = onPickFile
             ) {
-                BadgedBox(badge = { inputMediaType?.let { Badge() } }) {
+                BadgedBox(badge = { selected?.let { Badge() } }) {
                     Icon(Icons.Rounded.FileOpen, contentDescription = strings[TITLE_PICK_FILE])
                 }
             }
@@ -50,7 +50,7 @@ fun HomeNavigation(
                 NavigationRailItem(
                     icon = { Icon(icons[index], contentDescription = null) },
                     label = { Text(item) },
-                    enabled = inputMediaType?.index == index,
+                    enabled = selected?.index == index,
                     selected = selected?.index == index,
                     onClick = { MediaType.fromIndex(index)?.let { onSelected(it) } }
                 )
@@ -70,7 +70,6 @@ private fun DefaultPreview() {
         HomeNavigation(
             selected = MediaType.AUDIO,
             onSelected = {},
-            inputMediaType = MediaType.AUDIO,
             pickFileEnabled = true,
             onPickFile = {},
             onSettings = {}
