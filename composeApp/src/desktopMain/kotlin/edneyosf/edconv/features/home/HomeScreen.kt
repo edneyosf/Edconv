@@ -1,7 +1,6 @@
 package edneyosf.edconv.features.home
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -46,6 +45,7 @@ import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.features.settings.SettingsDialog
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.extensions.custom
+import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
@@ -69,7 +69,6 @@ fun HomeScreen() {
 //TODO
 @Composable
 private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
-    val isDarkTheme = isSystemInDarkTheme()
     var mediaType by remember { mutableStateOf(value = MediaType.AUDIO) }
     val titlePickFile = strings.get(TITLE_PICK_FILE)
     val compressions = listOf(strings.get(QUALITY_INPUT), strings.get(BIT_RATE_INPUT))
@@ -134,10 +133,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 }
             )
 
-            VerticalDivider(
-                color = if(isDarkTheme) MaterialTheme.colorScheme.surfaceContainer
-                else MaterialTheme.colorScheme.surfaceDim
-            )
+            VerticalDivider(color = DividerDefaults.customColor())
 
             Column(
                 modifier = Modifier.padding(dimens.i),
