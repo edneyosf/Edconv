@@ -2,7 +2,7 @@ package edneyosf.edconv.edconv.common
 
 enum class Codec(
     val value: String, val text: String, val mediaType: MediaType, val compression: List<CompressionType>,
-    val minCrf: Int? = null, val maxCrf: Int? = null, val minVbr: Int? = null, val maxVbr: Int? = null
+    val minCRF: Int? = null, val maxCRF: Int? = null, val minVBR: Int? = null, val maxVBR: Int? = null
 ) {
     AAC(
         value = "aac",
@@ -15,8 +15,8 @@ enum class Codec(
         text = "AAC (FDK)",
         mediaType = MediaType.AUDIO,
         compression = listOf(CompressionType.CBR, CompressionType.VBR),
-        minVbr = 1,
-        maxVbr = 5
+        minVBR = 1,
+        maxVBR = 5
     ),
     OPUS(
         value = "libopus",
@@ -47,32 +47,32 @@ enum class Codec(
         text = "H.264 (x264)",
         mediaType = MediaType.VIDEO,
         compression = listOf(CompressionType.CBR, CompressionType.CRF),
-        minCrf = 0,
-        maxCrf = 51
+        minCRF = 0,
+        maxCRF = 51
     ),
     H265(
         value = "libx265",
         text = "H.265 (x265)",
         mediaType = MediaType.VIDEO,
         compression = listOf(CompressionType.CBR, CompressionType.CRF),
-        minCrf = 0,
-        maxCrf = 51
+        minCRF = 0,
+        maxCRF = 51
     ),
     VP9(
         value = "libvpx-vp9",
         text = "VP9",
         mediaType = MediaType.VIDEO,
         compression =  listOf(CompressionType.CBR, CompressionType.CRF),
-        minCrf = 0,
-        maxCrf = 63
+        minCRF = 0,
+        maxCRF = 63
     ),
     AV1(
         value = "libsvtav1",
         text = "AV1 (SVT)",
         mediaType = MediaType.VIDEO,
         compression = listOf(CompressionType.CBR, CompressionType.CRF),
-        minCrf = 0,
-        maxCrf = 63
+        minCRF = 0,
+        maxCRF = 63
     );
 
     fun getVideoProfile(pixelFormat: PixelFormat?) = when(this) {
