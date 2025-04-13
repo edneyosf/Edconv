@@ -16,15 +16,7 @@ import edneyosf.edconv.features.settings.managers.SettingsManager
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatus
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.TITLE
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.SELECT_FFMPEG
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.SELECT_FFPROBE
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.CONFIRMATION_BUTTON
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.DEFAULT_ERROR
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.DEFINED
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.NO_DEFINED
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.PICK_FFMPEG_TITLE
-import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Key.PICK_FFPROBE_TITLE
+import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
 import edneyosf.edconv.ui.components.alerts.ErrorAlertText
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog

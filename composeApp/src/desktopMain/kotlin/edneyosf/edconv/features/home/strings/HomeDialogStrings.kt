@@ -6,6 +6,7 @@ import edneyosf.edconv.core.Languages.EN
 import edneyosf.edconv.core.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
+import edneyosf.edconv.features.home.strings.HomeDialogStrings.Keys.*
 
 inline val homeDialogStrings: HomeDialogStrings
     @ReadOnlyComposable
@@ -40,15 +41,15 @@ class HomeDialogStrings(override val language: String): Strings(language) {
 
     override val texts = mapOf(PT to pt, EN to en)
 
-    companion object Key {
-        const val ERROR_TITLE = 1L
-        const val WARNING_TITLE = 2L
-        const val COMPLETE_TITLE = 3L
-        const val CONFIRMATION_BUTTON = 4L
-        const val CANCEL_BUTTON = 5L
-        const val OVERWRITE_FILE = 6L
-        const val START_TIME = 7L
-        const val END_TIME = 8L
-        const val DURATION_TIME = 9L
+    enum class Keys {
+        ERROR_TITLE,
+        WARNING_TITLE,
+        COMPLETE_TITLE,
+        CONFIRMATION_BUTTON,
+        CANCEL_BUTTON,
+        OVERWRITE_FILE,
+        START_TIME,
+        END_TIME,
+        DURATION_TIME
     }
 }

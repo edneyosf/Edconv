@@ -6,6 +6,7 @@ import edneyosf.edconv.core.Languages.EN
 import edneyosf.edconv.core.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
+import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 
 inline val homeScreenStrings: HomeScreenStrings
     @ReadOnlyComposable
@@ -26,8 +27,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         PIXEL_FORMAT_INPUT to "Formato de pixel",
         RESOLUTION_INPUT to "Resolução",
         NO_AUDIO_INPUT to "Sem áudio",
-        QUALITY_INPUT to "Qualidade:",
-        BIT_RATE_INPUT to "Taxa de bits",
+        CBR_INPUT to "CBR:",
+        VBR_INPUT to "VBR:",
+        CRF_INPUT to "CRF:",
         PRESET_INPUT to "Predefinição:",
         AUDIO_MEDIA_TYPE to "Áudio",
         VIDEO_MEDIA_TYPE  to "Vídeo",
@@ -46,8 +48,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         PIXEL_FORMAT_INPUT to "Pixel format",
         RESOLUTION_INPUT to "Resolution",
         NO_AUDIO_INPUT to "No audio",
-        QUALITY_INPUT to "Constant:",
-        BIT_RATE_INPUT to "Bitrate",
+        CBR_INPUT to "CBR:",
+        VBR_INPUT to "VBR:",
+        CRF_INPUT to "CRF:",
         PRESET_INPUT to "Preset:",
         AUDIO_MEDIA_TYPE to "Audio",
         VIDEO_MEDIA_TYPE  to "Video",
@@ -56,23 +59,24 @@ class HomeScreenStrings(override val language: String): Strings(language) {
 
     override val texts = mapOf(PT to pt, EN to en)
 
-    companion object {
-        const val TITLE_PICK_FILE = 1L
-        const val SELECT_FILE = 2L
-        const val START_CONVERSION = 3L
-        const val STOP_CONVERSION = 4L
-        const val OUTPUT_FILE = 5L
-        const val FORMAT_INPUT = 6L
-        const val CHANNELS_INPUT = 7L
-        const val SAMPLE_RATE_INPUT = 8L
-        const val PIXEL_FORMAT_INPUT = 9L
-        const val RESOLUTION_INPUT = 10L
-        const val NO_AUDIO_INPUT = 11L
-        const val QUALITY_INPUT = 12L
-        const val BIT_RATE_INPUT = 13L
-        const val PRESET_INPUT = 14L
-        const val AUDIO_MEDIA_TYPE = 15L
-        const val VIDEO_MEDIA_TYPE = 16L
-        const val DEFAULT_ERROR = 17L
+    enum class Keys {
+        TITLE_PICK_FILE,
+        SELECT_FILE,
+        START_CONVERSION,
+        STOP_CONVERSION,
+        OUTPUT_FILE,
+        FORMAT_INPUT,
+        CHANNELS_INPUT,
+        SAMPLE_RATE_INPUT,
+        PIXEL_FORMAT_INPUT,
+        RESOLUTION_INPUT,
+        NO_AUDIO_INPUT,
+        CBR_INPUT,
+        VBR_INPUT,
+        CRF_INPUT,
+        PRESET_INPUT,
+        AUDIO_MEDIA_TYPE,
+        VIDEO_MEDIA_TYPE,
+        DEFAULT_ERROR
     }
 }

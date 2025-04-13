@@ -6,6 +6,7 @@ import edneyosf.edconv.core.Languages.EN
 import edneyosf.edconv.core.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
+import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
 
 inline val settingsDialogStrings: SettingsDialogStrings
     @ReadOnlyComposable
@@ -42,16 +43,16 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
 
     override val texts = mapOf(PT to pt, EN to en)
 
-    companion object Key {
-        const val TITLE = 1L
-        const val NO_DEFINED = 2L
-        const val DEFINED = 3L
-        const val SELECT_FFMPEG = 4L
-        const val SELECT_FFPROBE = 5L
-        const val CONFIRMATION_BUTTON = 6L
-        const val CANCEL_BUTTON = 7L
-        const val PICK_FFMPEG_TITLE = 8L
-        const val PICK_FFPROBE_TITLE = 9L
-        const val DEFAULT_ERROR = 10L
+    enum class Keys {
+        TITLE,
+        NO_DEFINED,
+        DEFINED,
+        SELECT_FFMPEG,
+        SELECT_FFPROBE,
+        CONFIRMATION_BUTTON,
+        CANCEL_BUTTON,
+        PICK_FFMPEG_TITLE,
+        PICK_FFPROBE_TITLE,
+        DEFAULT_ERROR
     }
 }

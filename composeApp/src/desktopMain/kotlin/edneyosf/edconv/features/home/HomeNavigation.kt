@@ -14,10 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import edneyosf.edconv.edconv.common.MediaType
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.AUDIO_MEDIA_TYPE
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.TITLE_PICK_FILE
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.VIDEO_MEDIA_TYPE
 import edneyosf.edconv.features.home.strings.homeScreenStrings
+import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
