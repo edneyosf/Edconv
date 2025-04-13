@@ -1,20 +1,20 @@
 package edneyosf.edconv.edconv.common
 
 enum class Codec(
-    val value: String, val text: String, val mediaType: MediaType, val compression: CompressionType,
+    val value: String, val text: String, val mediaType: MediaType, val compression: List<CompressionType>,
     val minCrf: Int? = null, val maxCrf: Int? = null, val minVbr: Int? = null, val maxVbr: Int? = null
 ) {
     AAC(
         value = "aac",
         text = "AAC",
         mediaType = MediaType.AUDIO,
-        compression = CompressionType.CONSTANT
+        compression = listOf(CompressionType.CBR)
     ),
     AAC_FDK(
         value = "libfdk_aac",
         text = "AAC (FDK)",
         mediaType = MediaType.AUDIO,
-        compression = CompressionType.CONSTANT_VARIABLE,
+        compression = listOf(CompressionType.CBR, CompressionType.VBR),
         minVbr = 1,
         maxVbr = 5
     ),
@@ -22,31 +22,31 @@ enum class Codec(
         value = "libopus",
         text = "Opus",
         mediaType = MediaType.AUDIO,
-        compression = CompressionType.CONSTANT
+        compression = listOf(CompressionType.CBR)
     ),
     AC3(
         value = "ac3",
         text = "AC3", mediaType = MediaType.AUDIO,
-        compression = CompressionType.CONSTANT
+        compression = listOf(CompressionType.CBR)
     ),
     EAC3(
         value = "eac3",
         text = "EAC3",
         mediaType = MediaType.AUDIO,
-        compression = CompressionType.CONSTANT
+        compression = listOf(CompressionType.CBR)
     ),
     FLAC(
         value = "flac",
         text = "FLAC",
         mediaType = MediaType.AUDIO,
-        compression = CompressionType.VARIABLE
+        compression = emptyList()
     ),
 
     H264(
         value = "libx264",
         text = "H.264 (x264)",
         mediaType = MediaType.VIDEO,
-        compression = CompressionType.CONSTANT_VARIABLE,
+        compression = listOf(CompressionType.CBR, CompressionType.CRF),
         minCrf = 0,
         maxCrf = 51
     ),
@@ -54,7 +54,7 @@ enum class Codec(
         value = "libx265",
         text = "H.265 (x265)",
         mediaType = MediaType.VIDEO,
-        compression = CompressionType.CONSTANT_VARIABLE,
+        compression = listOf(CompressionType.CBR, CompressionType.CRF),
         minCrf = 0,
         maxCrf = 51
     ),
@@ -62,7 +62,7 @@ enum class Codec(
         value = "libvpx-vp9",
         text = "VP9",
         mediaType = MediaType.VIDEO,
-        compression = CompressionType.CONSTANT_VARIABLE,
+        compression =  listOf(CompressionType.CBR, CompressionType.CRF),
         minCrf = 0,
         maxCrf = 63
     ),
@@ -70,7 +70,7 @@ enum class Codec(
         value = "libsvtav1",
         text = "AV1 (SVT)",
         mediaType = MediaType.VIDEO,
-        compression = CompressionType.CONSTANT_VARIABLE,
+        compression = listOf(CompressionType.CBR, CompressionType.CRF),
         minCrf = 0,
         maxCrf = 63
     );
