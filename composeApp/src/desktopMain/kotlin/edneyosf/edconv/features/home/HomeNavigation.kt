@@ -18,6 +18,7 @@ import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.AUDIO_M
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.TITLE_PICK_FILE
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.VIDEO_MEDIA_TYPE
 import edneyosf.edconv.features.home.strings.homeScreenStrings
+import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
@@ -35,7 +36,7 @@ fun HomeNavigation(
     val icons = listOf(Icons.Rounded.MusicNote, Icons.Rounded.Videocam)
 
     Row {
-        NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
+        NavigationRail {
             FilledTonalIconButton(
                 enabled = pickFileEnabled,
                 onClick = onPickFile
@@ -66,6 +67,7 @@ fun HomeNavigation(
                 Icon(Icons.Rounded.Settings, contentDescription = null)
             }
         }
+        VerticalDivider(color = DividerDefaults.customColor())
     }
 }
 
