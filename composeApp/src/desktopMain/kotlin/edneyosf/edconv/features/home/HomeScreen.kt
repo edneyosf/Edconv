@@ -1,39 +1,29 @@
 package edneyosf.edconv.features.home
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import edneyosf.edconv.core.common.compose.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
-import edneyosf.edconv.edconv.av1.AV1Preset
 import edneyosf.edconv.edconv.common.*
-import edneyosf.edconv.edconv.h265.H265Preset
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.events.HomeEvent.*
 import edneyosf.edconv.features.home.managers.HomeManager
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.states.HomeStatus
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.BIT_RATE_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.CHANNELS_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.FORMAT_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.NO_AUDIO_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.OUTPUT_FILE
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.PIXEL_FORMAT_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.PRESET_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.RESOLUTION_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.SAMPLE_RATE_INPUT
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.START_CONVERSION
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.STOP_CONVERSION
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Companion.TITLE_PICK_FILE
 import edneyosf.edconv.features.home.strings.homeScreenStrings
+import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.compositions.*
@@ -48,9 +38,8 @@ fun HomeScreen() {
     val manager = remember { HomeManager(scope) }
     val state by manager.state
 
-    state.Dialogs(onEvent = manager::onEvent)
-
     CompositionLocalProvider(stringsComp provides homeScreenStrings) {
+        state.Dialogs(onEvent = manager::onEvent)
         state.Content(onEvent = manager::onEvent)
     }
 }
@@ -60,22 +49,20 @@ fun HomeScreen() {
 private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
     val titlePickFile = strings[TITLE_PICK_FILE]
     var mediaType by remember { mutableStateOf<MediaType?>(value = null) }
-    /*val compressions = listOf(strings[QUALITY_INPUT], strings[BIT_RATE_INPUT])
-    var quality by remember { mutableStateOf<Int?>(value = null) }
+    /*var quality by remember { mutableStateOf<Int?>(value = null) }
     var preset by remember { mutableStateOf<Int?>(value = null) }*/
 
-    // Input
-    /*LaunchedEffect(input) {
-        input?.let {
-            mediaType = it.type
-        }
-    }
-    // Media Type
+    LaunchedEffected(input) { mediaType = it?.type }
     LaunchedEffect(mediaType) {
-        onEvent(SetCodec(null))
+        onEvent(SetCodec(codec = null))
+        onEvent(SetBitrate(bitrate = null))
+    }
+    LaunchedEffected(codec) {
+        if(vbr == null) onEvent(SetVbr(it?.minVBR))
+        if(crf == null) onEvent(SetCrf(it?.minCRF))
     }
     // Format
-    LaunchedEffect(codec) {
+    /*LaunchedEffect(codec) {
         /*codec.let {
             quality = 0
             preset = 0
@@ -114,32 +101,25 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
             HomeNavigation(
-                selected = input?.type,
+                selected = mediaType,
+                inputMediaType = input?.type,
                 onSelected = { mediaType = it },
                 pickFileEnabled = status !is HomeStatus.Loading,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
-                onSettings = {
-                    onEvent(SetStatus(HomeStatus.Settings))
-                }
+                onSettings = { onEvent(SetStatus(HomeStatus.Settings)) }
             )
-
             Column(
-                modifier = Modifier.padding(dimens.i),
+                modifier = Modifier.padding(dimens.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimens.i)
+                verticalArrangement = Arrangement.spacedBy(dimens.md)
             ) {
                 Actions(
-                    status = status,
-                    enabled = input != null && !output.isNullOrBlank() && codec != null,
-                    onStart = {
-                        onEvent(OnStart())
-                    },
+                    startEnabled = canStart(mediaType),
+                    onStart = { onEvent(OnStart()) },
                     onStop = { onEvent(OnStop) }
                 )
-
-                // Common Settings
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(dimens.m),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.xl),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     FormatInput(
@@ -147,30 +127,12 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         mediaType = mediaType,
                         onValueChange = { onEvent(SetCodec(it)) }
                     )
-
                     Column {
                         if(mediaType == MediaType.AUDIO) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(
-                                    selected = CompressionType.CONSTANT == compression,
-                                    onClick = { onEvent(SetCompression(CompressionType.CONSTANT)) }
-                                )
-
-                                /*Text(
-                                    text = compressions[CompressionType.CONSTANT.index],
-                                    style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                )*/
-
-                                Spacer(modifier = Modifier.width(dimens.d))
-
-                                /*Text(
-                                    text = quality?.toString() ?: "0",
-                                    style = TextStyle(
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontSize = fontSizes.c
-                                    )
-                                )*/
-                            }
+                            VBRInput(
+                                onClick = { onEvent(SetCompression(CompressionType.VBR)) },
+                                onValueChange = { onEvent(SetVbr(it)) }
+                            )
                         }
                         else {
                             /*Row {
@@ -190,7 +152,8 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                                 )
                             }*/
                         }
-                        val minRate = when(codec) {
+
+                        /*val minRate = when(codec) {
                             Codec.AAC_FDK -> codec.minVbr?.toFloat()
                             Codec.H265, Codec.AV1 -> codec.minCrf?.toFloat()
                             else -> 0f
@@ -199,7 +162,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                             Codec.AAC_FDK -> codec.maxVbr?.toFloat()
                             Codec.H265, Codec.AV1 -> codec.maxCrf?.toFloat()
                             else -> 0f
-                        } ?: 0f
+                        } ?: 0f*/
 
                         // TODO
                         /*Slider(
@@ -212,23 +175,29 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         )*/
                     }
 
-                    if(mediaType == MediaType.AUDIO) {
+                    if(codec?.compression?.contains(CompressionType.CBR) == true) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(
-                                selected = CompressionType.VARIABLE == compression,
-                                onClick = { onEvent(SetCompression(CompressionType.VARIABLE)) }
+                                selected = CompressionType.CBR == compression,
+                                onClick = { onEvent(SetCompression(CompressionType.CBR)) }
                             )
                             VariableCompressionInput(
                                 value = bitrate,
-                                enabled = CompressionType.VARIABLE == compression,
+                                mediaType = mediaType,
+                                enabled = CompressionType.CBR == compression,
                                 onValueChange = { onEvent(SetBitrate(it)) }
                             )
                         }
                     }
+
+                    CRFInput(
+                        onClick = { onEvent(SetCompression(CompressionType.CRF)) },
+                        onValueChange = { onEvent(SetCrf(it)) }
+                    )
                 }
 
                 // Audio Settings
-                if(mediaType == MediaType.AUDIO) {
+                /*if(mediaType == MediaType.AUDIO) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         ChannelsInput(
                             value = channels,
@@ -307,9 +276,8 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                             Text(strings.get(NO_AUDIO_INPUT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
                         }
                     }
-                }
-                //TODO
-                Row(modifier = Modifier.weight(1f)) {
+                }*/
+                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(dimens.md)) {
                     LogsView(logs)
 
                     TextField(
@@ -336,15 +304,12 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
     }
 }
 
-//TODO
 @Composable
-private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
-    val isLoading = status is HomeStatus.Loading
-    val startEnabled = !isLoading && status !is HomeStatus.Progress
+private fun HomeState.Actions(startEnabled: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
     val stopEnabled = status is HomeStatus.Progress
     val modifier =  Modifier
         .fillMaxWidth()
-        .padding(bottom = dimens.f)
+        .padding(bottom = dimens.sm)
 
     Row(
         modifier = modifier,
@@ -352,37 +317,33 @@ private fun Actions(status: HomeStatus, enabled: Boolean, onStart: () -> Unit, o
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledIconButton(
-                enabled = startEnabled && enabled,
+                enabled = startEnabled,
                 onClick = onStart
             ) {
                 Icon(
                     imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = strings.get(START_CONVERSION)
+                    contentDescription = strings[START_CONVERSION]
                 )
             }
-
             Text(
-                text = strings.get(START_CONVERSION),
-                style = TextStyle(fontSize = fontSizes.a)
+                text = strings[START_CONVERSION],
+                style = MaterialTheme.typography.bodySmall
             )
         }
-
-        Spacer(modifier = Modifier.width(dimens.i))
-
+        Spacer(modifier = Modifier.width(dimens.md))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledTonalIconButton(
-                enabled = stopEnabled && enabled,
+                enabled = stopEnabled,
                 onClick = onStop
-            ){
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Stop,
-                    contentDescription = strings.get(STOP_CONVERSION)
+                    contentDescription = strings[STOP_CONVERSION]
                 )
             }
-
             Text(
-                text = strings.get(STOP_CONVERSION),
-                style = TextStyle(fontSize = fontSizes.a)
+                text = strings[STOP_CONVERSION],
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
@@ -408,6 +369,83 @@ private fun FormatInput(value: Codec?, mediaType: MediaType?, onValueChange: (Co
                     onValueChange(item)
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun HomeState.VBRInput(onClick: () -> Unit,  onValueChange: (Int) -> Unit) {
+    if(codec?.compression?.contains(CompressionType.VBR) == true && vbr != null) {
+        val minVBR = codec.minVBR
+        val maxVBR = codec.maxVBR
+
+        if(minVBR != null && maxVBR != null) {
+            val isVBR = CompressionType.VBR == compression
+
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+                RadioButton(selected = isVBR, onClick = onClick)
+                Text(
+                    text = strings[VBR_INPUT],
+                    style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                )
+                Spacer(modifier = Modifier.width(dimens.xs))
+                Text(
+                    text = vbr.toString(),
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+            }
+            Box(modifier = Modifier.padding(start = 14.dp)) {
+                Slider(
+                    value = vbr.toFloat(),
+                    modifier = Modifier.width(220.dp),
+                    enabled = isVBR,
+                    steps = maxVBR - 2,
+                    onValueChange = { onValueChange(it.toInt()) },
+                    valueRange = minVBR.toFloat() .. maxVBR.toFloat()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeState.CRFInput(onClick: () -> Unit,  onValueChange: (Int) -> Unit) {
+    if(codec?.compression?.contains(CompressionType.CRF) == true && crf != null) {
+        val minCRF = codec.minCRF
+        val maxCRF = codec.maxCRF
+
+        if(minCRF != null && maxCRF != null) {
+            val isCRF = CompressionType.CRF == compression
+
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+                    RadioButton(selected = isCRF, onClick = onClick)
+                    Text(
+                        text = strings[CRF_INPUT],
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Text(
+                        text = crf.toString(),
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                }
+                Box(modifier = Modifier.padding(start = 14.dp)) {
+                    Slider(
+                        value = crf.toFloat(),
+                        modifier = Modifier.width(320.dp),
+                        enabled = isCRF,
+                        onValueChange = { onValueChange(it.toInt()) },
+                        valueRange = minCRF.toFloat() .. maxCRF.toFloat()
+                    )
+                }
+            }
         }
     }
 }
@@ -502,17 +540,17 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
 
 //TODO
 @Composable
-private fun VariableCompressionInput(value: Bitrate?, enabled: Boolean = true, onValueChange: (Bitrate) -> Unit) {
+private fun VariableCompressionInput(mediaType: MediaType?, value: Bitrate?, enabled: Boolean = true, onValueChange: (Bitrate) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
         text = value?.text ?: "",
-        label = strings.get(BIT_RATE_INPUT),
+        label = strings[CBR_INPUT],
         enabled = enabled,
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
-        Bitrate.getAllForAudio().forEach { item ->
+        Bitrate.getAllByMediaType(mediaType).forEach { item ->
             DropdownMenuItem(
                 text = { Text(item.text) },
                 onClick = {
@@ -529,20 +567,74 @@ private fun VariableCompressionInput(value: Bitrate?, enabled: Boolean = true, o
 private fun RowScope.LogsView(text: String) {
     val logsScroll = rememberScrollState()
     val modifier = Modifier
-        .fillMaxWidth()
+        .weight(2f)
         .fillMaxHeight()
-        .verticalScroll(state = logsScroll)
 
-    LaunchedEffect(text) { logsScroll.animateScrollTo(logsScroll.maxValue) }
+    LaunchedEffect(text) {
+        logsScroll.animateScrollTo(logsScroll.maxValue)
+    }
 
-    Column(modifier = Modifier
-        .weight(2f)) {
-        Text("Logs", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(modifier = Modifier.height(dimens.f))
-        Card(modifier = modifier) {
-            SelectionContainer(modifier = Modifier.padding(dimens.i)) {
-                Text(text, style = MaterialTheme.typography.labelMedium)
+    Card(modifier = modifier) {
+        Box(Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(end = 12.dp) // espaço pro scrollbar
+            ) {
+                Text("Logs", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(dimens.f))
+                HorizontalDivider()
+
+                SelectionContainer(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(logsScroll)
+                ) {
+                    Text(
+                        text = """
+                            sdfsdf
+                            sd
+                            fsdf
+                            sdf
+                            sdf
+                            sdf
+                            s
+                            df
+                            sdf
+                            sdf
+                            s
+                            df
+                            sdf
+                            sdf
+                            s
+                            df
+                            sdf
+                            a
+                            df
+                            ad
+                            fa
+                            df
+                            a
+                            df
+                            a
+                            df
+                            asdf
+                            asd
+                            fa
+                            dsfa
+                        """.trimIndent(),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
+
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(logsScroll),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+            )
         }
     }
 }
@@ -551,18 +643,17 @@ private fun RowScope.LogsView(text: String) {
 private fun Progress(status: HomeStatus) {
     val modifier = Modifier
         .fillMaxWidth()
-        .height(dimens.s)
+        .height(dimens.xxl)
 
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
-        if(status is HomeStatus.Loading) LinearProgress()
-        else if(status is HomeStatus.Progress) {
+        if(status is HomeStatus.Progress) {
             val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
             LinearProgress(status.percentage)
-            Spacer(modifier = Modifier.height(dimens.d))
+            Spacer(modifier = Modifier.height(dimens.xs))
             Text(text, style = TextStyle(color = MaterialTheme.colorScheme.onSurface))
         }
     }
@@ -575,6 +666,22 @@ private fun LinearProgress(percentage: Float = 0f) {
         progress = { percentage / 100 },
         strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
     )
+}
+
+private fun HomeState.canStart(mediaType: MediaType?): Boolean {
+    if (
+        mediaType == null ||
+        input == null ||
+        output.isNullOrBlank() ||
+        codec == null ||
+        status is HomeStatus.Loading ||
+        status is HomeStatus.Progress
+    ) return false
+
+    return when (mediaType) {
+        MediaType.AUDIO -> bitrate != null || vbr != null
+        MediaType.VIDEO -> preset != null && crf != null
+    }
 }
 
 @Composable

@@ -15,7 +15,7 @@ sealed interface HomeEvent {
     data class SetBitrate(val bitrate: Bitrate?): HomeEvent
     data class SetSampleRate(val sampleRate: SampleRate?): HomeEvent
     data class SetPreset(val preset: String): HomeEvent
-    data class SetCrf(val crf: Int): HomeEvent
+    data class SetCrf(val crf: Int?): HomeEvent
     data class SetResolution(val resolution: Resolution?): HomeEvent
     data class SetPixelFormat(val pixelFormat: PixelFormat?): HomeEvent
     data class SetNoAudio(val noAudio: Boolean): HomeEvent

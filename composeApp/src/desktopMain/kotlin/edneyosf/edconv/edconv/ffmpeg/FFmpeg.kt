@@ -1,5 +1,6 @@
 package edneyosf.edconv.edconv.ffmpeg
 
+import edneyosf.edconv.edconv.common.CompressionType
 import edneyosf.edconv.edconv.common.MediaType
 
 class FFmpeg private constructor(
@@ -21,15 +22,16 @@ class FFmpeg private constructor(
 
     companion object {
         fun createAudio(
-            logLevel: String, codec: String, sampleRate: String? = null, vbr: String?, bitrate: String?,
-            channels: String? = null, filter: String? = null, noVideo: Boolean = false): FFmpeg {
+            logLevel: String, codec: String, compressionType: CompressionType, sampleRate: String? = null,
+            vbr: String?, bitrate: String?, channels: String? = null, filter: String? = null,
+            noVideo: Boolean = false): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
                 mediaType = MediaType.AUDIO,
                 codec = codec,
-                vbr = vbr,
-                bitrate = bitrate,
+                vbr = if(compressionType == CompressionType.VBR) vbr else null,
+                bitrate = if(compressionType == CompressionType.CBR) bitrate else null,
                 sampleRate = sampleRate,
                 channels = channels,
                 filter = filter,
@@ -38,15 +40,17 @@ class FFmpeg private constructor(
         }
 
         fun createVideo(
-            logLevel: String, codec: String, preset: String, crf: Int, profile: String? = null,
-            pixelFormat: String? = null, filter: String? = null, noAudio: Boolean = false): FFmpeg {
+            logLevel: String, codec: String, compressionType: CompressionType, preset: String, crf: Int?,
+            bitrate: String?, profile: String? = null, pixelFormat: String? = null, filter: String? = null,
+            noAudio: Boolean = false): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
                 mediaType = MediaType.VIDEO,
                 codec = codec,
                 preset = preset,
-                crf = crf,
+                crf = if(compressionType == CompressionType.CRF) crf else null,
+                bitrate = if(compressionType == CompressionType.CBR) bitrate else null,
                 pixelFormat = pixelFormat,
                 profile = profile,
                 filter = filter,

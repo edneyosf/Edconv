@@ -41,7 +41,12 @@ enum class Bitrate(val value: String, val text: String, val mediaType: MediaType
     M50(value = "50M", text = "50 Mbps", mediaType = MediaType.VIDEO);
 
     companion object {
-        fun getAllForAudio() = entries.toList().filter { it.mediaType == MediaType.AUDIO }
-        fun getAllForVideo() = entries.toList().filter { it.mediaType == MediaType.VIDEO }
+        private fun getAllByAudio() = entries.toList().filter { it.mediaType == MediaType.AUDIO }
+        private fun getAllByVideo() = entries.toList().filter { it.mediaType == MediaType.VIDEO }
+        fun getAllByMediaType(mediaType: MediaType?) = when(mediaType) {
+            MediaType.AUDIO -> getAllByAudio()
+            MediaType.VIDEO -> getAllByVideo()
+            else -> emptyList()
+        }
     }
 }

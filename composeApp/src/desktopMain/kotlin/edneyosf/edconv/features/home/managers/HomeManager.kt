@@ -8,7 +8,7 @@ import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.DateTimeUtils
-import edneyosf.edconv.core.utils.MediaUtils
+import edneyosf.edconv.edconv.utils.MediaUtils
 import edneyosf.edconv.edconv.common.*
 import edneyosf.edconv.edconv.core.Edconv
 import edneyosf.edconv.edconv.core.data.MediaData
@@ -116,10 +116,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         val ffmpeg = when (codec.mediaType) {
             MediaType.AUDIO -> {
                 if(vbr == null && bitrate == null) return@run
-                if(vbr != null && bitrate != null) {
-                    onError(Throwable("VBR and bitrate cannot be combined"))
-                    return@run
-                }
 
                 val inputChannels = input.channels
                 if(inputChannels == null) {
@@ -132,6 +128,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 FFmpeg.createAudio(
                     logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
                     codec = codec.value,
+                    compressionType = compression,
                     sampleRate = sampleRate?.value,
                     channels = channels?.value,
                     vbr = vbr?.toString(),
@@ -140,7 +137,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 )
             }
             MediaType.VIDEO -> {
-                if(preset.isNullOrBlank() || crf == null) return@run
+                if(preset.isNullOrBlank() || (crf == null && bitrate == null)) return@run
 
                 val inputResolution = input.resolution
                 if(inputResolution == null) {
@@ -155,8 +152,10 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 FFmpeg.createVideo(
                     logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
                     codec = codec.value,
+                    compressionType = compression,
                     preset = preset,
                     crf = crf,
+                    bitrate = bitrate?.value,
                     profile = codec.getVideoProfile(pixelFormat),
                     pixelFormat = pixelFormat?.value,
                     filter = filter,
@@ -368,7 +367,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setBitrate(bitrate: Bitrate?) = _state.update { copy(bitrate = bitrate) }
     private fun setSampleRate(sampleRate: SampleRate?) = _state.update { copy(sampleRate = sampleRate) }
     private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
-    private fun setCrf(crf: Int) = _state.update { copy(crf = crf) }
+    private fun setCrf(crf: Int?) = _state.update { copy(crf = crf) }
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }

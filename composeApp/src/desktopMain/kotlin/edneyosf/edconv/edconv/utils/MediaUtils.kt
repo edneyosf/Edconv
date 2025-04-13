@@ -1,4 +1,4 @@
-package edneyosf.edconv.core.utils
+package edneyosf.edconv.edconv.utils
 
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.edconv.core.data.ContentTypeData
