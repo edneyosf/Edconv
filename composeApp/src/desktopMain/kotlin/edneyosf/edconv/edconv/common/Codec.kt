@@ -8,13 +8,14 @@ enum class Codec(
     val value: String, val text: String, val mediaType: MediaType, val compressions: List<CompressionType>,
     val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, val defaultVBR: Int? = null,
     val minVBR: Int? = null, val maxVBR: Int? = null, val defaultPreset: String? = null, val minPreset: Int? = null,
-    val maxPreset: Int? = null
+    val maxPreset: Int? = null, val defaultBitrate: Bitrate? = null
 ) {
     AAC(
         value = "aac",
         text = "AAC",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
+        defaultBitrate = Bitrate.K192
     ),
     AAC_FDK(
         value = "libfdk_aac",
@@ -23,24 +24,28 @@ enum class Codec(
         compressions = listOf(CompressionType.VBR, CompressionType.CBR),
         defaultVBR = 5,
         minVBR = 1,
-        maxVBR = 5
+        maxVBR = 5,
+        defaultBitrate = Bitrate.K192
     ),
     OPUS(
         value = "libopus",
         text = "Opus",
         mediaType = MediaType.AUDIO,
-        compressions = listOf(CompressionType.CBR)
+        compressions = listOf(CompressionType.CBR),
+        defaultBitrate = Bitrate.K128
     ),
     AC3(
         value = "ac3",
         text = "AC3", mediaType = MediaType.AUDIO,
-        compressions = listOf(CompressionType.CBR)
+        compressions = listOf(CompressionType.CBR),
+        defaultBitrate = Bitrate.K448
     ),
     EAC3(
         value = "eac3",
         text = "EAC3",
         mediaType = MediaType.AUDIO,
-        compressions = listOf(CompressionType.CBR)
+        compressions = listOf(CompressionType.CBR),
+        defaultBitrate = Bitrate.K384
     ),
     FLAC(
         value = "flac",
@@ -59,7 +64,8 @@ enum class Codec(
         maxCRF = 51,
         defaultPreset = H264Preset.SLOW.value,
         minPreset = 0,
-        maxPreset = 9
+        maxPreset = 9,
+        defaultBitrate = Bitrate.M6
     ),
     H265(
         value = "libx265",
@@ -71,7 +77,8 @@ enum class Codec(
         maxCRF = 51,
         defaultPreset = H265Preset.SLOW.value,
         minPreset = 0,
-        maxPreset = 9
+        maxPreset = 9,
+        defaultBitrate = Bitrate.M3_5
     ),
     /*VP9(
         value = "libvpx-vp9",
@@ -80,7 +87,8 @@ enum class Codec(
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 19,
         minCRF = 0,
-        maxCRF = 63
+        maxCRF = 63,
+        defaultBitrate = Bitrate.M3_5
     ),*/
     AV1(
         value = "libsvtav1",
@@ -93,6 +101,7 @@ enum class Codec(
         defaultPreset = AV1Preset.P4.value,
         minPreset = 0,
         maxPreset = 13,
+        defaultBitrate = Bitrate.M3
     );
 
     fun getVideoProfile(pixelFormat: PixelFormat?) = when(this) {

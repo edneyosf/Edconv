@@ -37,6 +37,16 @@ fun HomeScreen() {
     val manager = remember { HomeManager(scope) }
     val state by manager.state
 
+    LaunchedEffected(state.codec) {
+        manager.run {
+            onEvent(SetBitrate(bitrate = it?.defaultBitrate))
+            onEvent(SetVbr(it?.defaultVBR))
+            onEvent(SetCrf(it?.defaultCRF))
+            onEvent(SetPreset(it?.defaultPreset))
+            onEvent(SetCompression(compression = it?.compressions?.firstOrNull()))
+        }
+    }
+
     CompositionLocalProvider(stringsComp provides homeScreenStrings) {
         state.Dialogs(onEvent = manager::onEvent)
         state.Content(onEvent = manager::onEvent)
@@ -48,18 +58,16 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
     val titlePickFile = strings[TITLE_PICK_FILE]
     var mediaType by remember { mutableStateOf<MediaType?>(value = null) }
 
-    LaunchedEffected(input) {
-        mediaType = it?.type
-    }
+    LaunchedEffected(input) { mediaType = it?.type }
+
     LaunchedEffected(mediaType) {
-        onEvent(SetCodec(codec = if(it == MediaType.AUDIO) Codec.AAC else if(it == MediaType.VIDEO) Codec.H264 else null))
-        onEvent(SetBitrate(bitrate = if(it == MediaType.AUDIO) Bitrate.K256 else if(it == MediaType.VIDEO) Bitrate.M3_5 else null))
-    }
-    LaunchedEffected(codec) {
-        onEvent(SetVbr(it?.defaultVBR))
-        onEvent(SetCrf(it?.defaultCRF))
-        onEvent(SetPreset(it?.defaultPreset))
-        onEvent(SetCompression(compression = it?.compressions?.firstOrNull()))
+        val defaultCodec = when(it) {
+            MediaType.AUDIO -> Codec.AAC
+            MediaType.VIDEO -> Codec.AV1
+            else -> null
+        }
+
+        onEvent(SetCodec(codec = defaultCodec))
     }
 
     Scaffold { innerPadding ->
@@ -105,8 +113,6 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         onValueChange = { onEvent(SetBitrate(it)) }
                     )
                 }
-
-                // Audio Settings
                 if(mediaType == MediaType.AUDIO) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +128,6 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         )
                     }
                 }
-                // Video Settings
                 else if(mediaType == MediaType.VIDEO) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -138,46 +143,44 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         )
                         PresetInput(
                             mediaType = mediaType,
-                            onValueChange = {
-                                onEvent(SetPreset(it))
-                            }
+                            onValueChange = { onEvent(SetPreset(it)) }
                         )
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             checked = noAudio,
-                            onCheckedChange = {
-                                onEvent(SetNoAudio(it))
-                            }
+                            onCheckedChange = { onEvent(SetNoAudio(it)) }
                         )
                         Spacer(modifier = Modifier.width(dimens.xxs))
                         Text(
                             text = strings[NO_AUDIO_INPUT],
-                            style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
                     }
                 }
-                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(dimens.md)) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.md)
+                ) {
                     LogsView(logs)
-
                     TextField(
                         value = cmd,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                         colors = TextFieldDefaults.colors().custom(),
                         onValueChange = { onEvent(SetCmd(it)) },
-                        label = { Text(text = "Comando") }
+                        label = { Text(strings[COMMAND_INPUT]) }
                     )
                 }
-
                 Progress(status)
-
                 TextField(
                     value = output ?: "",
                     modifier = Modifier.fillMaxWidth(),
                     enabled = input != null,
                     colors = TextFieldDefaults.colors().custom(),
                     onValueChange = { onEvent(SetOutput(it)) },
-                    label = { Text(text = strings[OUTPUT_FILE]) }
+                    label = { Text(strings[OUTPUT_FILE]) }
                 )
             }
         }

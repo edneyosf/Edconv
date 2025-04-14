@@ -33,6 +33,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         PRESET_INPUT to "Predefinição:",
         AUDIO_MEDIA_TYPE to "Áudio",
         VIDEO_MEDIA_TYPE  to "Vídeo",
+        COMMAND_INPUT to "Comando",
         DEFAULT_ERROR to "Opa! Algo deu errado.",
     )
 
@@ -54,6 +55,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         PRESET_INPUT to "Preset:",
         AUDIO_MEDIA_TYPE to "Audio",
         VIDEO_MEDIA_TYPE  to "Video",
+        COMMAND_INPUT to "Command",
         DEFAULT_ERROR to "Oops! Something went wrong.",
     )
 
@@ -77,6 +79,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         PRESET_INPUT,
         AUDIO_MEDIA_TYPE,
         VIDEO_MEDIA_TYPE,
+        COMMAND_INPUT,
         DEFAULT_ERROR
     }
 }
