@@ -2,7 +2,7 @@ package edneyosf.edconv.edconv.common
 
 enum class Codec(
     val value: String, val text: String, val mediaType: MediaType, val compression: List<CompressionType>,
-    val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, defaultVBR: Int? = null,
+    val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, val defaultVBR: Int? = null,
     val minVBR: Int? = null, val maxVBR: Int? = null
 ) {
     AAC(
