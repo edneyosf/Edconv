@@ -2,19 +2,21 @@ package edneyosf.edconv.edconv.common
 
 enum class Codec(
     val value: String, val text: String, val mediaType: MediaType, val compression: List<CompressionType>,
-    val minCRF: Int? = null, val maxCRF: Int? = null, val minVBR: Int? = null, val maxVBR: Int? = null
+    val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, defaultVBR: Int? = null,
+    val minVBR: Int? = null, val maxVBR: Int? = null
 ) {
     AAC(
         value = "aac",
         text = "AAC",
         mediaType = MediaType.AUDIO,
-        compression = listOf(CompressionType.CBR)
+        compression = listOf(CompressionType.CBR),
     ),
     AAC_FDK(
         value = "libfdk_aac",
         text = "AAC (FDK)",
         mediaType = MediaType.AUDIO,
-        compression = listOf(CompressionType.CBR, CompressionType.VBR),
+        compression = listOf(CompressionType.VBR, CompressionType.CBR),
+        defaultVBR = 5,
         minVBR = 1,
         maxVBR = 5
     ),
@@ -46,7 +48,8 @@ enum class Codec(
         value = "libx264",
         text = "H.264 (x264)",
         mediaType = MediaType.VIDEO,
-        compression = listOf(CompressionType.CBR, CompressionType.CRF),
+        compression = listOf(CompressionType.CRF, CompressionType.CBR),
+        defaultCRF = 20,
         minCRF = 0,
         maxCRF = 51
     ),
@@ -54,7 +57,8 @@ enum class Codec(
         value = "libx265",
         text = "H.265 (x265)",
         mediaType = MediaType.VIDEO,
-        compression = listOf(CompressionType.CBR, CompressionType.CRF),
+        compression = listOf(CompressionType.CRF, CompressionType.CBR),
+        defaultCRF = 21,
         minCRF = 0,
         maxCRF = 51
     ),
@@ -62,7 +66,8 @@ enum class Codec(
         value = "libvpx-vp9",
         text = "VP9",
         mediaType = MediaType.VIDEO,
-        compression =  listOf(CompressionType.CBR, CompressionType.CRF),
+        compression = listOf(CompressionType.CRF, CompressionType.CBR),
+        defaultCRF = 19,
         minCRF = 0,
         maxCRF = 63
     ),
@@ -70,7 +75,8 @@ enum class Codec(
         value = "libsvtav1",
         text = "AV1 (SVT)",
         mediaType = MediaType.VIDEO,
-        compression = listOf(CompressionType.CBR, CompressionType.CRF),
+        compression = listOf(CompressionType.CRF, CompressionType.CBR),
+        defaultCRF = 25,
         minCRF = 0,
         maxCRF = 63
     );
