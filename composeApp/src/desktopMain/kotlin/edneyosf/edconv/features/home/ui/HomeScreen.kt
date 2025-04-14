@@ -466,10 +466,7 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
                     Spacer(modifier = Modifier.width(dimens.xs))
                     Text(
                         text = preset ?: "",
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = fontSizes.c
-                        )
+                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
                     )
                 }
                 val teste = if(!preset.isNullOrBlank()) codec.indexByPresetValue(preset)?.toFloat() ?: 0f else 0f
