@@ -56,7 +56,7 @@ fun HomeNavigation(
                     icon = { Icon(icons[index], contentDescription = null) },
                     label = { Text(string) },
                     enabled = enabled,
-                    selected = selected?.index == index,
+                    selected = selected?.ordinal == index,
                     onClick = { item?.let { onSelected(it) } }
                 )
             }
