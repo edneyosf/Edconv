@@ -469,7 +469,7 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
 
         if(minPreset != null && maxPreset != null) {
             Column {
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = strings[PRESET_INPUT],
                         style = TextStyle(
@@ -484,6 +484,7 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
                         )
                     )
                 }
+                Spacer(modifier = Modifier.height(dimens.xs))
                 Slider(
                     value = codec.indexByPresetValue(preset)?.toFloat() ?: 0f,
                     modifier = Modifier.width(320.dp),
