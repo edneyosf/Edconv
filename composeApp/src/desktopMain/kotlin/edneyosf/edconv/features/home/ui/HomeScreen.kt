@@ -37,16 +37,6 @@ fun HomeScreen() {
     val manager = remember { HomeManager(scope) }
     val state by manager.state
 
-    LaunchedEffected(state.codec) {
-        manager.run {
-            onEvent(SetBitrate(bitrate = it?.defaultBitrate))
-            onEvent(SetVbr(it?.defaultVBR))
-            onEvent(SetCrf(it?.defaultCRF))
-            onEvent(SetPreset(it?.defaultPreset))
-            onEvent(SetCompression(compression = it?.compressions?.firstOrNull()))
-        }
-    }
-
     CompositionLocalProvider(stringsComp provides homeScreenStrings) {
         state.Dialogs(onEvent = manager::onEvent)
         state.Content(onEvent = manager::onEvent)
@@ -59,6 +49,14 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
     var mediaType by remember { mutableStateOf<MediaType?>(value = null) }
 
     LaunchedEffected(input) { mediaType = it?.type }
+
+    LaunchedEffected(codec) {
+        onEvent(SetBitrate(bitrate = it?.defaultBitrate))
+        onEvent(SetVbr(it?.defaultVBR))
+        onEvent(SetCrf(it?.defaultCRF))
+        onEvent(SetPreset(it?.defaultPreset))
+        onEvent(SetCompression(compression = it?.compressions?.firstOrNull()))
+    }
 
     LaunchedEffected(mediaType) {
         val defaultCodec = when(it) {
@@ -267,11 +265,16 @@ private fun HomeState.VBRInput(onClick: () -> Unit,  onValueChange: (Int) -> Uni
             val valueColor = MaterialTheme.colorScheme.run { if(isVBR) onSurface else onSurface.copy(alpha = 0.38f) }
 
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
                     if(codec.compressions.size > 1) RadioButton(selected = isVBR, onClick = onClick)
                     Text(
                         text = strings[VBR_INPUT],
-                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                     Spacer(modifier = Modifier.width(dimens.xs))
                     Text(
@@ -336,11 +339,16 @@ private fun HomeState.CRFInput(onClick: () -> Unit,  onValueChange: (Int) -> Uni
             val isCRF = CompressionType.CRF == compression
 
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
                     if(codec.compressions.size > 1) RadioButton(selected = isCRF, onClick = onClick)
                     Text(
                         text = strings[CRF_INPUT],
-                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                     Spacer(modifier = Modifier.width(dimens.xs))
                     Text(
@@ -455,7 +463,7 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
 
 @Composable
 private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?) -> Unit) {
-    if(codec != null) {
+    if(codec != null && preset != null) {
         val minPreset = codec.minPreset
         val maxPreset = codec.maxPreset
 
@@ -464,19 +472,20 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
                 Row {
                     Text(
                         text = strings[PRESET_INPUT],
-                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                     Spacer(modifier = Modifier.width(dimens.xs))
                     Text(
-                        text = preset ?: "",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
+                        text = preset,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     )
                 }
-                val teste = if(!preset.isNullOrBlank()) codec.indexByPresetValue(preset)?.toFloat() ?: 0f else 0f
-                println(teste)
-
                 Slider(
-                    value = teste,
+                    value = codec.indexByPresetValue(preset)?.toFloat() ?: 0f,
                     modifier = Modifier.width(320.dp),
                     enabled = mediaType == MediaType.VIDEO,
                     steps = maxPreset,
@@ -488,79 +497,55 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
     }
 }
 
-//TODO
 @Composable
 private fun RowScope.LogsView(text: String) {
-    val logsScroll = rememberScrollState()
+    val scrollState = rememberScrollState()
     val modifier = Modifier
         .weight(2f)
         .fillMaxHeight()
 
-    LaunchedEffect(text) {
-        logsScroll.animateScrollTo(logsScroll.maxValue)
-    }
+    LaunchedEffect(text) { scrollState.animateScrollTo(scrollState.maxValue) }
 
     Card(modifier = modifier) {
-        Box(Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(end = dimens.sm) // espaço pro scrollbar
-            ) {
-                Text("Logs", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(dimens.sm))
-                HorizontalDivider()
-
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = strings[LOGS_VIEW],
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(
+                    top = dimens.md,
+                    start = dimens.md,
+                    end = dimens.md
+                )
+            )
+            Spacer(modifier = Modifier.height(dimens.sm))
+            HorizontalDivider()
+            Box(modifier = Modifier.fillMaxSize()) {
                 SelectionContainer(
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(logsScroll)
+                        .verticalScroll(scrollState)
+                        .fillMaxSize()
+                        .padding(
+                            start = dimens.md,
+                            end = 12.dp, // Space for VerticalScrollbar
+                            top = dimens.sm,
+                            bottom = dimens.sm
+                        )
                 ) {
                     Text(
-                        text = """
-                            sdfsdf
-                            sd
-                            fsdf
-                            sdf
-                            sdf
-                            sdf
-                            s
-                            df
-                            sdf
-                            sdf
-                            s
-                            df
-                            sdf
-                            sdf
-                            s
-                            df
-                            sdf
-                            a
-                            df
-                            ad
-                            fa
-                            df
-                            a
-                            df
-                            a
-                            df
-                            asdf
-                            asd
-                            fa
-                            dsfa
-                        """.trimIndent(),
+                        text = text,
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(8.dp)
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = dimens.md)
                     )
                 }
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(scrollState),
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                )
             }
-
-            VerticalScrollbar(
-                adapter = rememberScrollbarAdapter(logsScroll),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight()
-            )
         }
     }
 }
@@ -580,7 +565,12 @@ private fun Progress(status: HomeStatus) {
 
             LinearProgress(status.percentage)
             Spacer(modifier = Modifier.height(dimens.xs))
-            Text(text, style = TextStyle(color = MaterialTheme.colorScheme.onSurface))
+            Text(
+                text = text,
+                style = TextStyle(
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
         }
     }
 }
@@ -612,7 +602,7 @@ private fun HomeState.canStart(mediaType: MediaType?): Boolean {
 
 @Composable
 private fun DefaultPreview() {
-    CompositionLocalProvider(languageComp provides language) {
+    CompositionLocalProvider(stringsComp provides homeScreenStrings) {
         HomeState.default().Content(onEvent = {})
     }
 }
