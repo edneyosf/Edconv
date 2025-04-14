@@ -1,9 +1,14 @@
 package edneyosf.edconv.edconv.common
 
+import edneyosf.edconv.edconv.av1.AV1Preset
+import edneyosf.edconv.edconv.h264.H264Preset
+import edneyosf.edconv.edconv.h265.H265Preset
+
 enum class Codec(
     val value: String, val text: String, val mediaType: MediaType, val compressions: List<CompressionType>,
     val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, val defaultVBR: Int? = null,
-    val minVBR: Int? = null, val maxVBR: Int? = null
+    val minVBR: Int? = null, val maxVBR: Int? = null, val defaultPreset: String? = null, val minPreset: Int? = null,
+    val maxPreset: Int? = null
 ) {
     AAC(
         value = "aac",
@@ -51,7 +56,10 @@ enum class Codec(
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 20,
         minCRF = 0,
-        maxCRF = 51
+        maxCRF = 51,
+        defaultPreset = H264Preset.SLOW.value,
+        minPreset = 0,
+        maxPreset = 9
     ),
     H265(
         value = "libx265",
@@ -60,9 +68,12 @@ enum class Codec(
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 21,
         minCRF = 0,
-        maxCRF = 51
+        maxCRF = 51,
+        defaultPreset = H265Preset.SLOW.value,
+        minPreset = 0,
+        maxPreset = 9
     ),
-    VP9(
+    /*VP9(
         value = "libvpx-vp9",
         text = "VP9",
         mediaType = MediaType.VIDEO,
@@ -70,7 +81,7 @@ enum class Codec(
         defaultCRF = 19,
         minCRF = 0,
         maxCRF = 63
-    ),
+    ),*/
     AV1(
         value = "libsvtav1",
         text = "AV1 (SVT)",
@@ -78,7 +89,10 @@ enum class Codec(
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 25,
         minCRF = 0,
-        maxCRF = 63
+        maxCRF = 63,
+        defaultPreset = AV1Preset.P4.value,
+        minPreset = 0,
+        maxPreset = 13,
     );
 
     fun getVideoProfile(pixelFormat: PixelFormat?) = when(this) {
@@ -101,8 +115,22 @@ enum class Codec(
         EAC3 -> "eac3"
         FLAC -> "flac"
 
-        VP9 -> "webm"
+        //VP9 -> "webm"
         H264, H265, AV1 -> "mkv"
+    }
+
+    fun presetValueByIndex(index: Int) = when(this) {
+        H264 -> H264Preset.valueByIndex(index)
+        H265 -> H265Preset.valueByIndex(index)
+        AV1 -> AV1Preset.valueByIndex(index)
+        else -> null
+    }
+
+    fun indexByPresetValue(value: String) = when(this) {
+        H264 -> H264Preset.indexByValue(value)
+        H265 -> H265Preset.indexByValue(value)
+        AV1 -> AV1Preset.indexByValue(value)
+        else -> null
     }
 
     companion object {
