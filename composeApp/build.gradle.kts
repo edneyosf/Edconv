@@ -71,7 +71,7 @@ tasks.register("createDeb") {
         val buildDir = build.get().asFile
         val outputDir = output.get().asFile
         val distDir = dist.get().asFile
-        val outputDeb = outputDir.resolve("$appName-$appVersion.deb")
+        val outputDeb = outputDir.resolve("${appName}_${appVersion}_${arch}.deb")
         val targetDir = buildDir.resolve("opt")
         val shareDir = buildDir.resolve("usr/share/applications")
         val desktopFile = shareDir.resolve("$appName.desktop")
