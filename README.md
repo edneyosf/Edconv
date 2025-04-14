@@ -5,6 +5,8 @@
 
 **Edconv** is a lightweight and user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
 
+![Application Preview](assets/edconv.webp)
+
 ---
 
 ## 🚀 Features
