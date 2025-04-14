@@ -77,6 +77,8 @@ tasks.register("createDeb") {
         val desktopFile = shareDir.resolve("$appName.desktop")
         val debianDir = buildDir.resolve("DEBIAN")
         val controlFile = debianDir.resolve("control")
+        val libDir = targetDir.resolve("$appName/lib")
+        val runtimeLibDir = libDir.resolve("runtime/lib")
         val binFile = targetDir.resolve("$appName/bin/$appName")
 
         buildDir.run {
@@ -123,6 +125,9 @@ tasks.register("createDeb") {
         )
 
         exec { commandLine("chmod", "+x", binFile.absolutePath) }
+        exec { commandLine("chmod", "+x", libDir.resolve("libapplauncher.so").absolutePath) }
+        exec { commandLine("chmod", "+x", runtimeLibDir.resolve("jexec").absolutePath) }
+        exec { commandLine("chmod", "+x", runtimeLibDir.resolve("jspawnhelper").absolutePath) }
         exec { commandLine("fakeroot", "dpkg-deb", "--build", buildDir.absolutePath, outputDeb.absolutePath) }
 
         println(".deb generated at: ${outputDeb.absolutePath}")
