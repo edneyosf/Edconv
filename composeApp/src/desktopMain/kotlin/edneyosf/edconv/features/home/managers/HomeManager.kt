@@ -179,8 +179,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     return
                 }
 
-                setLogs("MediaInfo = { $input }\n")
-
                 conversion = converter.run(
                     source = ConfigManager.getFFmpegPath(),
                     inputFile = File(inputPath),
