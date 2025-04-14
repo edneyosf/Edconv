@@ -368,7 +368,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setVbr(vbr: Int?) = _state.update { copy(vbr = vbr) }
     private fun setBitrate(bitrate: Bitrate?) = _state.update { copy(bitrate = bitrate) }
     private fun setSampleRate(sampleRate: SampleRate?) = _state.update { copy(sampleRate = sampleRate) }
-    private fun setPreset(preset: String) = _state.update { copy(preset = preset) }
+    private fun setPreset(preset: String?) = _state.update { copy(preset = preset) }
     private fun setCrf(crf: Int?) = _state.update { copy(crf = crf) }
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
