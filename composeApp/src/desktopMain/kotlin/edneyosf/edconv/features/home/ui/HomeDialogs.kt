@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.home
+package edneyosf.edconv.features.home.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,7 @@ import edneyosf.edconv.features.home.states.HomeStatus
 import edneyosf.edconv.features.home.strings.homeDialogStrings
 import edneyosf.edconv.features.home.strings.HomeDialogStrings.Keys.*
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.DEFAULT_ERROR
-import edneyosf.edconv.features.settings.SettingsDialog
+import edneyosf.edconv.features.settings.ui.SettingsDialog
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings

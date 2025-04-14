@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.settings
+package edneyosf.edconv.features.settings.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*

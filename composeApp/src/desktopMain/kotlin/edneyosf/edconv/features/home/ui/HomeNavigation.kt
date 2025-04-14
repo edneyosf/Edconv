@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.home
+package edneyosf.edconv.features.home.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Row

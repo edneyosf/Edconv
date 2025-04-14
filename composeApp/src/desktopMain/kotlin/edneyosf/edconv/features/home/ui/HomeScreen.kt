@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.home
+package edneyosf.edconv.features.home.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,59 +43,24 @@ fun HomeScreen() {
     }
 }
 
-//TODO
 @Composable
 private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
     val titlePickFile = strings[TITLE_PICK_FILE]
     var mediaType by remember { mutableStateOf<MediaType?>(value = null) }
-    /*var quality by remember { mutableStateOf<Int?>(value = null) }
-    var preset by remember { mutableStateOf<Int?>(value = null) }*/
 
-    LaunchedEffected(input) { mediaType = it?.type }
-    LaunchedEffect(mediaType) {
-        onEvent(SetCodec(codec = null))
-        onEvent(SetBitrate(bitrate = null))
+    LaunchedEffected(input) {
+        mediaType = it?.type
+    }
+    LaunchedEffected(mediaType) {
+        onEvent(SetCodec(codec = if(it == MediaType.AUDIO) Codec.AAC else if(it == MediaType.VIDEO) Codec.H264 else null))
+        onEvent(SetBitrate(bitrate = if(it == MediaType.AUDIO) Bitrate.K256 else if(it == MediaType.VIDEO) Bitrate.M3_5 else null))
     }
     LaunchedEffected(codec) {
-        if(vbr == null) onEvent(SetVbr(it?.minVBR))
-        if(crf == null) onEvent(SetCrf(it?.minCRF))
+        onEvent(SetVbr(it?.defaultVBR))
+        onEvent(SetCrf(it?.defaultCRF))
+        onEvent(SetPreset(it?.defaultPreset))
+        onEvent(SetCompression(compression = it?.compressions?.firstOrNull()))
     }
-    // Format
-    /*LaunchedEffect(codec) {
-        /*codec.let {
-            quality = 0
-            preset = 0
-        }*/
-    }
-    // Quality
-    LaunchedEffect(quality) {
-        if(mediaType == MediaType.AUDIO) onEvent(SetVbr(quality))
-        else quality?.let { onEvent(SetCrf(it)) }
-    }
-    // Preset
-    LaunchedEffect(preset) {
-        if(codec == Codec.AV1) {
-            AV1Preset.fromId(preset ?: -1)?.value?.let{
-                onEvent(SetPreset(it))
-            }
-        }
-        else if(codec == Codec.H265) {
-            H265Preset.fromId(preset ?: -1)?.value?.let{
-                onEvent(SetPreset(it))
-            }
-        }
-    }
-    // Compression
-    LaunchedEffect(compression) {
-        compression?.let {
-            if(it == CompressionType.CONSTANT) {
-                onEvent(SetVbr(null))
-            }
-            else {
-                onEvent(SetBitrate(null))
-            }
-        }
-    }*/
 
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
@@ -111,7 +75,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
             Column(
                 modifier = Modifier.padding(dimens.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimens.md)
+                verticalArrangement = Arrangement.spacedBy(dimens.xl)
             ) {
                 Actions(
                     startEnabled = canStart(mediaType),
@@ -127,83 +91,31 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         mediaType = mediaType,
                         onValueChange = { onEvent(SetCodec(it)) }
                     )
-                    Column {
-                        if(mediaType == MediaType.AUDIO) {
-                            VBRInput(
-                                onClick = { onEvent(SetCompression(CompressionType.VBR)) },
-                                onValueChange = { onEvent(SetVbr(it)) }
-                            )
-                        }
-                        else {
-                            /*Row {
-                                Text(
-                                    text = compressions[CompressionType.CONSTANT.index],
-                                    style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                )
-
-                                Spacer(modifier = Modifier.width(dimens.d))
-
-                                Text(
-                                    text = quality?.toString() ?: "0",
-                                    style = TextStyle(
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontSize = fontSizes.c
-                                    )
-                                )
-                            }*/
-                        }
-
-                        /*val minRate = when(codec) {
-                            Codec.AAC_FDK -> codec.minVbr?.toFloat()
-                            Codec.H265, Codec.AV1 -> codec.minCrf?.toFloat()
-                            else -> 0f
-                        } ?: 0f
-                        val maxRate = when(codec) {
-                            Codec.AAC_FDK -> codec.maxVbr?.toFloat()
-                            Codec.H265, Codec.AV1 -> codec.maxCrf?.toFloat()
-                            else -> 0f
-                        } ?: 0f*/
-
-                        // TODO
-                        /*Slider(
-                            value = quality?.toFloat() ?: 0.0f,
-                            modifier = Modifier.width(320.dp),
-                            enabled = codec != null && compression == CompressionType.CONSTANT,
-                            colors = SliderDefaults.custom(),
-                            onValueChange = { quality = it.roundToInt() },
-                            valueRange = minRate .. maxRate,
-                        )*/
-                    }
-
-                    if(codec?.compression?.contains(CompressionType.CBR) == true) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = CompressionType.CBR == compression,
-                                onClick = { onEvent(SetCompression(CompressionType.CBR)) }
-                            )
-                            VariableCompressionInput(
-                                value = bitrate,
-                                mediaType = mediaType,
-                                enabled = CompressionType.CBR == compression,
-                                onValueChange = { onEvent(SetBitrate(it)) }
-                            )
-                        }
-                    }
-
+                    VBRInput(
+                        onClick = { onEvent(SetCompression(CompressionType.VBR)) },
+                        onValueChange = { onEvent(SetVbr(it)) }
+                    )
                     CRFInput(
                         onClick = { onEvent(SetCompression(CompressionType.CRF)) },
                         onValueChange = { onEvent(SetCrf(it)) }
                     )
+                    CBRInput(
+                        mediaType = mediaType,
+                        onClick = { onEvent(SetCompression(CompressionType.CBR)) },
+                        onValueChange = { onEvent(SetBitrate(it)) }
+                    )
                 }
 
                 // Audio Settings
-                /*if(mediaType == MediaType.AUDIO) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                if(mediaType == MediaType.AUDIO) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                    ) {
                         ChannelsInput(
                             value = channels,
                             onValueChange = { onEvent(SetChannels(it)) }
                         )
-
                         SampleRateInput(
                             value = sampleRate,
                             onValueChange = { onEvent(SetSampleRate(it)) }
@@ -211,72 +123,40 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     }
                 }
                 // Video Settings
-                else {
-                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.m), verticalAlignment = Alignment.CenterVertically) {
+                else if(mediaType == MediaType.VIDEO) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                    ) {
                         ResolutionInput(
                             value = resolution,
                             onValueChange = { onEvent(SetResolution(it)) }
                         )
-
                         PixelFormatInput(
                             value = pixelFormat,
                             onValueChange = { onEvent(SetPixelFormat(it)) }
                         )
-
-                        Column {
-                            var presetText = ""
-
-                            /*if(codec == Codec.H265) {
-                                preset?.let {
-                                    presetText = H265Preset.fromId(it)?.value ?: ""
-                                }
+                        PresetInput(
+                            mediaType = mediaType,
+                            onValueChange = {
+                                onEvent(SetPreset(it))
                             }
-                            else if(codec == Codec.AV1) {
-                                preset?.let {
-                                    presetText = AV1Preset.fromId(it)?.value ?: ""
-                                }
-                            }*/
-
-                            Row {
-                                Text(text = strings.get(PRESET_INPUT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
-                                //Spacer(modifier = Modifier.width(dimens.d))
-                                Text(
-                                    presetText,
-                                    style = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = fontSizes.c))
-                            }
-                            val minPreset = when(codec) {
-                                Codec.H265 -> H265Preset.MIN_ID.toFloat()
-                                Codec.AV1 -> AV1Preset.MIN_ID.toFloat()
-                                else -> 0f
-                            }
-                            val maxPreset = when(codec) {
-                                Codec.H265 -> H265Preset.MAX_ID.toFloat()
-                                Codec.AV1 -> AV1Preset.MAX_ID.toFloat()
-                                else -> 0f
-                            }
-
-                            /*Slider(
-                                value = preset?.toFloat() ?: 0f,
-                                modifier = Modifier.width(320.dp),
-                                enabled = codec != null,
-                                colors = SliderDefaults.custom(),
-                                onValueChange = { preset = it.roundToInt() },
-                                valueRange = minPreset .. maxPreset
-                            )*/
-                        }
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Switch(
-                                checked = noAudio,
-                                onCheckedChange = {
-                                    onEvent(SetNoAudio(it))
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(dimens.f))
-                            Text(strings.get(NO_AUDIO_INPUT), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant))
-                        }
+                        )
                     }
-                }*/
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = noAudio,
+                            onCheckedChange = {
+                                onEvent(SetNoAudio(it))
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(dimens.xxs))
+                        Text(
+                            text = strings[NO_AUDIO_INPUT],
+                            style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        )
+                    }
+                }
                 Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(dimens.md)) {
                     LogsView(logs)
 
@@ -297,7 +177,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     enabled = input != null,
                     colors = TextFieldDefaults.colors().custom(),
                     onValueChange = { onEvent(SetOutput(it)) },
-                    label = { Text(text = strings.get(OUTPUT_FILE)) }
+                    label = { Text(text = strings[OUTPUT_FILE]) }
                 )
             }
         }
@@ -375,37 +255,69 @@ private fun FormatInput(value: Codec?, mediaType: MediaType?, onValueChange: (Co
 
 @Composable
 private fun HomeState.VBRInput(onClick: () -> Unit,  onValueChange: (Int) -> Unit) {
-    if(codec?.compression?.contains(CompressionType.VBR) == true && vbr != null) {
+    if(codec?.compressions?.contains(CompressionType.VBR) == true && vbr != null) {
         val minVBR = codec.minVBR
         val maxVBR = codec.maxVBR
 
         if(minVBR != null && maxVBR != null) {
             val isVBR = CompressionType.VBR == compression
+            val valueColor = MaterialTheme.colorScheme.run { if(isVBR) onSurface else onSurface.copy(alpha = 0.38f) }
 
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
-                RadioButton(selected = isVBR, onClick = onClick)
-                Text(
-                    text = strings[VBR_INPUT],
-                    style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                )
-                Spacer(modifier = Modifier.width(dimens.xs))
-                Text(
-                    text = vbr.toString(),
-                    style = TextStyle(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Medium
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+                    if(codec.compressions.size > 1) RadioButton(selected = isVBR, onClick = onClick)
+                    Text(
+                        text = strings[VBR_INPUT],
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
                     )
-                )
+                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Text(
+                        text = vbr.toString(),
+                        style = TextStyle(
+                            color = valueColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                }
+                Box(modifier = Modifier.padding(start = 14.dp)) {
+                    Slider(
+                        value = vbr.toFloat(),
+                        modifier = Modifier.width(220.dp),
+                        enabled = isVBR,
+                        steps = maxVBR - 2,
+                        onValueChange = { onValueChange(it.toInt()) },
+                        valueRange = minVBR.toFloat() .. maxVBR.toFloat()
+                    )
+                }
             }
-            Box(modifier = Modifier.padding(start = 14.dp)) {
-                Slider(
-                    value = vbr.toFloat(),
-                    modifier = Modifier.width(220.dp),
-                    enabled = isVBR,
-                    steps = maxVBR - 2,
-                    onValueChange = { onValueChange(it.toInt()) },
-                    valueRange = minVBR.toFloat() .. maxVBR.toFloat()
-                )
+        }
+    }
+}
+
+@Composable
+private fun HomeState.CBRInput(mediaType: MediaType?, onClick: () -> Unit,  onValueChange: (Bitrate) -> Unit) {
+    if(codec?.compressions?.contains(CompressionType.CBR) == true) {
+        var expanded by remember { mutableStateOf(value = false) }
+        val isCBR = CompressionType.CBR == compression
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if(codec.compressions.size > 1) RadioButton(selected = isCBR, onClick = onClick)
+            Selector(
+                text = bitrate?.text ?: "",
+                label = strings[CBR_INPUT],
+                enabled = isCBR,
+                expanded = expanded,
+                onExpanded = { expanded = it }
+            ) {
+                Bitrate.getAllByMediaType(mediaType).forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(item.text) },
+                        onClick = {
+                            expanded = false
+                            onValueChange(item)
+                        }
+                    )
+                }
             }
         }
     }
@@ -413,7 +325,7 @@ private fun HomeState.VBRInput(onClick: () -> Unit,  onValueChange: (Int) -> Uni
 
 @Composable
 private fun HomeState.CRFInput(onClick: () -> Unit,  onValueChange: (Int) -> Unit) {
-    if(codec?.compression?.contains(CompressionType.CRF) == true && crf != null) {
+    if(codec?.compressions?.contains(CompressionType.CRF) == true && crf != null) {
         val minCRF = codec.minCRF
         val maxCRF = codec.maxCRF
 
@@ -422,7 +334,7 @@ private fun HomeState.CRFInput(onClick: () -> Unit,  onValueChange: (Int) -> Uni
 
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
-                    RadioButton(selected = isCRF, onClick = onClick)
+                    if(codec.compressions.size > 1) RadioButton(selected = isCRF, onClick = onClick)
                     Text(
                         text = strings[CRF_INPUT],
                         style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -456,7 +368,7 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
 
     Selector(
         text = value?.text ?: "",
-        label = strings.get(CHANNELS_INPUT),
+        label = strings[CHANNELS_INPUT],
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -478,7 +390,7 @@ private fun SampleRateInput(value: SampleRate?, onValueChange: (SampleRate) -> U
 
     Selector(
         text = value?.text ?: "",
-        label = strings.get(SAMPLE_RATE_INPUT),
+        label = strings[SAMPLE_RATE_INPUT],
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -500,7 +412,7 @@ private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -
 
     Selector(
         text = value?.text ?: "",
-        label = strings.get(PIXEL_FORMAT_INPUT),
+        label = strings[PIXEL_FORMAT_INPUT],
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -522,7 +434,7 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
 
     Selector(
         text = value?.text ?: "",
-        label = strings.get(RESOLUTION_INPUT),
+        label = strings[RESOLUTION_INPUT],
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
@@ -538,26 +450,40 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
     }
 }
 
-//TODO
 @Composable
-private fun VariableCompressionInput(mediaType: MediaType?, value: Bitrate?, enabled: Boolean = true, onValueChange: (Bitrate) -> Unit) {
-    var expanded by remember { mutableStateOf(value = false) }
+private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?) -> Unit) {
+    if(codec != null) {
+        val minPreset = codec.minPreset
+        val maxPreset = codec.maxPreset
 
-    Selector(
-        text = value?.text ?: "",
-        label = strings[CBR_INPUT],
-        enabled = enabled,
-        expanded = expanded,
-        onExpanded = { expanded = it }
-    ) {
-        Bitrate.getAllByMediaType(mediaType).forEach { item ->
-            DropdownMenuItem(
-                text = { Text(item.text) },
-                onClick = {
-                    expanded = false
-                    onValueChange(item)
+        if(minPreset != null && maxPreset != null) {
+            Column {
+                Row {
+                    Text(
+                        text = strings[PRESET_INPUT],
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Text(
+                        text = preset ?: "",
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = fontSizes.c
+                        )
+                    )
                 }
-            )
+                val teste = if(!preset.isNullOrBlank()) codec.indexByPresetValue(preset)?.toFloat() ?: 0f else 0f
+                println(teste)
+
+                Slider(
+                    value = teste,
+                    modifier = Modifier.width(320.dp),
+                    enabled = mediaType == MediaType.VIDEO,
+                    steps = maxPreset,
+                    onValueChange = { onValueChange(codec.presetValueByIndex(it.toInt())) },
+                    valueRange = minPreset.toFloat() .. maxPreset.toFloat()
+                )
+            }
         }
     }
 }
@@ -579,10 +505,10 @@ private fun RowScope.LogsView(text: String) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(end = 12.dp) // espaço pro scrollbar
+                    .padding(end = dimens.sm) // espaço pro scrollbar
             ) {
                 Text("Logs", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(dimens.f))
+                Spacer(modifier = Modifier.height(dimens.sm))
                 HorizontalDivider()
 
                 SelectionContainer(
@@ -679,7 +605,7 @@ private fun HomeState.canStart(mediaType: MediaType?): Boolean {
     ) return false
 
     return when (mediaType) {
-        MediaType.AUDIO -> bitrate != null || vbr != null
+        MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
         MediaType.VIDEO -> preset != null && crf != null
     }
 }
