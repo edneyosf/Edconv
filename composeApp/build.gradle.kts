@@ -51,6 +51,8 @@ compose.desktop {
             copyright = "© 2025 $appAuthor. All rights reserved."
             vendor = appAuthor
 
+            licenseFile.set(File("../LICENSE"))
+
             linux { iconFile.set(resourceDir.resolve("icon.png")) }
             windows { iconFile.set(resourceDir.resolve("icon.ico")) }
         }
