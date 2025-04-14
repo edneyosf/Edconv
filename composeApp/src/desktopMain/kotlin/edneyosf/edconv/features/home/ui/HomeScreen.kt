@@ -541,6 +541,9 @@ private fun RowScope.LogsView(text: String) {
                 }
                 VerticalScrollbar(
                     adapter = rememberScrollbarAdapter(scrollState),
+                    style = LocalScrollbarStyle.current.copy(
+                        hoverColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .fillMaxHeight()
