@@ -261,6 +261,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         scope.launch(context = Dispatchers.IO) {
             val contentType = MediaUtils.getContentType(inputFile)
             val duration: Long?
+            val channels: Int?
             val size = MediaUtils.getSize(inputFile)
             val type = when {
                 contentType.audio && !contentType.video -> MediaType.AUDIO
@@ -270,7 +271,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
             val newState = when (type) {
                 MediaType.AUDIO -> {
-                    val channels = MediaUtils.getAudioChannels(inputFile)
+                    channels = MediaUtils.getAudioChannels(inputFile)
                     duration = MediaUtils.getDuration(inputFile)
 
                     if(duration != null && channels != null) {
@@ -301,6 +302,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 }
                 MediaType.VIDEO -> {
                     val resolution = MediaUtils.getVideoResolution(inputFile)
+                    channels = MediaUtils.getAudioChannels(inputFile)
                     duration = MediaUtils.getDuration(inputFile)
 
                     if(duration != null && resolution != null) {
@@ -309,6 +311,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                             type = type,
                             contentType = contentType,
                             duration = duration,
+                            channels = channels,
                             resolution = resolution,
                             size = size
                         )
