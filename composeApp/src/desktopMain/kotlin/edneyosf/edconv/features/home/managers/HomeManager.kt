@@ -108,16 +108,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
         if (!canBuild) return
 
-        if (input == null || input.path.isBlank() || codec == null || compression == null || output.isNullOrBlank()) {
+        if (input == null || input.path.isBlank() || codec == null || output.isNullOrBlank()) {
             setCmd("")
             return
         }
 
         val ffmpeg = when (codec.mediaType) {
             MediaType.AUDIO -> {
-                if(vbr == null && bitrate == null) return@run
-
                 val inputChannels = input.channels
+
                 if(inputChannels == null) {
                     onError(Throwable("Input channels is null"))
                     return@run

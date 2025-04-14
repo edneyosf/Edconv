@@ -22,7 +22,7 @@ class FFmpeg private constructor(
 
     companion object {
         fun createAudio(
-            logLevel: String, codec: String, compressionType: CompressionType, sampleRate: String? = null,
+            logLevel: String, codec: String, compressionType: CompressionType?, sampleRate: String? = null,
             vbr: String?, bitrate: String?, channels: String? = null, filter: String? = null,
             noVideo: Boolean = false): FFmpeg {
 
@@ -40,7 +40,7 @@ class FFmpeg private constructor(
         }
 
         fun createVideo(
-            logLevel: String, codec: String, compressionType: CompressionType, preset: String, crf: Int?,
+            logLevel: String, codec: String, compressionType: CompressionType?, preset: String, crf: Int?,
             bitrate: String?, profile: String? = null, pixelFormat: String? = null, filter: String? = null,
             noAudio: Boolean = false): FFmpeg {
 
