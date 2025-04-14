@@ -4,6 +4,7 @@ import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.edconv.core.data.ProgressData
 import edneyosf.edconv.edconv.ffmpeg.FFmpegArgs
 import kotlinx.coroutines.*
+import kotlinx.coroutines.swing.Swing
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -109,5 +110,5 @@ class Edconv(
     }
 
     private suspend inline fun <T> notify(crossinline block: () -> T): Unit =
-        withContext(context = Dispatchers.Main) { block() }
+        withContext(context = Dispatchers.Swing) { block() }
 }

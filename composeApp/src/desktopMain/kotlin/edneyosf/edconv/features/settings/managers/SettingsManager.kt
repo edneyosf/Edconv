@@ -49,11 +49,11 @@ class SettingsManager(override val scope: CoroutineScope): Manager(scope) {
             try {
                 ConfigManager.setFFmpegPath(ffmpegPath)
                 ConfigManager.setFFprobePath(ffprobePath)
-                withContext(context = Dispatchers.Main) { setStatus(SettingsStatus.Complete) }
+                notifyMain { setStatus(SettingsStatus.Complete) }
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                withContext(context = Dispatchers.Main) { setStatus(SettingsStatus.Error(e.message)) }
+                notifyMain { setStatus(SettingsStatus.Error(e.message)) }
             }
         }
     }

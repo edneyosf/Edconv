@@ -371,7 +371,4 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
-
-    private suspend inline fun <T> notifyMain(crossinline block: () -> T): Unit =
-        withContext(context = Dispatchers.Main) { block() }
 }
