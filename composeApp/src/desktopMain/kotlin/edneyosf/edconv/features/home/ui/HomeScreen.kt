@@ -60,7 +60,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
 
     LaunchedEffected(mediaType) {
         val defaultCodec = when(it) {
-            MediaType.AUDIO -> Codec.AAC
+            MediaType.AUDIO -> Codec.OPUS
             MediaType.VIDEO -> Codec.AV1
             else -> null
         }

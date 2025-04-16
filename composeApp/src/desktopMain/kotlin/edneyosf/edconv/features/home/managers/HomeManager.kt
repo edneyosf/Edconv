@@ -97,11 +97,12 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         }
     }
 
-    private fun buildCommand(event: HomeEvent) = _state.value.run {
+    private fun buildCommand(event: HomeEvent? = null) = _state.value.run {
         val canBuild = when (event) {
             is HomeEvent.SetCmd,
             is HomeEvent.OnStart,
             is HomeEvent.OnStop,
+            is HomeEvent.SetInput,
             is HomeEvent.SetStatus -> false
             else -> true
         }
@@ -123,6 +124,11 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 }
 
                 val filter = channels?.downmixingFilter(inputChannels)
+                val customChannelsArgs = Channels.customArguments(
+                    channels = channels?.value?.toInt(),
+                    inputChannels = inputChannels,
+                    codec = codec
+                )
 
                 FFmpeg.createAudio(
                     logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
@@ -132,7 +138,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     channels = channels?.value,
                     vbr = vbr?.toString(),
                     bitrate = bitrate?.value,
-                    filter = filter
+                    filter = filter,
+                    custom = customChannelsArgs
                 )
             }
             MediaType.VIDEO -> {
@@ -281,7 +288,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                             size = size
                         )
 
-                        println("MediaInfo: $media")
+                        setLogs(media.toString())
 
                         _state.value.copy(
                             input = media,
@@ -313,7 +320,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                             size = size
                         )
 
-                        println("MediaInfo: $media")
+                        setLogs(media.toString())
 
                         _state.value.copy(
                             input = media,
@@ -338,7 +345,10 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 }
             }
 
-            notifyMain { _state.value = newState }
+            notifyMain {
+                _state.value = newState
+                buildCommand()
+            }
         }
     }
 

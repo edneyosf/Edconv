@@ -19,4 +19,5 @@ object FFmpegArgs {
     const val NO_VIDEO = "-vn"
     const val FILTER_AUDIO = "-af"
     const val FILTER_VIDEO = "-vf"
+    const val MAPPING_FAMILY = "-mapping_family"
 }

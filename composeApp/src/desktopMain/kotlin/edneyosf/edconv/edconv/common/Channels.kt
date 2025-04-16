@@ -1,5 +1,7 @@
 package edneyosf.edconv.edconv.common
 
+import edneyosf.edconv.edconv.ffmpeg.FFmpegArgs
+
 enum class Channels(val value: String, val text: String) {
     STEREO(value = "2", text = "Stereo (2.0)"),
     SURROUND_51(value = "6", text = "Surround (5.1)");
@@ -16,6 +18,15 @@ enum class Channels(val value: String, val text: String) {
 
     companion object {
         fun getAll() = entries.toList()
+
+        fun customArguments(channels: Int?, inputChannels: Int?, codec: Codec): List<String>? {
+            val value = channels ?: inputChannels
+
+            return when (codec) {
+                Codec.OPUS -> if (value == SURROUND_51.value.toInt()) listOf(FFmpegArgs.MAPPING_FAMILY, "1") else null
+                else -> null
+            }
+        }
     }
 }
 
