@@ -3,8 +3,10 @@ package edneyosf.edconv.edconv.common
 import edneyosf.edconv.edconv.ffmpeg.FFmpegArgs
 
 enum class Channels(val value: String, val text: String) {
-    STEREO(value = "2", text = "Stereo (2.0)"),
-    SURROUND_51(value = "6", text = "Surround (5.1)");
+    MONO(value = "1", text = "Mono"),
+    STEREO(value = "2", text = "Stereo"),
+    SURROUND_51(value = "6", text = "Surround (5.1)"),
+    SURROUND_71(value = "8", text = "Surround (7.1)");
 
     fun downmixingFilter(sourceChannels: Int): String? {
         var filter: String? = null
