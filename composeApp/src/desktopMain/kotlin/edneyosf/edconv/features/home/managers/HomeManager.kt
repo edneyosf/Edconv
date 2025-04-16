@@ -220,7 +220,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun onStart() {
         startTime = Instant.now()
         setStatus(HomeStatus.Loading)
-        setLogs("")
+        setLogs(_state.value.input.toString() + "\n")
     }
 
     private fun onStdout(it: String) = setLogs(_state.value.logs + "$it\n")
@@ -288,8 +288,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                             size = size
                         )
 
-                        setLogs(media.toString())
-
                         _state.value.copy(
                             input = media,
                             output = output,
@@ -319,8 +317,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                             resolution = resolution,
                             size = size
                         )
-
-                        setLogs(media.toString())
 
                         _state.value.copy(
                             input = media,

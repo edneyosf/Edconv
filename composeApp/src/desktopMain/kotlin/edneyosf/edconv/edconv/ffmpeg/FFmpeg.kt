@@ -62,11 +62,13 @@ class FFmpeg private constructor(
     }
 
     fun build(): String {
-        val data = mutableListOf(
-            FFmpegArgs.LOG_LEVEL, logLevel,
-            codecArg(), codec
-        )
+        val data = mutableListOf<String>()
 
+        data.addCmd(FFmpegArgs.LOG_LEVEL, logLevel)
+        if(isVideo()) data.addCmd(FFmpegArgs.MAP, "0:v:0")
+        data.addCmd(FFmpegArgs.MAP, if (isVideo()) "0:a" else "0:a:0")
+        if(isVideo()) data.addCmd(FFmpegArgs.MAP, "0:s?")
+        data.addCmd(codecArg(), codec)
         data.addCmd(bitRateArg(), bitrate)
         data.addCmd(FFmpegArgs.VBR, vbr)
         data.addCmd(FFmpegArgs.SAMPLE_RATE, sampleRate)
@@ -82,6 +84,9 @@ class FFmpeg private constructor(
 
         custom?.let { data.addAll(custom) }
 
+        if(isVideo()) data.addCmd(FFmpegArgs.CODEC_AUDIO, FFmpegArgs.COPY)
+        if(isVideo()) data.addCmd(FFmpegArgs.CODEC_SUBTITLES, FFmpegArgs.COPY)
+
         return data.joinToString(separator = " ")
     }
 
@@ -96,4 +101,5 @@ class FFmpeg private constructor(
     }
 
     private fun isAudio() = mediaType == MediaType.AUDIO
+    private fun isVideo() = mediaType == MediaType.VIDEO
 }
