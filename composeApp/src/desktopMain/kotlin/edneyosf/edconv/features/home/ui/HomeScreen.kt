@@ -3,6 +3,7 @@ package edneyosf.edconv.features.home.ui
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import edneyosf.edconv.core.common.compose.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.edconv.common.*
@@ -30,6 +32,7 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import edneyosf.edconv.ui.theme.firaCodeFont
 
 @Composable
 fun HomeScreen() {
@@ -144,17 +147,26 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                             onValueChange = { onEvent(SetPreset(it)) }
                         )
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                ) {
+                    CheckboxInput(
+                        checked = noMetadata,
+                        label = strings[NO_METADATA_INPUT],
+                        onCheckedChange = { onEvent(SetNoMetadata(it)) }
+                    )
+                    if(mediaType == MediaType.VIDEO) {
+                        CheckboxInput(
                             checked = noAudio,
+                            label = strings[NO_AUDIO_INPUT],
                             onCheckedChange = { onEvent(SetNoAudio(it)) }
                         )
-                        Spacer(modifier = Modifier.width(dimens.xxs))
-                        Text(
-                            text = strings[NO_AUDIO_INPUT],
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        CheckboxInput(
+                            checked = noSubtitle,
+                            label = strings[NO_SUBTITLE_INPUT],
+                            onCheckedChange = { onEvent(SetNoSubtitle(it)) }
                         )
                     }
                 }
@@ -165,6 +177,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     LogsView(logs)
                     TextField(
                         value = cmd,
+                        textStyle = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                         colors = TextFieldDefaults.colors().custom(),
                         onValueChange = { onEvent(SetCmd(it)) },
@@ -290,7 +303,6 @@ private fun HomeState.VBRInput(onClick: () -> Unit,  onValueChange: (Int) -> Uni
                         value = vbr.toFloat(),
                         modifier = Modifier.width(220.dp),
                         enabled = isVBR,
-                        steps = maxVBR - 2,
                         onValueChange = { onValueChange(it.toInt()) },
                         valueRange = minVBR.toFloat() .. maxVBR.toFloat()
                     )
@@ -489,12 +501,28 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
                     value = codec.indexByPresetValue(preset)?.toFloat() ?: 0f,
                     modifier = Modifier.width(320.dp),
                     enabled = mediaType == MediaType.VIDEO,
-                    steps = maxPreset,
                     onValueChange = { onValueChange(codec.presetValueByIndex(it.toInt())) },
                     valueRange = minPreset.toFloat() .. maxPreset.toFloat()
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CheckboxInput(checked: Boolean, label: String, onCheckedChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+        Spacer(modifier = Modifier.width(dimens.xxs))
+        Text(
+            text = label,
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
     }
 }
 
@@ -507,19 +535,30 @@ private fun RowScope.LogsView(text: String) {
 
     LaunchedEffect(text) { scrollState.animateScrollTo(scrollState.maxValue) }
 
-    Card(modifier = modifier) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(dimens.xs)
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Text(
-                text = strings[LOGS_VIEW],
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.titleSmall,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(
-                    top = dimens.md,
-                    start = dimens.md,
-                    end = dimens.md
+                    vertical = dimens.xs,
+                    horizontal = dimens.md)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Terminal,
+                    modifier = Modifier.size(dimens.lg),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    contentDescription = null
                 )
-            )
-            Spacer(modifier = Modifier.height(dimens.sm))
+                Spacer(modifier = Modifier.width(dimens.xs))
+                Text(
+                    text = strings[LOGS_VIEW],
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            }
             HorizontalDivider()
             Box(modifier = Modifier.fillMaxSize()) {
                 SelectionContainer(
@@ -528,14 +567,18 @@ private fun RowScope.LogsView(text: String) {
                         .fillMaxSize()
                         .padding(
                             start = dimens.md,
-                            end = 12.dp, // Space for VerticalScrollbar
+                            end = dimens.sm, // Space for VerticalScrollbar
                             top = dimens.sm,
                             bottom = dimens.sm
                         )
                 ) {
                     Text(
                         text = text,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                            fontFamily = firaCodeFont
+                        ),
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = dimens.md)
                     )
@@ -567,7 +610,11 @@ private fun Progress(status: HomeStatus) {
         if(status is HomeStatus.Progress) {
             val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
-            LinearProgress(status.percentage)
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                progress = { status.percentage / 100 },
+                strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
+            )
             Spacer(modifier = Modifier.height(dimens.xs))
             Text(
                 text = text,
@@ -576,16 +623,10 @@ private fun Progress(status: HomeStatus) {
                 )
             )
         }
+        else if(status is HomeStatus.Loading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
-}
-
-@Composable
-private fun LinearProgress(percentage: Float = 0f) {
-    LinearProgressIndicator(
-        modifier = Modifier.fillMaxWidth(),
-        progress = { percentage / 100 },
-        strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
-    )
 }
 
 private fun HomeState.canStart(mediaType: MediaType?): Boolean {

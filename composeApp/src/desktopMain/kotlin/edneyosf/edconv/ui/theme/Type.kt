@@ -11,6 +11,10 @@ import edconv.composeapp.generated.resources.Roboto_Medium
 import edconv.composeapp.generated.resources.Roboto_Regular
 import org.jetbrains.compose.resources.Font
 
+val firaCodeFont
+    @Composable
+    get() = FontFamily(Font(resource = Res.font.FiraCodeNerdFont_Regular, weight = FontWeight.Normal))
+
 @Composable
 fun appTypography(): Typography {
     val baseline = Typography()

@@ -61,6 +61,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetResolution -> setResolution(resolution)
             is HomeEvent.SetPixelFormat -> setPixelFormat(pixelFormat)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
+            is HomeEvent.SetNoSubtitle -> setNoSubtitle(noSubtitle)
+            is HomeEvent.SetNoMetadata -> setNoMetadata(noMetadata)
             is HomeEvent.OnStart -> startConversion(overwrite)
             is HomeEvent.OnStop -> stopConversion()
         }
@@ -103,6 +105,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.OnStart,
             is HomeEvent.OnStop,
             is HomeEvent.SetInput,
+            is HomeEvent.SetOutput,
             is HomeEvent.SetStatus -> false
             else -> true
         }
@@ -139,6 +142,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     vbr = vbr?.toString(),
                     bitrate = bitrate?.value,
                     filter = filter,
+                    noMetadata = noMetadata,
                     custom = customChannelsArgs
                 )
             }
@@ -165,12 +169,17 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     profile = codec.getVideoProfile(pixelFormat),
                     pixelFormat = pixelFormat?.value,
                     filter = filter,
-                    noAudio = noAudio
+                    noAudio = noAudio,
+                    noSubtitle = noSubtitle,
+                    noMetadata = noMetadata
                 )
             }
         }
+        val cmd = ffmpeg.build()
+        val regex = Regex(" (?=-[a-zA-Z])")
+        val command = cmd.replace(regex, "\n")
 
-        setCmd(ffmpeg.build())
+        setCmd(command)
     }
 
     private fun startConversion(overwrite: Boolean) = _state.value.run {
@@ -186,10 +195,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     return
                 }
 
+                val command = cmd
+                    .replace("\n", " ")
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+
                 conversion = converter.run(
                     source = ConfigManager.getFFmpegPath(),
                     inputFile = File(inputPath),
-                    cmd = cmd,
+                    cmd = command,
                     outputFile = outputFile
                 )
             }
@@ -377,4 +391,6 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
+    private fun setNoSubtitle(noSubtitle: Boolean) = _state.update { copy(noSubtitle = noSubtitle) }
+    private fun setNoMetadata(noMetadata: Boolean) = _state.update { copy(noMetadata = noMetadata) }
 }

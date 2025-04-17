@@ -25,7 +25,12 @@ enum class Channels(val value: String, val text: String) {
             val value = channels ?: inputChannels
 
             return when (codec) {
-                Codec.OPUS -> if (value == SURROUND_51.value.toInt()) listOf(FFmpegArgs.MAPPING_FAMILY, "1") else null
+                Codec.OPUS -> {
+                    if (value == SURROUND_51.value.toInt() || value == SURROUND_71.value.toInt()) {
+                        listOf(FFmpegArgs.MAPPING_FAMILY, "1")
+                    }
+                    else null
+                }
                 else -> null
             }
         }
