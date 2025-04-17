@@ -105,6 +105,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.OnStart,
             is HomeEvent.OnStop,
             is HomeEvent.SetInput,
+            is HomeEvent.SetOutput,
             is HomeEvent.SetStatus -> false
             else -> true
         }
