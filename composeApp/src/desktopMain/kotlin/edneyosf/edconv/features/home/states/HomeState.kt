@@ -20,7 +20,8 @@ data class HomeState(
     val resolution: Resolution?,
     val pixelFormat: PixelFormat?,
     val noAudio: Boolean,
-    val noSubtitle: Boolean
+    val noSubtitle: Boolean,
+    val noMetadata: Boolean
 ) {
     companion object {
         fun default() = HomeState(
@@ -40,7 +41,8 @@ data class HomeState(
             resolution = null,
             pixelFormat = null,
             noAudio = false,
-            noSubtitle = false
+            noSubtitle = false,
+            noMetadata = false
         )
     }
 }

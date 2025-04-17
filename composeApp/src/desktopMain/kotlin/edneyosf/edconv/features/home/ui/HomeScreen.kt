@@ -149,6 +149,11 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(dimens.xl)
                     ) {
                         CheckboxInput(
+                            checked = noMetadata,
+                            label = strings[NO_METADATA_INPUT],
+                            onCheckedChange = { onEvent(SetNoMetadata(it)) }
+                        )
+                        CheckboxInput(
                             checked = noAudio,
                             label = strings[NO_AUDIO_INPUT],
                             onCheckedChange = { onEvent(SetNoAudio(it)) }

@@ -62,6 +62,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetPixelFormat -> setPixelFormat(pixelFormat)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
             is HomeEvent.SetNoSubtitle -> setNoSubtitle(noSubtitle)
+            is HomeEvent.SetNoMetadata -> setNoMetadata(noMetadata)
             is HomeEvent.OnStart -> startConversion(overwrite)
             is HomeEvent.OnStop -> stopConversion()
         }
@@ -140,6 +141,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     vbr = vbr?.toString(),
                     bitrate = bitrate?.value,
                     filter = filter,
+                    noMetadata = noMetadata,
                     custom = customChannelsArgs
                 )
             }
@@ -167,7 +169,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     pixelFormat = pixelFormat?.value,
                     filter = filter,
                     noAudio = noAudio,
-                    noSubtitle = noSubtitle
+                    noSubtitle = noSubtitle,
+                    noMetadata = noMetadata
                 )
             }
         }
@@ -380,4 +383,5 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
     private fun setNoSubtitle(noSubtitle: Boolean) = _state.update { copy(noSubtitle = noSubtitle) }
+    private fun setNoMetadata(noMetadata: Boolean) = _state.update { copy(noMetadata = noMetadata) }
 }

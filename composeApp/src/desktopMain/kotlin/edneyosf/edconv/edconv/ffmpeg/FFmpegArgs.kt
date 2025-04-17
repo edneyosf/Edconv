@@ -24,4 +24,5 @@ object FFmpegArgs {
     const val FILTER_VIDEO = "-vf"
     const val MAPPING_FAMILY = "-mapping_family"
     const val COPY = "copy"
+    const val MAP_METADATA = "-map_metadata"
 }
