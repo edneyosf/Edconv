@@ -177,7 +177,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     LogsView(logs)
                     TextField(
                         value = cmd,
-                        textStyle = MaterialTheme.typography.bodySmall,
+                        textStyle = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                         colors = TextFieldDefaults.colors().custom(),
                         onValueChange = { onEvent(SetCmd(it)) },
