@@ -144,15 +144,17 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                             onValueChange = { onEvent(SetPreset(it)) }
                         )
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
-                    ) {
-                        CheckboxInput(
-                            checked = noMetadata,
-                            label = strings[NO_METADATA_INPUT],
-                            onCheckedChange = { onEvent(SetNoMetadata(it)) }
-                        )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                ) {
+                    CheckboxInput(
+                        checked = noMetadata,
+                        label = strings[NO_METADATA_INPUT],
+                        onCheckedChange = { onEvent(SetNoMetadata(it)) }
+                    )
+                    if(mediaType == MediaType.VIDEO) {
                         CheckboxInput(
                             checked = noAudio,
                             label = strings[NO_AUDIO_INPUT],
@@ -591,7 +593,10 @@ private fun Progress(status: HomeStatus) {
         if(status is HomeStatus.Progress) {
             val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
-            LinearProgress(status.percentage)
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                progress = { status.percentage / 100 }
+            )
             Spacer(modifier = Modifier.height(dimens.xs))
             Text(
                 text = text,
@@ -600,16 +605,10 @@ private fun Progress(status: HomeStatus) {
                 )
             )
         }
+        else if(status is HomeStatus.Loading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
-}
-
-@Composable
-private fun LinearProgress(percentage: Float = 0f) {
-    LinearProgressIndicator(
-        modifier = Modifier.fillMaxWidth(),
-        progress = { percentage / 100 },
-        strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
-    )
 }
 
 private fun HomeState.canStart(mediaType: MediaType?): Boolean {

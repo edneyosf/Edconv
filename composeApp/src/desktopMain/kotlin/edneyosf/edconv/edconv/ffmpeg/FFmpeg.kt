@@ -84,7 +84,7 @@ class FFmpeg private constructor(
 
         if(noAudio) data.add(FFmpegArgs.NO_AUDIO)
         if(noSubtitle) data.add(FFmpegArgs.NO_SUBTITLE)
-        if(isVideo() && noMetadata) data.addCmd(FFmpegArgs.MAP_METADATA, "-1")
+        if(noMetadata) data.addCmd(FFmpegArgs.MAP_METADATA, "-1")
 
         custom?.let { data.addAll(custom) }
 

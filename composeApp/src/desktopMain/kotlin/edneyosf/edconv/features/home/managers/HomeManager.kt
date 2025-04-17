@@ -175,8 +175,11 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                 )
             }
         }
+        val cmd = ffmpeg.build()
+        val regex = Regex(" (?=-[a-zA-Z])")
+        val command = cmd.replace(regex, "\n")
 
-        setCmd(ffmpeg.build())
+        setCmd(command)
     }
 
     private fun startConversion(overwrite: Boolean) = _state.value.run {
@@ -192,10 +195,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     return
                 }
 
+                val command = cmd
+                    .replace("\n", " ")
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+
                 conversion = converter.run(
                     source = ConfigManager.getFFmpegPath(),
                     inputFile = File(inputPath),
-                    cmd = cmd,
+                    cmd = command,
                     outputFile = outputFile
                 )
             }
