@@ -19,6 +19,7 @@ sealed interface HomeEvent {
     data class SetResolution(val resolution: Resolution?): HomeEvent
     data class SetPixelFormat(val pixelFormat: PixelFormat?): HomeEvent
     data class SetNoAudio(val noAudio: Boolean): HomeEvent
+    data class SetNoSubtitle(val noSubtitle: Boolean): HomeEvent
     data class OnStart(val overwrite: Boolean = false): HomeEvent
     data object OnStop: HomeEvent
 }

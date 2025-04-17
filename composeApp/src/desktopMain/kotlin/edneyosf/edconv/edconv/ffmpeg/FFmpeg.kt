@@ -17,7 +17,7 @@ class FFmpeg private constructor(
     val pixelFormat: String? = null,
     val filter: String? = null,
     val noAudio: Boolean = false,
-    val noVideo: Boolean = false,
+    val noSubtitle: Boolean = false,
     val custom: List<String>? = null
 ) {
 
@@ -25,7 +25,7 @@ class FFmpeg private constructor(
         fun createAudio(
             logLevel: String, codec: String, compressionType: CompressionType?, sampleRate: String? = null,
             vbr: String?, bitrate: String?, channels: String? = null, filter: String? = null,
-            noVideo: Boolean = false, custom: List<String>? = null): FFmpeg {
+            custom: List<String>? = null): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
@@ -36,7 +36,6 @@ class FFmpeg private constructor(
                 sampleRate = sampleRate,
                 channels = channels,
                 filter = filter,
-                noVideo = noVideo,
                 custom = custom
             )
         }
@@ -44,7 +43,7 @@ class FFmpeg private constructor(
         fun createVideo(
             logLevel: String, codec: String, compressionType: CompressionType?, preset: String, crf: Int?,
             bitrate: String?, profile: String? = null, pixelFormat: String? = null, filter: String? = null,
-            noAudio: Boolean = false): FFmpeg {
+            noAudio: Boolean = false, noSubtitle: Boolean = false): FFmpeg {
 
             return FFmpeg(
                 logLevel = logLevel,
@@ -57,6 +56,7 @@ class FFmpeg private constructor(
                 profile = profile,
                 filter = filter,
                 noAudio = noAudio,
+                noSubtitle = noSubtitle
             )
         }
     }
@@ -66,8 +66,8 @@ class FFmpeg private constructor(
 
         data.addCmd(FFmpegArgs.LOG_LEVEL, logLevel)
         if(isVideo()) data.addCmd(FFmpegArgs.MAP, "0:v:0")
-        data.addCmd(FFmpegArgs.MAP, if (isVideo()) "0:a" else "0:a:0")
-        if(isVideo()) data.addCmd(FFmpegArgs.MAP, "0:s?")
+        if(isVideo() && !noAudio) data.addCmd(FFmpegArgs.MAP, "0:a")
+        if(isVideo() && !noSubtitle) data.addCmd(FFmpegArgs.MAP, "0:s?")
         data.addCmd(codecArg(), codec)
         data.addCmd(bitRateArg(), bitrate)
         data.addCmd(FFmpegArgs.VBR, vbr)
@@ -80,12 +80,12 @@ class FFmpeg private constructor(
         data.addCmd(filterArg(), filter)
 
         if(noAudio) data.add(FFmpegArgs.NO_AUDIO)
-        if(noVideo) data.add(FFmpegArgs.NO_VIDEO)
+        if(noSubtitle) data.add(FFmpegArgs.NO_SUBTITLE)
 
         custom?.let { data.addAll(custom) }
 
-        if(isVideo()) data.addCmd(FFmpegArgs.CODEC_AUDIO, FFmpegArgs.COPY)
-        if(isVideo()) data.addCmd(FFmpegArgs.CODEC_SUBTITLES, FFmpegArgs.COPY)
+        if(isVideo() && !noAudio) data.addCmd(FFmpegArgs.CODEC_AUDIO, FFmpegArgs.COPY)
+        if(isVideo() && !noSubtitle) data.addCmd(FFmpegArgs.CODEC_SUBTITLES, FFmpegArgs.COPY)
 
         return data.joinToString(separator = " ")
     }

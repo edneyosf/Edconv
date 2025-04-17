@@ -61,6 +61,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.SetResolution -> setResolution(resolution)
             is HomeEvent.SetPixelFormat -> setPixelFormat(pixelFormat)
             is HomeEvent.SetNoAudio -> setNoAudio(noAudio)
+            is HomeEvent.SetNoSubtitle -> setNoSubtitle(noSubtitle)
             is HomeEvent.OnStart -> startConversion(overwrite)
             is HomeEvent.OnStop -> stopConversion()
         }
@@ -165,7 +166,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     profile = codec.getVideoProfile(pixelFormat),
                     pixelFormat = pixelFormat?.value,
                     filter = filter,
-                    noAudio = noAudio
+                    noAudio = noAudio,
+                    noSubtitle = noSubtitle
                 )
             }
         }
@@ -377,4 +379,5 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
     private fun setResolution(resolution: Resolution?) = _state.update { copy(resolution = resolution) }
     private fun setPixelFormat(pixelFormat: PixelFormat?) = _state.update { copy(pixelFormat = pixelFormat) }
     private fun setNoAudio(noAudio: Boolean) = _state.update { copy(noAudio = noAudio) }
+    private fun setNoSubtitle(noSubtitle: Boolean) = _state.update { copy(noSubtitle = noSubtitle) }
 }

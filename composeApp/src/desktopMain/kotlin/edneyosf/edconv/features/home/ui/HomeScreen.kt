@@ -144,17 +144,19 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                             onValueChange = { onEvent(SetPreset(it)) }
                         )
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                    ) {
+                        CheckboxInput(
                             checked = noAudio,
+                            label = strings[NO_AUDIO_INPUT],
                             onCheckedChange = { onEvent(SetNoAudio(it)) }
                         )
-                        Spacer(modifier = Modifier.width(dimens.xxs))
-                        Text(
-                            text = strings[NO_AUDIO_INPUT],
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        CheckboxInput(
+                            checked = noSubtitle,
+                            label = strings[NO_SUBTITLE_INPUT],
+                            onCheckedChange = { onEvent(SetNoSubtitle(it)) }
                         )
                     }
                 }
@@ -495,6 +497,23 @@ private fun HomeState.PresetInput(mediaType: MediaType?, onValueChange: (String?
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CheckboxInput(checked: Boolean, label: String, onCheckedChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+        Spacer(modifier = Modifier.width(dimens.xxs))
+        Text(
+            text = label,
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
     }
 }
 

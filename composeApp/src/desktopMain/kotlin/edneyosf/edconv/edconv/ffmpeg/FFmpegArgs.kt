@@ -18,6 +18,7 @@ object FFmpegArgs {
     const val PROFILE_AUDIO = "-profile:a"
     const val PIXEL_FORMAT = "-pix_fmt"
     const val NO_AUDIO = "-an"
+    const val NO_SUBTITLE = "-sn"
     const val NO_VIDEO = "-vn"
     const val FILTER_AUDIO = "-af"
     const val FILTER_VIDEO = "-vf"
