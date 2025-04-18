@@ -37,6 +37,8 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         VIDEO_MEDIA_TYPE  to "Vídeo",
         COMMAND_INPUT to "Comando",
         LOGS_VIEW to "Registros",
+        NO_FILE_SELECTED to "Selecione um arquivo de mídia",
+        VERSION to "Versão",
         DEFAULT_ERROR to "Opa! Algo deu errado.",
     )
 
@@ -62,6 +64,8 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         VIDEO_MEDIA_TYPE  to "Video",
         COMMAND_INPUT to "Command",
         LOGS_VIEW to "Logs",
+        NO_FILE_SELECTED to "Select a media file",
+        VERSION to "Version",
         DEFAULT_ERROR to "Oops! Something went wrong.",
     )
 
@@ -89,6 +93,8 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         VIDEO_MEDIA_TYPE,
         COMMAND_INPUT,
         LOGS_VIEW,
+        NO_FILE_SELECTED,
+        VERSION,
         DEFAULT_ERROR
     }
 }

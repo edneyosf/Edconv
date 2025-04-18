@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edneyosf.edconv.core.common.compose.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
+import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.edconv.common.*
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.events.HomeEvent.*
@@ -81,118 +82,140 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = { onEvent(SetStatus(HomeStatus.Settings)) }
             )
-            Column(
-                modifier = Modifier.padding(dimens.md),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimens.xl)
-            ) {
-                Actions(
-                    startEnabled = canStart(mediaType),
-                    onStart = { onEvent(OnStart()) },
-                    onStop = { onEvent(OnStop) }
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(dimens.xl),
-                    verticalAlignment = Alignment.CenterVertically
+            if(input != null) {
+                Column(
+                    modifier = Modifier.padding(dimens.md),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(dimens.xl)
                 ) {
-                    FormatInput(
-                        value = codec,
-                        mediaType = mediaType,
-                        onValueChange = { onEvent(SetCodec(it)) }
+                    Actions(
+                        startEnabled = canStart(mediaType),
+                        onStart = { onEvent(OnStart()) },
+                        onStop = { onEvent(OnStop) }
                     )
-                    VBRInput(
-                        onClick = { onEvent(SetCompression(CompressionType.VBR)) },
-                        onValueChange = { onEvent(SetVbr(it)) }
-                    )
-                    CRFInput(
-                        onClick = { onEvent(SetCompression(CompressionType.CRF)) },
-                        onValueChange = { onEvent(SetCrf(it)) }
-                    )
-                    CBRInput(
-                        mediaType = mediaType,
-                        onClick = { onEvent(SetCompression(CompressionType.CBR)) },
-                        onValueChange = { onEvent(SetBitrate(it)) }
-                    )
-                }
-                if(mediaType == MediaType.AUDIO) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                        horizontalArrangement = Arrangement.spacedBy(dimens.xl),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ChannelsInput(
-                            value = channels,
-                            onValueChange = { onEvent(SetChannels(it)) }
-                        )
-                        SampleRateInput(
-                            value = sampleRate,
-                            onValueChange = { onEvent(SetSampleRate(it)) }
-                        )
-                    }
-                }
-                else if(mediaType == MediaType.VIDEO) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
-                    ) {
-                        ResolutionInput(
-                            value = resolution,
-                            onValueChange = { onEvent(SetResolution(it)) }
-                        )
-                        PixelFormatInput(
-                            value = pixelFormat,
-                            onValueChange = { onEvent(SetPixelFormat(it)) }
-                        )
-                        PresetInput(
+                        FormatInput(
+                            value = codec,
                             mediaType = mediaType,
-                            onValueChange = { onEvent(SetPreset(it)) }
+                            onValueChange = { onEvent(SetCodec(it)) }
+                        )
+                        VBRInput(
+                            onClick = { onEvent(SetCompression(CompressionType.VBR)) },
+                            onValueChange = { onEvent(SetVbr(it)) }
+                        )
+                        CRFInput(
+                            onClick = { onEvent(SetCompression(CompressionType.CRF)) },
+                            onValueChange = { onEvent(SetCrf(it)) }
+                        )
+                        CBRInput(
+                            mediaType = mediaType,
+                            onClick = { onEvent(SetCompression(CompressionType.CBR)) },
+                            onValueChange = { onEvent(SetBitrate(it)) }
                         )
                     }
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(dimens.xl)
-                ) {
-                    CheckboxInput(
-                        checked = noMetadata,
-                        label = strings[NO_METADATA_INPUT],
-                        onCheckedChange = { onEvent(SetNoMetadata(it)) }
-                    )
-                    if(mediaType == MediaType.VIDEO) {
-                        CheckboxInput(
-                            checked = noAudio,
-                            label = strings[NO_AUDIO_INPUT],
-                            onCheckedChange = { onEvent(SetNoAudio(it)) }
-                        )
-                        CheckboxInput(
-                            checked = noSubtitle,
-                            label = strings[NO_SUBTITLE_INPUT],
-                            onCheckedChange = { onEvent(SetNoSubtitle(it)) }
-                        )
+                    if(mediaType == MediaType.AUDIO) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                        ) {
+                            ChannelsInput(
+                                value = channels,
+                                onValueChange = { onEvent(SetChannels(it)) }
+                            )
+                            SampleRateInput(
+                                value = sampleRate,
+                                onValueChange = { onEvent(SetSampleRate(it)) }
+                            )
+                        }
                     }
-                }
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(dimens.md)
-                ) {
-                    LogsView(logs)
+                    else if(mediaType == MediaType.VIDEO) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                        ) {
+                            ResolutionInput(
+                                value = resolution,
+                                onValueChange = { onEvent(SetResolution(it)) }
+                            )
+                            PixelFormatInput(
+                                value = pixelFormat,
+                                onValueChange = { onEvent(SetPixelFormat(it)) }
+                            )
+                            PresetInput(
+                                mediaType = mediaType,
+                                onValueChange = { onEvent(SetPreset(it)) }
+                            )
+                        }
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                    ) {
+                        CheckboxInput(
+                            checked = noMetadata,
+                            label = strings[NO_METADATA_INPUT],
+                            onCheckedChange = { onEvent(SetNoMetadata(it)) }
+                        )
+                        if(mediaType == MediaType.VIDEO) {
+                            CheckboxInput(
+                                checked = noAudio,
+                                label = strings[NO_AUDIO_INPUT],
+                                onCheckedChange = { onEvent(SetNoAudio(it)) }
+                            )
+                            CheckboxInput(
+                                checked = noSubtitle,
+                                label = strings[NO_SUBTITLE_INPUT],
+                                onCheckedChange = { onEvent(SetNoSubtitle(it)) }
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(dimens.md)
+                    ) {
+                        LogsView(logs)
+                        if(cmd.isNotBlank()) {
+                            TextField(
+                                value = cmd,
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                colors = TextFieldDefaults.colors().custom(),
+                                onValueChange = { onEvent(SetCmd(it)) },
+                                label = { Text(strings[COMMAND_INPUT]) }
+                            )
+                        }
+                    }
+                    Progress(status)
                     TextField(
-                        value = cmd,
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        value = output ?: "",
+                        modifier = Modifier.fillMaxWidth(),
                         colors = TextFieldDefaults.colors().custom(),
-                        onValueChange = { onEvent(SetCmd(it)) },
-                        label = { Text(strings[COMMAND_INPUT]) }
+                        onValueChange = { onEvent(SetOutput(it)) },
+                        label = { Text(strings[OUTPUT_FILE]) }
                     )
                 }
-                Progress(status)
-                TextField(
-                    value = output ?: "",
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = input != null,
-                    colors = TextFieldDefaults.colors().custom(),
-                    onValueChange = { onEvent(SetOutput(it)) },
-                    label = { Text(strings[OUTPUT_FILE]) }
-                )
+            }
+            else {
+                val version = remember { PropertyUtils.version }
+
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(dimens.md),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        modifier = Modifier.size(dimens.giga),
+                        imageVector = Icons.Rounded.VideoLibrary,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.height(dimens.xl))
+                    Text(strings[NO_FILE_SELECTED])
+                    Spacer(modifier = Modifier.weight(1f))
+                    if(version != null) Text("${strings[VERSION]} $version")
+                }
             }
         }
     }
