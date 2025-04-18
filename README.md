@@ -48,6 +48,8 @@ See the [LICENSE](./LICENSE) file for full terms.
 
 ---
 
-<a href="https://buymeacoffee.com/edneyosf">
-  <img src="assets/bmc-button.svg" width="200">
-</a>
+<p align="center">
+  <a href="https://buymeacoffee.com/edneyosf">
+    <img src="assets/bmc-button.svg" width="200">
+  </a>
+</p>
