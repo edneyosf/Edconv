@@ -45,3 +45,9 @@ Run the installer as administrator and follow the installation steps.
 This project is licensed under a custom MIT-based **Non-Commercial License**.  
 Commercial use and redistribution for profit are not allowed.  
 See the [LICENSE](./LICENSE) file for full terms.
+
+---
+
+<a href="https://buymeacoffee.com/edneyosf">
+  <img src="assets/bmc-button.svg" width="200">
+</a>
