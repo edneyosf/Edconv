@@ -11,7 +11,7 @@
 
 ---
 
-## ✨ Features
+## Features ✨
 
 - 🎥 Convert video and audio using FFmpeg
 - 🎛️ Presets for movies, shows, and music (soon)
