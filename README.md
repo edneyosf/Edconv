@@ -13,10 +13,10 @@
 
 ## Features ✨
 
-- 🎥 Convert video and audio using FFmpeg
-- 🎛️ Presets for movies, shows, and music (soon)
-- ⚙️ Custom FFmpeg arguments
-- 🖥️ Clean, intuitive interface
+- Convert video and audio using FFmpeg
+- Presets for movies, shows, and music (soon)
+- Custom FFmpeg arguments
+- Clean, intuitive interface
 
 ---
 
