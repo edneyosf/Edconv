@@ -36,6 +36,11 @@ Download the latest release for your system from the [Releases page](https://git
 sudo dpkg -i edconv_x.x.x.deb
 ```
 
+#### Rpm
+```bash
+sudo dnf install edconv_x.x.x.rpm
+```
+
 #### Windows:  
 
 Run the installer as administrator and follow the installation steps.
