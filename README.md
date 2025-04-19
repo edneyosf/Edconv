@@ -36,7 +36,7 @@ Download the latest release for your system from the [Releases page](https://git
 sudo dpkg -i edconv_x.x.x.deb
 ```
 
-#### Rpm
+#### RPM-based systems:
 ```bash
 sudo dnf install edconv_x.x.x.rpm
 ```
