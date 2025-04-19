@@ -50,6 +50,10 @@ See the [LICENSE](./LICENSE) file for full terms.
 
 ---
 
+## Support & Donations
+
+Special thanks to all supporter ❤️
+
 <p align="center">
   <a href="https://buymeacoffee.com/edneyosf">
     <img src="assets/bmc-button.svg" width="200">
