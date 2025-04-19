@@ -3,6 +3,8 @@
 [![Linux Build](https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml/badge.svg)](https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml)
 [![Windows Build](https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml/badge.svg)](https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml)
 ![GitHub all releases](https://img.shields.io/github/downloads/edneyosf/Edconv/total)
+![Release (latest)](https://img.shields.io/github/v/release/edneyosf/Edconv)
+![License](https://img.shields.io/github/license/edneyosf/Edconv)
 
 **Edconv** is a user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
 
