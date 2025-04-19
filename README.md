@@ -54,8 +54,6 @@ See the [LICENSE](./LICENSE) file for full terms.
 
 Special thanks to all supporter ❤️
 
-<p align="center">
-  <a href="https://buymeacoffee.com/edneyosf">
-    <img src="assets/bmc-button.svg" width="200">
-  </a>
-</p>
+<a href="https://buymeacoffee.com/edneyosf">
+  <img src="assets/bmc-button.svg" width="200">
+</a>
