@@ -3,18 +3,18 @@
 <div align="center">
   <h1>Edconv</h1>
 
-**Edconv** is a user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
+A user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
 
-![Release (latest)](https://img.shields.io/github/v/release/edneyosf/Edconv)
-![GitHub all releases](https://img.shields.io/github/downloads/edneyosf/Edconv/total)
+  <a href="https://github.com/edneyosf/Edconv/releases"><img src="https://img.shields.io/github/v/release/edneyosf/Edconv"/></a>
+  <a href="https://github.com/edneyosf/Edconv/releases"><img src="https://img.shields.io/github/downloads/edneyosf/Edconv/total"/></a>
 
-[![Linux Build](https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml/badge.svg)](https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml)
-[![Windows Build](https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml/badge.svg)](https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml)
+  <a href="https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml/badge.svg"/></a>
+  <a href="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml/badge.svg"/></a>
 
-<h4>Download</h4> 
-<a href="https://github.com/edneyosf/Edconv/releases">
-  <img src="assets/badge_github.png" height="80">
-</a>
+  <h4>Download</h4> 
+  <a href="https://github.com/edneyosf/Edconv/releases">
+    <img src="assets/badge_github.png" height="80">
+  </a>
 </div>
 
 ## Features ✨
