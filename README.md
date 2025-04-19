@@ -13,7 +13,7 @@
 
 <h4>Download</h4> 
 <a href="https://github.com/edneyosf/Edconv/releases">
-  <img src="https://raw.githubusercontent.com/NeoApplications/Neo-Backup/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" height="80">
+  <img src="assets/badge_github.png" height="80">
 </a>
 </div>
 
