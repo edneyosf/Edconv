@@ -42,14 +42,6 @@ Run the installer as administrator and follow the installation steps.
 
 ---
 
-## License
-
-This project is licensed under a custom MIT-based **Non-Commercial License**.  
-Commercial use and redistribution for profit are not allowed.  
-See the [LICENSE](./LICENSE) file for full terms.
-
----
-
 ## Support & Donations
 
 Special thanks to all supporter ❤️
