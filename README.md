@@ -17,8 +17,6 @@
 </a>
 </div>
 
----
-
 ## Features ✨
 
 - Convert video and audio using FFmpeg
@@ -26,20 +24,14 @@
 - Custom FFmpeg arguments
 - Clean, intuitive interface
 
----
-
 ## Screenshots
 
 ![Application Preview](assets/edconv.webp)
-
----
 
 ## Requirements
 
 - [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system
 - On first launch, Edconv will prompt you to select your local FFmpeg binary
-
----
 
 ## Installation
 
@@ -58,8 +50,6 @@ sudo dnf install edconv_x.x.x.rpm
 #### Windows:  
 
 Run the installer as administrator and follow the installation steps.
-
----
 
 ## Support & Donations
 
