@@ -20,14 +20,14 @@
 
 ---
 
-## ⚠️ Requirements
+## Requirements
 
 - [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system
 - On first launch, Edconv will prompt you to select your local FFmpeg binary
 
 ---
 
-## 🔧 Installation
+## Installation
 
 Download the latest release for your system from the [Releases page](https://github.com/edneyosf/edconv/releases):
 
@@ -42,7 +42,7 @@ Run the installer as administrator and follow the installation steps.
 
 ---
 
-## 📖 License
+## License
 
 This project is licensed under a custom MIT-based **Non-Commercial License**.  
 Commercial use and redistribution for profit are not allowed.  
