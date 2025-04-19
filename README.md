@@ -28,6 +28,12 @@
 
 ---
 
+## Screenshots
+
+![Application Preview](assets/edconv.webp)
+
+---
+
 ## Requirements
 
 - [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system
