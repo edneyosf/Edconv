@@ -80,7 +80,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 selected = mediaType,
                 inputMediaType = input?.type,
                 onSelected = { mediaType = it },
-                pickFileEnabled = status !is HomeStatus.Loading,
+                loading = status is HomeStatus.Loading,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
                 onSettings = { onEvent(SetDialog(HomeDialog.Settings)) }
             )
@@ -209,13 +209,18 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
-                    Icon(
-                        modifier = Modifier.size(dimens.giga),
-                        imageVector = Icons.Rounded.VideoLibrary,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.height(dimens.xl))
-                    Text(strings[NO_FILE_SELECTED])
+                    if(status !is HomeStatus.Loading) {
+                        Icon(
+                            modifier = Modifier.size(dimens.giga),
+                            imageVector = Icons.Rounded.VideoLibrary,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.height(dimens.xl))
+                        Text(strings[NO_FILE_SELECTED])
+                    }
+                    else {
+                        CircularProgressIndicator()
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     if(version != null) Text("${strings[VERSION]} $version")
                 }
