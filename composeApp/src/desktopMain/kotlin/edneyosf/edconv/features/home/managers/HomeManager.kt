@@ -293,6 +293,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                         _state.value.copy(
                             input = mediaData,
                             output = output,
+                            codec = if(mediaData.type != codec?.mediaType) null else codec,
                             status = HomeStatus.Initial
                         )
                     }
@@ -300,6 +301,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                         _state.value.copy(
                             input = null,
                             output = null,
+                            codec = null,
                             status = HomeStatus.Error("Could not retrieve the audio duration or channels")
                         )
                     }
@@ -314,6 +316,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                         _state.value.copy(
                             input = mediaData,
                             output = output,
+                            codec = if(mediaData.type != codec?.mediaType) null else codec,
                             status = HomeStatus.Initial
                         )
                     }
@@ -321,6 +324,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                         _state.value.copy(
                             input = null,
                             output = null,
+                            codec = null,
                             status = HomeStatus.Error("Could not retrieve the video duration or resolution")
                         )
                     }
@@ -329,6 +333,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     _state.value.copy(
                         input = null,
                         output = null,
+                        codec = null,
                         status = HomeStatus.Error("Could not identify media type")
                     )
                 }
