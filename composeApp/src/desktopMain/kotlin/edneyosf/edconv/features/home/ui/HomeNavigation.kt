@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import edneyosf.edconv.edconv.common.MediaType
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
+import edneyosf.edconv.ui.components.TextTooltip
 import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
@@ -35,12 +36,14 @@ fun HomeNavigation(
 
     Row {
         NavigationRail {
-            FilledTonalIconButton(
-                enabled = pickFileEnabled,
-                onClick = onPickFile
-            ) {
-                BadgedBox(badge = { selected?.let { Badge() } }) {
-                    Icon(Icons.Rounded.FileOpen, contentDescription = strings[TITLE_PICK_FILE])
+            TextTooltip(text = strings[SELECT_MEDIA_FILE]) {
+                FilledTonalIconButton(
+                    enabled = pickFileEnabled,
+                    onClick = onPickFile
+                ) {
+                    BadgedBox(badge = { selected?.let { Badge() } }) {
+                        Icon(Icons.Rounded.FileOpen, contentDescription = strings[SELECT_MEDIA_FILE])
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(dimens.xl))
@@ -61,8 +64,10 @@ fun HomeNavigation(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { onSettings() }) {
-                Icon(Icons.Rounded.Settings, contentDescription = null)
+            TextTooltip(text = strings[SETTINGS]) {
+                IconButton(onClick = { onSettings() }) {
+                    Icon(Icons.Rounded.Settings, contentDescription = strings[SETTINGS])
+                }
             }
         }
         VerticalDivider(color = DividerDefaults.customColor())
