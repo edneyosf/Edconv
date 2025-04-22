@@ -41,7 +41,8 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         VERSION to "Versão",
         DEFAULT_ERROR to "Opa! Algo deu errado.",
         SELECT_MEDIA_FILE to "Selecionar mídia",
-        SETTINGS to "Configurações"
+        SETTINGS to "Configurações",
+        MEDIA_INFO to "Informações da mídia"
     )
 
     override val en = mapOf(
@@ -70,7 +71,8 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         VERSION to "Version",
         DEFAULT_ERROR to "Oops! Something went wrong.",
         SELECT_MEDIA_FILE to "Select media",
-        SETTINGS to "Settings"
+        SETTINGS to "Settings",
+        MEDIA_INFO to "Media information"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -101,6 +103,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         VERSION,
         DEFAULT_ERROR,
         SELECT_MEDIA_FILE,
-        SETTINGS
+        SETTINGS,
+        MEDIA_INFO
     }
 }

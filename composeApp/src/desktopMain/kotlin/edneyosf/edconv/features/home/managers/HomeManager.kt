@@ -8,13 +8,13 @@ import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.DateTimeUtils
-import edneyosf.edconv.edconv.utils.MediaUtils
+import edneyosf.edconv.edconv.ffprobe.FFprobe
 import edneyosf.edconv.edconv.common.*
 import edneyosf.edconv.edconv.core.Edconv
-import edneyosf.edconv.edconv.core.data.MediaData
 import edneyosf.edconv.edconv.core.data.ProgressData
 import edneyosf.edconv.edconv.ffmpeg.FFmpeg
 import edneyosf.edconv.features.home.events.HomeEvent
+import edneyosf.edconv.features.home.states.HomeDialog
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.states.HomeStatus
 import kotlinx.coroutines.*
@@ -47,6 +47,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
         when(this) {
             is HomeEvent.SetStatus -> setStatus(status)
+            is HomeEvent.SetDialog -> setDialog(dialog)
             is HomeEvent.SetCmd -> setCmd(cmd)
             is HomeEvent.SetInput -> setInput(path)
             is HomeEvent.SetOutput -> setOutput(path)
@@ -75,7 +76,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         val ffprobePath = ConfigManager.getFFprobePath()
 
         if (ffmpegPath.isBlank() || ffprobePath.isBlank()) {
-            setStatus(HomeStatus.Settings)
+            setDialog(HomeDialog.Settings)
             return
         }
 
@@ -84,7 +85,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
         if (!ffmpegFile.exists() || !ffmpegFile.isFile ||
             !ffprobeFile.exists() || !ffprobeFile.isFile) {
-            setStatus(HomeStatus.Settings)
+            setDialog(HomeDialog.Settings)
         }
     }
 
@@ -106,6 +107,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             is HomeEvent.OnStop,
             is HomeEvent.SetInput,
             is HomeEvent.SetOutput,
+            is HomeEvent.SetDialog,
             is HomeEvent.SetStatus -> false
             else -> true
         }
@@ -119,7 +121,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
         val ffmpeg = when (codec.mediaType) {
             MediaType.AUDIO -> {
-                val inputChannels = input.channels
+                val stream = input.audioStreams.firstOrNull()
+                val inputChannels = stream?.channels
 
                 if(inputChannels == null) {
                     onError(Throwable("Input channels is null"))
@@ -149,14 +152,15 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
             MediaType.VIDEO -> {
                 if(preset.isNullOrBlank() || (crf == null && bitrate == null)) return@run
 
-                val inputResolution = input.resolution
-                if(inputResolution == null) {
+                val stream = input.videoStreams.firstOrNull()
+                val width = stream?.width
+                val height = stream?.height
+
+                if(width == null || height == null) {
                     onError(Throwable("Input resolution is null"))
                     return@run
                 }
 
-                val width = inputResolution.first
-                val height = inputResolution.second
                 val filter = resolution?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height)
 
                 FFmpeg.createVideo(
@@ -277,33 +281,17 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
         setLogs("")
 
         scope.launch(context = Dispatchers.IO) {
-            val contentType = MediaUtils.getContentType(inputFile)
-            val duration: Long?
-            val channels: Int?
-            val size = MediaUtils.getSize(inputFile)
-            val type = when {
-                contentType.audio && !contentType.video -> MediaType.AUDIO
-                contentType.video -> MediaType.VIDEO
-                else -> null
-            }
+            val mediaData = FFprobe.analyze(inputFile)
 
-            val newState = when (type) {
+            val newState = when (mediaData?.type) {
                 MediaType.AUDIO -> {
-                    channels = MediaUtils.getAudioChannels(inputFile)
-                    duration = MediaUtils.getDuration(inputFile)
+                    val stream = mediaData.audioStreams.firstOrNull()
+                    val duration = mediaData.duration
+                    val channels = stream?.channels
 
                     if(duration != null && channels != null) {
-                        val media = MediaData(
-                            path = path,
-                            type = type,
-                            contentType = contentType,
-                            duration = duration,
-                            channels = channels,
-                            size = size
-                        )
-
                         _state.value.copy(
-                            input = media,
+                            input = mediaData,
                             output = output,
                             status = HomeStatus.Initial
                         )
@@ -317,23 +305,14 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
                     }
                 }
                 MediaType.VIDEO -> {
-                    val resolution = MediaUtils.getVideoResolution(inputFile)
-                    channels = MediaUtils.getAudioChannels(inputFile)
-                    duration = MediaUtils.getDuration(inputFile)
+                    val stream = mediaData.videoStreams.firstOrNull()
+                    val duration = mediaData.duration
+                    val height = stream?.height
+                    val width = stream?.width
 
-                    if(duration != null && resolution != null) {
-                        val media = MediaData(
-                            path = path,
-                            type = type,
-                            contentType = contentType,
-                            duration = duration,
-                            channels = channels,
-                            resolution = resolution,
-                            size = size
-                        )
-
+                    if(duration != null && width != null && height != null) {
                         _state.value.copy(
-                            input = media,
+                            input = mediaData,
                             output = output,
                             status = HomeStatus.Initial
                         )
@@ -379,6 +358,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope) {
 
     private fun setCmd(cmd: String) = _state.update { copy(cmd = cmd) }
     private fun setStatus(status: HomeStatus) = _state.update { copy(status = status) }
+    private fun setDialog(dialog: HomeDialog) = _state.update { copy(dialog = dialog) }
     private fun setOutput(path: String) = _state.update { copy(output = path) }
     private fun setLogs(log: String) = _state.update { copy(logs = log) }
     private fun setCompression(type: CompressionType?) = _state.update { copy(compression = type) }

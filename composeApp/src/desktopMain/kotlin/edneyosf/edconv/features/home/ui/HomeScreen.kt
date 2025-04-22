@@ -22,11 +22,13 @@ import edneyosf.edconv.edconv.common.*
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.events.HomeEvent.*
 import edneyosf.edconv.features.home.managers.HomeManager
+import edneyosf.edconv.features.home.states.HomeDialog
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.states.HomeStatus
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.ui.components.Selector
+import edneyosf.edconv.ui.components.TextTooltip
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
@@ -80,7 +82,7 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                 onSelected = { mediaType = it },
                 pickFileEnabled = status !is HomeStatus.Loading,
                 onPickFile = { FileUtils.pickFile(titlePickFile)?.let { onEvent(SetInput(it)) } },
-                onSettings = { onEvent(SetStatus(HomeStatus.Settings)) }
+                onSettings = { onEvent(SetDialog(HomeDialog.Settings)) }
             )
             if(input != null) {
                 Column(
@@ -91,7 +93,8 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
                     Actions(
                         startEnabled = canStart(mediaType),
                         onStart = { onEvent(OnStart()) },
-                        onStop = { onEvent(OnStop) }
+                        onStop = { onEvent(OnStop) },
+                        onMediaInfo = { onEvent(SetDialog(HomeDialog.MediaInfo(mediaData = input)))}
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(dimens.xl),
@@ -222,16 +225,14 @@ private fun HomeState.Content(onEvent: (HomeEvent) -> Unit) {
 }
 
 @Composable
-private fun HomeState.Actions(startEnabled: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
+private fun HomeState.Actions(startEnabled: Boolean, onStart: () -> Unit, onStop: () -> Unit, onMediaInfo: () -> Unit) {
     val stopEnabled = status is HomeStatus.Progress
     val modifier =  Modifier
         .fillMaxWidth()
         .padding(bottom = dimens.sm)
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Center
-    ) {
+    Row(modifier = modifier) {
+        Spacer(modifier = Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledIconButton(
                 enabled = startEnabled,
@@ -262,6 +263,12 @@ private fun HomeState.Actions(startEnabled: Boolean, onStart: () -> Unit, onStop
                 text = strings[STOP_CONVERSION],
                 style = MaterialTheme.typography.bodySmall
             )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        TextTooltip(text = strings[MEDIA_INFO]) {
+            IconButton(onClick = onMediaInfo) {
+                Icon(imageVector = Icons.Rounded.Info, contentDescription = strings[MEDIA_INFO])
+            }
         }
     }
 }

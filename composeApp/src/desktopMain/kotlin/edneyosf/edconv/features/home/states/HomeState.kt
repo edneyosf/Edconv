@@ -5,6 +5,7 @@ import edneyosf.edconv.edconv.core.data.MediaData
 
 data class HomeState(
     val status: HomeStatus,
+    val dialog: HomeDialog,
     val logs: String,
     val cmd: String,
     val input: MediaData?,
@@ -26,6 +27,7 @@ data class HomeState(
     companion object {
         fun default() = HomeState(
             status = HomeStatus.Initial,
+            dialog = HomeDialog.None,
             logs = "",
             cmd = "",
             input = null,
@@ -51,8 +53,13 @@ sealed interface HomeStatus {
     data object Initial: HomeStatus
     data object Loading: HomeStatus
     data object FileExists: HomeStatus
-    data object Settings: HomeStatus
     data class Progress(val percentage: Float, val speed: String): HomeStatus
     data class Complete(val startTime: String, val finishTime: String, val duration: String): HomeStatus
     data class Error(val message: String? = null): HomeStatus
+}
+
+sealed interface HomeDialog {
+    data object None: HomeDialog
+    data object Settings: HomeDialog
+    data class MediaInfo(val mediaData: MediaData): HomeDialog
 }
