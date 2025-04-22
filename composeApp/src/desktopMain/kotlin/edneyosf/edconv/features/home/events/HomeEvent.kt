@@ -1,10 +1,12 @@
 package edneyosf.edconv.features.home.events
 
 import edneyosf.edconv.edconv.common.*
+import edneyosf.edconv.features.home.states.HomeDialog
 import edneyosf.edconv.features.home.states.HomeStatus
 
 sealed interface HomeEvent {
     data class SetStatus(val status: HomeStatus): HomeEvent
+    data class SetDialog(val dialog: HomeDialog): HomeEvent
     data class SetCmd(val cmd: String): HomeEvent
     data class SetInput(val path: String): HomeEvent
     data class SetOutput(val path: String): HomeEvent

@@ -30,7 +30,7 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 
 ## Requirements
 
-- [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system
+- [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system, **recommended to use version 7.1 or higher**
 - On first launch, Edconv will prompt you to select your local FFmpeg binary
 
 ## Installation

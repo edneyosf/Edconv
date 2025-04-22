@@ -2,24 +2,24 @@ package edneyosf.edconv.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Source Color #3BBF9C
+// Source Color #01D993
 
 // Light Scheme
 
-val primaryLight = Color(0xFF006B55)
+val primaryLight = Color(0xFF006C47)
 val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFF3BBF9C)
-val onPrimaryContainerLight = Color(0xFF004938)
+val primaryContainerLight = Color(0xFF01D993)
+val onPrimaryContainerLight = Color(0xFF00593A)
 
-val secondaryLight = Color(0xFF3B6758)
+val secondaryLight = Color(0xFF2F694D)
 val onSecondaryLight = Color(0xFFFFFFFF)
-val secondaryContainerLight = Color(0xFFBEEDDA)
-val onSecondaryContainerLight = Color(0xFF416D5E)
+val secondaryContainerLight = Color(0xFFB3F0CC)
+val onSecondaryContainerLight = Color(0xFF366F53)
 
-val tertiaryLight = Color(0xFF6051A9)
+val tertiaryLight = Color(0xFF375F98)
 val onTertiaryLight = Color(0xFFFFFFFF)
-val tertiaryContainerLight = Color(0xFFAE9EFC)
-val onTertiaryContainerLight = Color(0xFF413087)
+val tertiaryContainerLight = Color(0xFF9AC0FF)
+val onTertiaryContainerLight = Color(0xFF234E85)
 
 val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color(0xFFFFFFFF)
@@ -54,20 +54,20 @@ val surfaceContainerHighestLight = Color(0xFFF6F6F6) // TextField
 
 // Dark Scheme
 
-val primaryDark = Color(0xFF5DDCB7)
-val onPrimaryDark = Color(0xFF00382B)
-val primaryContainerDark = Color(0xFF3BBF9C)
-val onPrimaryContainerDark = Color(0xFF004938)
+val primaryDark = Color(0xFF45F6AD)
+val onPrimaryDark = Color(0xFF003823)
+val primaryContainerDark = Color(0xFF01D993)
+val onPrimaryContainerDark = Color(0xFF00593A)
 
-val secondaryDark = Color(0xFFA2D0BF)
-val onSecondaryDark = Color(0xFF07372B)
-val secondaryContainerDark = Color(0xFF255143)
-val onSecondaryContainerDark = Color(0xFF94C2B1)
+val secondaryDark = Color(0xFF97D4B1)
+val onSecondaryDark = Color(0xFF003823)
+val secondaryContainerDark = Color(0xFF135137)
+val onSecondaryContainerDark = Color(0xFF86C2A1)
 
-val tertiaryDark = Color(0xFFCABEFF)
-val onTertiaryDark = Color(0xFF321F77)
-val tertiaryContainerDark = Color(0xFFAE9EFC)
-val onTertiaryContainerDark = Color(0xFF413087)
+val tertiaryDark = Color(0xFFC8DBFF)
+val onTertiaryDark = Color(0xFF003061)
+val tertiaryContainerDark = Color(0xFF9AC0FF)
+val onTertiaryContainerDark = Color(0xFF234E85)
 
 val errorDark = Color(0xFFFFB4AB)
 val onErrorDark = Color(0xFF690005)

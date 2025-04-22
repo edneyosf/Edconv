@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import edneyosf.edconv.edconv.common.MediaType
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
+import edneyosf.edconv.ui.components.TextTooltip
 import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
@@ -27,7 +28,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun HomeNavigation(
-    selected: MediaType?, inputMediaType: MediaType?, onSelected: (MediaType) -> Unit, pickFileEnabled: Boolean = true,
+    selected: MediaType?, inputMediaType: MediaType?, onSelected: (MediaType) -> Unit, loading: Boolean = false,
     onPickFile: () -> Unit, onSettings: () -> Unit) {
 
     val mediaTypes = listOf(strings[AUDIO_MEDIA_TYPE], strings[VIDEO_MEDIA_TYPE])
@@ -35,12 +36,14 @@ fun HomeNavigation(
 
     Row {
         NavigationRail {
-            FilledTonalIconButton(
-                enabled = pickFileEnabled,
-                onClick = onPickFile
-            ) {
-                BadgedBox(badge = { selected?.let { Badge() } }) {
-                    Icon(Icons.Rounded.FileOpen, contentDescription = strings[TITLE_PICK_FILE])
+            TextTooltip(text = strings[SELECT_MEDIA_FILE]) {
+                FilledTonalIconButton(
+                    enabled = !loading,
+                    onClick = onPickFile
+                ) {
+                    BadgedBox(badge = { selected?.let { Badge() } }) {
+                        Icon(Icons.Rounded.FileOpen, contentDescription = strings[SELECT_MEDIA_FILE])
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(dimens.xl))
@@ -55,14 +58,16 @@ fun HomeNavigation(
                 NavigationRailItem(
                     icon = { Icon(icons[index], contentDescription = null) },
                     label = { Text(string) },
-                    enabled = enabled,
+                    enabled = enabled && !loading,
                     selected = selected?.ordinal == index,
                     onClick = { item?.let { onSelected(it) } }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { onSettings() }) {
-                Icon(Icons.Rounded.Settings, contentDescription = null)
+            TextTooltip(text = strings[SETTINGS]) {
+                IconButton(enabled = !loading, onClick = { onSettings() }) {
+                    Icon(Icons.Rounded.Settings, contentDescription = strings[SETTINGS])
+                }
             }
         }
         VerticalDivider(color = DividerDefaults.customColor())
@@ -76,7 +81,7 @@ private fun DefaultPreview() {
             selected = MediaType.AUDIO,
             inputMediaType = MediaType.AUDIO,
             onSelected = {},
-            pickFileEnabled = true,
+            loading = false,
             onPickFile = {},
             onSettings = {}
         )

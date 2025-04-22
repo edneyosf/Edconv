@@ -40,6 +40,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         NO_FILE_SELECTED to "Selecione um arquivo de mídia",
         VERSION to "Versão",
         DEFAULT_ERROR to "Opa! Algo deu errado.",
+        SELECT_MEDIA_FILE to "Selecionar mídia",
+        SETTINGS to "Configurações",
+        MEDIA_INFO to "Informações da mídia"
     )
 
     override val en = mapOf(
@@ -67,6 +70,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         NO_FILE_SELECTED to "Select a media file",
         VERSION to "Version",
         DEFAULT_ERROR to "Oops! Something went wrong.",
+        SELECT_MEDIA_FILE to "Select media",
+        SETTINGS to "Settings",
+        MEDIA_INFO to "Media information"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -95,6 +101,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         LOGS_VIEW,
         NO_FILE_SELECTED,
         VERSION,
-        DEFAULT_ERROR
+        DEFAULT_ERROR,
+        SELECT_MEDIA_FILE,
+        SETTINGS,
+        MEDIA_INFO
     }
 }
