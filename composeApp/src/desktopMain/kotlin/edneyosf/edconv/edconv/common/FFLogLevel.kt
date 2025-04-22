@@ -1,6 +1,6 @@
-package edneyosf.edconv.edconv.ffmpeg
+package edneyosf.edconv.edconv.common
 
-object FFmpegLogLevel {
+object FFLogLevel {
     const val QUIET = "quiet"
     const val PANIC = "panic"
     const val FATAL = "fatal"
