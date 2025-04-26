@@ -39,7 +39,12 @@ fun HomeErrorDialog(error: String, onFinish: () -> Unit) {
         SimpleDialog(
             icon = Icons.Rounded.Error,
             title = commonStrings[ERROR_TITLE],
-            content = { Text(text = description, style = TextStyle(textAlign = TextAlign.Center)) },
+            content = {
+                Text(
+                    text = "$description\n($error)",
+                    style = TextStyle(textAlign = TextAlign.Center)
+                )
+            },
             onConfirmation = onFinish,
             confirmationText = commonStrings[CONFIRMATION_BUTTON]
         )
