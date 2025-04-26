@@ -14,9 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import edneyosf.edconv.edconv.common.MediaType
-import edneyosf.edconv.edconv.core.data.ContentTypeData
-import edneyosf.edconv.edconv.core.data.InputMedia
+import edneyosf.edconv.ffmpeg.common.MediaType
+import edneyosf.edconv.ffmpeg.data.ContentTypeData
+import edneyosf.edconv.ffmpeg.data.InputMedia
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*

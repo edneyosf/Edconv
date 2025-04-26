@@ -1,7 +1,7 @@
 package edneyosf.edconv.features.converter.states
 
-import edneyosf.edconv.edconv.common.*
-import edneyosf.edconv.edconv.core.data.InputMedia
+import edneyosf.edconv.ffmpeg.common.*
+import edneyosf.edconv.ffmpeg.data.InputMedia
 
 data class ConverterState(
     val input: InputMedia,

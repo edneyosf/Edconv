@@ -2,8 +2,8 @@ package edneyosf.edconv.features.nomedia.strings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import edneyosf.edconv.core.Languages.EN
-import edneyosf.edconv.core.Languages.PT
+import edneyosf.edconv.core.common.Languages.EN
+import edneyosf.edconv.core.common.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
 import edneyosf.edconv.features.nomedia.strings.NoMediaScreenStrings.Keys.*

@@ -8,9 +8,9 @@ import edneyosf.edconv.core.common.Errors
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
-import edneyosf.edconv.edconv.common.MediaType
-import edneyosf.edconv.edconv.core.data.InputMedia
-import edneyosf.edconv.edconv.ffprobe.FFprobe
+import edneyosf.edconv.ffmpeg.common.MediaType
+import edneyosf.edconv.ffmpeg.data.InputMedia
+import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState

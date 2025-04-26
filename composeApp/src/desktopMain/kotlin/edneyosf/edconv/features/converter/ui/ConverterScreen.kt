@@ -15,10 +15,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edneyosf.edconv.core.common.compose.LaunchedEffected
-import edneyosf.edconv.edconv.common.*
-import edneyosf.edconv.edconv.core.data.ContentTypeData
-import edneyosf.edconv.edconv.core.data.InputMedia
+import edneyosf.edconv.core.extensions.LaunchedEffected
+import edneyosf.edconv.ffmpeg.common.*
+import edneyosf.edconv.ffmpeg.data.ContentTypeData
+import edneyosf.edconv.ffmpeg.data.InputMedia
 import edneyosf.edconv.features.converter.events.ConverterEvent
 import edneyosf.edconv.features.converter.events.ConverterEvent.*
 import edneyosf.edconv.features.converter.managers.ConverterManager

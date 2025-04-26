@@ -2,8 +2,8 @@ package edneyosf.edconv.features.settings.strings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import edneyosf.edconv.core.Languages.EN
-import edneyosf.edconv.core.Languages.PT
+import edneyosf.edconv.core.common.Languages.EN
+import edneyosf.edconv.core.common.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
@@ -24,8 +24,7 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CONFIRMATION_BUTTON to "Confirmar",
         CANCEL_BUTTON to "Cancelar",
         PICK_FFMPEG_TITLE to "Selecione o arquivo FFmpeg",
-        PICK_FFPROBE_TITLE to "Selecione o arquivo FFprobe",
-        DEFAULT_ERROR to "Oops! Something went wrong.",
+        PICK_FFPROBE_TITLE to "Selecione o arquivo FFprobe"
     )
 
     override val en = mapOf(
@@ -37,8 +36,7 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CONFIRMATION_BUTTON to "Confirm",
         CANCEL_BUTTON to "Cancel",
         PICK_FFMPEG_TITLE to "Select FFmpeg file",
-        PICK_FFPROBE_TITLE to "Select FFprobe file",
-        DEFAULT_ERROR to "Opa! Algo deu errado.",
+        PICK_FFPROBE_TITLE to "Select FFprobe file"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -52,7 +50,6 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CONFIRMATION_BUTTON,
         CANCEL_BUTTON,
         PICK_FFMPEG_TITLE,
-        PICK_FFPROBE_TITLE,
-        DEFAULT_ERROR
+        PICK_FFPROBE_TITLE
     }
 }

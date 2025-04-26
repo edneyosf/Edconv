@@ -1,7 +1,7 @@
 package edneyosf.edconv.app
 
-import edneyosf.edconv.core.Languages
-import edneyosf.edconv.edconv.common.FFLogLevel
+import edneyosf.edconv.core.common.Languages
+import edneyosf.edconv.ffmpeg.common.FFLogLevel
 
 object AppConfigs {
     var outputDefault = ""

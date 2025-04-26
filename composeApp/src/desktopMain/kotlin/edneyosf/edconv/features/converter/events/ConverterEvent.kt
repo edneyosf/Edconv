@@ -1,7 +1,6 @@
 package edneyosf.edconv.features.converter.events
 
-import edneyosf.edconv.edconv.common.*
-import edneyosf.edconv.edconv.core.data.InputMedia
+import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.states.ConverterDialog
 import edneyosf.edconv.features.converter.states.ConverterStatus
 

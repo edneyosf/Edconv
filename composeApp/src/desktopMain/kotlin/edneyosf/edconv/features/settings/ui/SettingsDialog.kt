@@ -11,12 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import edneyosf.edconv.core.utils.FileUtils
+import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.events.SettingsEvent
 import edneyosf.edconv.features.settings.managers.SettingsManager
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatus
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
+import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
 import edneyosf.edconv.ui.components.alerts.ErrorAlertText
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
@@ -84,7 +86,7 @@ private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
                 }
                 if(status is SettingsStatus.Error) {
                     Spacer(modifier = Modifier.height(dimens.md))
-                    ErrorAlertText(text = status.message ?: strings[DEFAULT_ERROR])
+                    ErrorAlertText(text = status.message ?: commonStrings[ERROR_DEFAULT])
                 }
             }
         },

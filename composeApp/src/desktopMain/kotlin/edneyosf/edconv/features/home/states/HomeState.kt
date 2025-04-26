@@ -1,6 +1,6 @@
 package edneyosf.edconv.features.home.states
 
-import edneyosf.edconv.edconv.core.data.InputMedia
+import edneyosf.edconv.ffmpeg.data.InputMedia
 
 data class HomeState(
     val navigation: HomeNavigationState = HomeNavigationState.Initial,

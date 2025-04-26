@@ -8,10 +8,10 @@ import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.DateTimeUtils
-import edneyosf.edconv.edconv.common.*
-import edneyosf.edconv.edconv.core.Edconv
-import edneyosf.edconv.edconv.core.data.ProgressData
-import edneyosf.edconv.edconv.ffmpeg.FFmpeg
+import edneyosf.edconv.ffmpeg.common.*
+import edneyosf.edconv.ffmpeg.converter.Converter
+import edneyosf.edconv.ffmpeg.data.ProgressData
+import edneyosf.edconv.ffmpeg.ffmpeg.FFmpeg
 import edneyosf.edconv.features.converter.events.ConverterEvent
 import edneyosf.edconv.features.converter.states.ConverterDialog
 import edneyosf.edconv.features.converter.states.ConverterState
@@ -24,13 +24,13 @@ class ConverterManager(val defaultState: ConverterState, override val scope: Cor
 
     private var startTime: Instant? = null
     private var conversion: Job? = null
-    private val converter: Edconv
+    private val converter: Converter
 
     private val _state = mutableStateOf(value = teste())
     val state: State<ConverterState> = _state
 
     init {
-        converter = Edconv(
+        converter = Converter(
             scope = scope,
             onStart = ::onStart,
             onStdout = ::onStdout,

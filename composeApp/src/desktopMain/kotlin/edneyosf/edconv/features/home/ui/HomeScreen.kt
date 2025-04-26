@@ -16,9 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import edneyosf.edconv.core.common.compose.LaunchedEffected
+import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.PropertyUtils
-import edneyosf.edconv.edconv.common.MediaType
+import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.converter.ui.ConverterScreen
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.manager.HomeManager
