@@ -38,10 +38,11 @@ fun HomeErrorDialog(error: String, onFinish: () -> Unit) {
 
         SimpleDialog(
             icon = Icons.Rounded.Error,
+            iconDescription = error.takeIf { it.isNotBlank() },
             title = commonStrings[ERROR_TITLE],
             content = {
                 Text(
-                    text = "$description\n($error)",
+                    text = description,
                     style = TextStyle(textAlign = TextAlign.Center)
                 )
             },
@@ -52,7 +53,7 @@ fun HomeErrorDialog(error: String, onFinish: () -> Unit) {
 }
 
 @Composable
-private fun DefaultPreview() = HomeErrorDialog(error = "Sample", onFinish = {})
+private fun DefaultPreview() = HomeErrorDialog(error = "0001", onFinish = {})
 
 @Preview
 @Composable
