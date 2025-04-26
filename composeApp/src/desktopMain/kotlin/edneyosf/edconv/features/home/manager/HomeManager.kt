@@ -115,7 +115,9 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
         }
     }
 
+    @Suppress("SameParameterValue")
     private fun setLoading(status: Boolean) = _state.update { copy(loading = status) }
 
+    @Suppress("SameParameterValue")
     private fun onError(id: String) = setDialog(state = HomeDialogState.Error(id = id))
 }

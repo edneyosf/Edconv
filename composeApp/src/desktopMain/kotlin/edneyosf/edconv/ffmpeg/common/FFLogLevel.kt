@@ -1,5 +1,6 @@
 package edneyosf.edconv.ffmpeg.common
 
+@Suppress("unused")
 object FFLogLevel {
     const val QUIET = "quiet"
     const val PANIC = "panic"
