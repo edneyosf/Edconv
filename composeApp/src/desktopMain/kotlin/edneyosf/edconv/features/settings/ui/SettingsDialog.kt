@@ -21,6 +21,7 @@ import edneyosf.edconv.features.settings.states.SettingsStatus
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
 import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
+import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.ui.components.alerts.ErrorAlertText
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
@@ -98,7 +99,7 @@ private fun SettingsState.Content(event: SettingsEvent) {
             }
         },
         confirmationEnabled = defined && !isLoading,
-        confirmationText = settingsDialogStrings[CONFIRMATION_BUTTON],
+        confirmationText = commonStrings[CONFIRMATION_BUTTON],
         onConfirmation = { event.onSave() },
         onDismissRequest = { }
     )
