@@ -4,14 +4,14 @@ import edneyosf.edconv.edconv.common.MediaType
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MediaData(
+data class InputMedia(
     val path: String,
     val type: MediaType,
-    val formatName: String? = null,
     val contentType: ContentTypeData,
+    val size: Long,
+    val formatName: String? = null,
     val duration: Long? = null,
     val bitRate: Long? = null,
-    val size: Long,
     val videoStreams: List<VideoData> = emptyList(),
     val audioStreams: List<AudioData> = emptyList(),
     val subtitleStreams: List<SubtitleData> = emptyList()

@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.home.strings
+package edneyosf.edconv.features.converter.strings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -6,14 +6,14 @@ import edneyosf.edconv.core.Languages.EN
 import edneyosf.edconv.core.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
-import edneyosf.edconv.features.home.strings.HomeDialogStrings.Keys.*
+import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.*
 
-inline val homeDialogStrings: HomeDialogStrings
+inline val converterDialogStrings: ConverterDialogStrings
     @ReadOnlyComposable
     @Composable
-    get() = HomeDialogStrings(language)
+    get() = ConverterDialogStrings(language)
 
-class HomeDialogStrings(override val language: String): Strings(language) {
+class ConverterDialogStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
         ERROR_TITLE to "Algo deu errado",

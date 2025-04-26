@@ -5,7 +5,7 @@ import edneyosf.edconv.edconv.common.FFLogLevel
 import edneyosf.edconv.edconv.common.MediaType
 import edneyosf.edconv.edconv.core.data.AudioData
 import edneyosf.edconv.edconv.core.data.ContentTypeData
-import edneyosf.edconv.edconv.core.data.MediaData
+import edneyosf.edconv.edconv.core.data.InputMedia
 import edneyosf.edconv.edconv.core.data.SubtitleData
 import edneyosf.edconv.edconv.core.data.VideoData
 import kotlinx.serialization.json.Json
@@ -26,8 +26,8 @@ object FFprobe {
     private const val VIDEO_TYPE = "video"
     private const val SUBTITLE_TYPE = "subtitle"
 
-    fun analyze(file: File): MediaData? {
-        var mediaData: MediaData? = null
+    fun analyze(file: File): InputMedia? {
+        var inputMedia: InputMedia? = null
 
         try {
             val command = arrayOf(
@@ -120,7 +120,7 @@ object FFprobe {
 
             val format = output.format
 
-            mediaData = MediaData(
+            inputMedia = InputMedia(
                 path = file.path,
                 type = type,
                 formatName = format.formatLongName,
@@ -137,7 +137,7 @@ object FFprobe {
             e.printStackTrace()
         }
 
-        return mediaData
+        return inputMedia
     }
 
     private fun formatEntries(): String {
