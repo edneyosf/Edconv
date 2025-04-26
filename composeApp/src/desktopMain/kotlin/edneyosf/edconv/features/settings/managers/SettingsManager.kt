@@ -3,6 +3,7 @@ package edneyosf.edconv.features.settings.managers
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import edneyosf.edconv.core.ConfigManager
+import edneyosf.edconv.core.common.Errors
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.settings.events.SettingsEvent
@@ -11,9 +12,9 @@ import edneyosf.edconv.features.settings.states.SettingsStatus
 import kotlinx.coroutines.*
 import java.io.File
 
-class SettingsManager(override val scope: CoroutineScope): Manager(scope) {
+class SettingsManager(override val scope: CoroutineScope): Manager(scope), SettingsEvent {
 
-    private val _state = mutableStateOf(SettingsState.default())
+    private val _state = mutableStateOf(value = SettingsState())
     val state: State<SettingsState> = _state
 
     init {
@@ -26,20 +27,11 @@ class SettingsManager(override val scope: CoroutineScope): Manager(scope) {
         }
         catch (e: Exception) {
             e.printStackTrace()
-            setStatus(SettingsStatus.Error(e.message))
+            onError(id = Errors.FFMPEG_OR_FFPROBE_VERIFICATION)
         }
     }
 
-    fun onEvent(event: SettingsEvent) = event.run {
-        when(this) {
-            is SettingsEvent.SetStatus -> setStatus(status)
-            is SettingsEvent.SetFFmpegPath -> setFFmpegPath(path)
-            is SettingsEvent.SetFFprobePath -> setFFprobePath(path)
-            is SettingsEvent.OnSave -> saveFFmpegProbePath()
-        }
-    }
-
-    private fun saveFFmpegProbePath() {
+    override fun onSave() {
         val ffmpegPath = _state.value.ffmpegPath
         val ffprobePath = _state.value.ffprobePath
 
@@ -53,12 +45,16 @@ class SettingsManager(override val scope: CoroutineScope): Manager(scope) {
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                notifyMain { setStatus(SettingsStatus.Error(e.message)) }
+                onError(id = Errors.CONFIGURATION_SAVE)
             }
         }
     }
 
-    private fun setStatus(status: SettingsStatus) = _state.update { copy(status = status) }
-    private fun setFFmpegPath(path: String) = _state.update { copy(ffmpegPath = path) }
-    private fun setFFprobePath(path: String) = _state.update { copy(ffprobePath = path) }
+    override fun setStatus(status: SettingsStatus) = _state.update { copy(status = status) }
+
+    override fun setFFmpegPath(path: String) = _state.update { copy(ffmpegPath = path) }
+
+    override fun setFFprobePath(path: String) = _state.update { copy(ffprobePath = path) }
+
+    private fun onError(id: String) = setStatus(SettingsStatus.Error(id = id))
 }

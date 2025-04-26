@@ -24,7 +24,9 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CONFIRMATION_BUTTON to "Confirmar",
         CANCEL_BUTTON to "Cancelar",
         PICK_FFMPEG_TITLE to "Selecione o arquivo FFmpeg",
-        PICK_FFPROBE_TITLE to "Selecione o arquivo FFprobe"
+        PICK_FFPROBE_TITLE to "Selecione o arquivo FFprobe",
+        FFMPEG_OR_FFPROBE_VERIFICATION to "Falha na verificação de existência do FFmpeg/FFprobe.",
+        CONFIGURATION_SAVE to "Falha ao salvar configuração."
     )
 
     override val en = mapOf(
@@ -36,7 +38,9 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CONFIRMATION_BUTTON to "Confirm",
         CANCEL_BUTTON to "Cancel",
         PICK_FFMPEG_TITLE to "Select FFmpeg file",
-        PICK_FFPROBE_TITLE to "Select FFprobe file"
+        PICK_FFPROBE_TITLE to "Select FFprobe file",
+        FFMPEG_OR_FFPROBE_VERIFICATION to "Failed to verify the existence of FFmpeg/FFprobe.",
+        CONFIGURATION_SAVE to "Failed to save configuration."
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -50,6 +54,8 @@ class SettingsDialogStrings(override val language: String): Strings(language) {
         CONFIRMATION_BUTTON,
         CANCEL_BUTTON,
         PICK_FFMPEG_TITLE,
-        PICK_FFPROBE_TITLE
+        PICK_FFPROBE_TITLE,
+        FFMPEG_OR_FFPROBE_VERIFICATION,
+        CONFIGURATION_SAVE
     }
 }

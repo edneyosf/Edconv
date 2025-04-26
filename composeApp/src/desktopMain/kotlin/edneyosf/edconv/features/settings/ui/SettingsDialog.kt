@@ -10,6 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import edneyosf.edconv.core.common.Errors
+import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.events.SettingsEvent
@@ -35,17 +37,17 @@ fun SettingsDialog(onComplete: () -> Unit) {
     val state by manager.state
     val status = state.status
 
-    LaunchedEffect(status) {
-        if(status is SettingsStatus.Complete) onComplete()
+    LaunchedEffected(key = status) {
+        if(it is SettingsStatus.Complete) onComplete()
     }
 
-    CompositionLocalProvider(stringsComp provides settingsDialogStrings) {
-        state.Content(onEvent = manager::onEvent)
+    CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
+        state.Content(event = manager)
     }
 }
 
 @Composable
-private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
+private fun SettingsState.Content(event: SettingsEvent) {
     val defined = !(ffmpegPath.isBlank() || ffprobePath.isBlank())
     val isLoading = status is SettingsStatus.Loading
     val pickFFmpegTitle = strings[PICK_FFMPEG_TITLE]
@@ -60,49 +62,53 @@ private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
                     text = if(defined) strings[DEFINED] else strings[NO_DEFINED],
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(dimens.xl))
+                Spacer(modifier = Modifier.height(height = dimens.xl))
                 Row {
                     PrimaryButton(
-                        icon = if(ffmpegPath.isNotBlank()) Icons.Rounded.CheckCircle else null,
+                        icon = Icons.Rounded.CheckCircle.takeIf { ffmpegPath.isNotBlank() },
                         text = strings[SELECT_FFMPEG],
                         loading = isLoading,
                         onClick = {
-                            FileUtils.pickFile(title = pickFFmpegTitle)?.let {
-                                onEvent(SettingsEvent.SetFFmpegPath(it))
-                            }
+                            FileUtils.pickFile(title = pickFFmpegTitle)
+                                ?.let { event.setFFmpegPath(it) }
                         }
                     )
-                    Spacer(modifier = Modifier.width(dimens.md))
+                    Spacer(modifier = Modifier.width(width = dimens.md))
                     PrimaryButton(
-                        icon = if(ffprobePath.isNotBlank()) Icons.Rounded.CheckCircle else null,
+                        icon = Icons.Rounded.CheckCircle.takeIf { ffprobePath.isNotBlank() },
                         text = strings[SELECT_FFPROBE],
                         loading = isLoading,
                         onClick = {
-                            FileUtils.pickFile(title = pickFFprobeTitle)?.let {
-                                onEvent(SettingsEvent.SetFFprobePath(it))
-                            }
+                            FileUtils.pickFile(title = pickFFprobeTitle)
+                                ?.let { event.setFFprobePath(it) }
                         }
                     )
                 }
                 if(status is SettingsStatus.Error) {
-                    Spacer(modifier = Modifier.height(dimens.md))
-                    ErrorAlertText(text = status.message ?: commonStrings[ERROR_DEFAULT])
+                    val error = status.id
+                    val message = when(error) {
+                        Errors.FFMPEG_OR_FFPROBE_VERIFICATION -> strings[FFMPEG_OR_FFPROBE_VERIFICATION]
+                        Errors.CONFIGURATION_SAVE -> strings[CONFIGURATION_SAVE]
+                        else -> commonStrings[ERROR_DEFAULT]
+                    }
+
+                    Spacer(modifier = Modifier.height(height = dimens.md))
+                    ErrorAlertText(text = "$error: $message")
                 }
             }
         },
         confirmationEnabled = defined && !isLoading,
         confirmationText = settingsDialogStrings[CONFIRMATION_BUTTON],
-        onConfirmation = { onEvent(SettingsEvent.OnSave) },
+        onConfirmation = { event.onSave() },
         onDismissRequest = { }
     )
 }
 
 @Composable
 private fun DefaultPreview() {
-    CompositionLocalProvider(stringsComp provides settingsDialogStrings) {
-        SettingsState.default()
-            .copy(ffmpegPath = "ffmpeg", status = SettingsStatus.Error())
-            .Content(onEvent = {})
+    CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
+        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatus.Error(id = "0001"))
+            .Content(event = object : SettingsEvent {})
     }
 }
 
