@@ -17,9 +17,9 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-object FFprobe {
+class FFprobe(private val file: File) {
 
-    fun analyze(file: File): InputMediaData? {
+    fun analyze(): InputMediaData? {
         var inputMedia: InputMediaData? = null
 
         try {

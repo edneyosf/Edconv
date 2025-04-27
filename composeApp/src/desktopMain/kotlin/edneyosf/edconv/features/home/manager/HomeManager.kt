@@ -72,7 +72,8 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
         _state.update { copy(loading = true) }
 
         scope.launch(context = Dispatchers.IO) {
-            val data = FFprobe.analyze(File(path))
+            val ffprobe = FFprobe(file = File(path))
+            val data = ffprobe.analyze()
             val error = data.run {
                 when {
                     this == null -> Errors.UNKNOWN_INPUT_MEDIA
