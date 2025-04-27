@@ -1,10 +1,10 @@
-package edneyosf.edconv.ffmpeg.ffprobe
+package edneyosf.edconv.ffmpeg.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FormatFFprobe(
+data class FormatData(
     @SerialName("format_name")
     val formatName: String? = null,
     @SerialName("format_long_name")

@@ -2,11 +2,9 @@ package edneyosf.edconv.ffmpeg.ffprobe
 
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.ffmpeg.common.FFLogLevel
-import edneyosf.edconv.ffmpeg.common.MediaType
-import edneyosf.edconv.ffmpeg.data.AudioData
+import edneyosf.edconv.ffmpeg.data.FFprobeData
 import edneyosf.edconv.ffmpeg.data.InputMediaData
-import edneyosf.edconv.ffmpeg.data.SubtitleData
-import edneyosf.edconv.ffmpeg.data.VideoData
+import edneyosf.edconv.ffmpeg.data.mappers.toInputMediaData
 import kotlinx.serialization.json.Json
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobeArgs.SHOW_ENTRIES
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobeArgs.STREAM_TAGS
@@ -42,88 +40,9 @@ object FFprobe {
             val reader = BufferedReader(input)
             val jsonText = reader.readText()
             val json = Json { ignoreUnknownKeys = true }
-            val output = json.decodeFromString<OutputFFprobe>(jsonText)
-            val subtitleStreams = mutableListOf<SubtitleData>()
-            val videoStreams = mutableListOf<VideoData>()
-            val audioStreams = mutableListOf<AudioData>()
-            var hasVideo = false
-            var hasAudio = false
+            val output = json.decodeFromString<FFprobeData>(string = jsonText)
 
-            output.streams.forEach { stream ->
-                when (stream.codecType) {
-                    MediaType.VIDEO.name.lowercase() -> {
-                        val frameRate = stream.frameRate
-                            ?.split('/')
-                            ?.takeIf { it.size == 2 && it[1] != "0" }
-                            ?.let { it[0].toFloat() / it[1].toFloat() }
-                            ?: 0.0f
-
-                        hasVideo = true
-                        videoStreams.add(
-                            VideoData(
-                                codec = stream.codecLongName,
-                                title = stream.tags?.title,
-                                language = stream.tags?.language,
-                                profile = stream.profile,
-                                width = stream.width,
-                                height = stream.height,
-                                bitDepth = stream.bitDepth,
-                                pixFmt = stream.pixFmt,
-                                fps = frameRate,
-                                level = stream.level,
-                                filmGrain = stream.filmGrain == 1,
-                                displayAspectRatio = stream.displayAspectRatio,
-                                fieldOrder = stream.fieldOrder
-                            )
-                        )
-                    }
-
-                    MediaType.AUDIO.name.lowercase() -> {
-                        hasAudio = true
-                        audioStreams.add(
-                            AudioData(
-                                codec = stream.codecLongName,
-                                title = stream.tags?.title,
-                                language = stream.tags?.language,
-                                profile = stream.profile,
-                                channels = stream.channels,
-                                sampleRate = stream.sampleRate,
-                                bitDepth = stream.bitDepth
-                            )
-                        )
-                    }
-
-                    MediaType.SUBTITLE.name.lowercase() -> {
-                        subtitleStreams.add(
-                            SubtitleData(
-                                codec = stream.codecLongName,
-                                title = stream.tags?.title,
-                                language = stream.tags?.language
-                            )
-                        )
-                    }
-                }
-            }
-
-            val type = when {
-                hasAudio && !hasVideo -> MediaType.AUDIO
-                hasVideo -> MediaType.VIDEO
-                else -> return null
-            }
-
-            val format = output.format
-
-            inputMedia = InputMediaData(
-                path = file.path,
-                type = type,
-                formatName = format.formatLongName,
-                duration = format.duration?.let { (it * 1000).toLong() },
-                bitRate = format.bitRate,
-                size = file.length(),
-                videoStreams = videoStreams,
-                audioStreams = audioStreams,
-                subtitleStreams = subtitleStreams
-            )
+            inputMedia = output.toInputMediaData(inputFile = file)
         }
         catch (e: Exception) {
             e.printStackTrace()

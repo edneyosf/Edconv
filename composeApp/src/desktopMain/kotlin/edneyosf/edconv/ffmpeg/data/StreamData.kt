@@ -1,10 +1,10 @@
-package edneyosf.edconv.ffmpeg.ffprobe
+package edneyosf.edconv.ffmpeg.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class StreamFFprobe(
+data class StreamData(
     @SerialName("codec_type")
     val codecType: String? = null,
     @SerialName("codec_name")
@@ -30,5 +30,5 @@ data class StreamFFprobe(
     val fieldOrder: String? = null,
     @SerialName("display_aspect_ratio")
     val displayAspectRatio: String? = null,
-    val tags: StreamTagsFFprobe? = null
+    val tags: StreamTagsData? = null
 )
