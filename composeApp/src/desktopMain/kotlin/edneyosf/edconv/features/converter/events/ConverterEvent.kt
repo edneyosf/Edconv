@@ -4,25 +4,24 @@ import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.states.ConverterDialog
 import edneyosf.edconv.features.converter.states.ConverterStatus
 
-sealed interface ConverterEvent {
-    data class SetStatus(val status: ConverterStatus): ConverterEvent
-    data class SetDialog(val dialog: ConverterDialog): ConverterEvent
-    data class SetCmd(val cmd: String): ConverterEvent
-    //data class SetInput(val inputMedia: InputMedia): ConverterEvent
-    data class SetOutput(val path: String): ConverterEvent
-    data class SetCodec(val codec: Codec?): ConverterEvent
-    data class SetCompression(val compression: CompressionType?): ConverterEvent
-    data class SetChannels(val channels: Channels?): ConverterEvent
-    data class SetVbr(val vbr: Int?): ConverterEvent
-    data class SetBitrate(val bitrate: Bitrate?): ConverterEvent
-    data class SetSampleRate(val sampleRate: SampleRate?): ConverterEvent
-    data class SetPreset(val preset: String?): ConverterEvent
-    data class SetCrf(val crf: Int?): ConverterEvent
-    data class SetResolution(val resolution: Resolution?): ConverterEvent
-    data class SetPixelFormat(val pixelFormat: PixelFormat?): ConverterEvent
-    data class SetNoAudio(val noAudio: Boolean): ConverterEvent
-    data class SetNoSubtitle(val noSubtitle: Boolean): ConverterEvent
-    data class SetNoMetadata(val noMetadata: Boolean): ConverterEvent
-    data class OnStart(val overwrite: Boolean = false): ConverterEvent
-    data object OnStop: ConverterEvent
+interface ConverterEvent {
+    fun setStatus(status: ConverterStatus) = Unit
+    fun setDialog(dialog: ConverterDialog) = Unit
+    fun setCmd(cmd: String) = Unit
+    fun setOutput(path: String) = Unit
+    fun setCodec(codec: Codec?) = Unit
+    fun setCompression(type: CompressionType?) = Unit
+    fun setChannels(channels: Channels?) = Unit
+    fun setVbr(vbr: Int?) = Unit
+    fun setBitrate(bitrate: Bitrate?) = Unit
+    fun setSampleRate(sampleRate: SampleRate?) = Unit
+    fun setPreset(preset: String?) = Unit
+    fun setCrf(crf: Int?) = Unit
+    fun setResolution(resolution: Resolution?) = Unit
+    fun setPixelFormat(pixelFormat: PixelFormat?) = Unit
+    fun setNoAudio(noAudio: Boolean) = Unit
+    fun setNoSubtitle(noSubtitle: Boolean) = Unit
+    fun setNoMetadata(noMetadata: Boolean) = Unit
+    fun start(overwrite: Boolean = false) = Unit
+    fun stop() = Unit
 }

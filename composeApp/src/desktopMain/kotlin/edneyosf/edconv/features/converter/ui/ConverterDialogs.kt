@@ -21,19 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import edneyosf.edconv.core.extensions.toDurationString
-import edneyosf.edconv.core.extensions.toReadableBitrate
-import edneyosf.edconv.core.extensions.toReadableSize
+import edneyosf.edconv.features.common.models.Audio
+import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.common.models.Subtitle
+import edneyosf.edconv.features.common.models.Video
 import edneyosf.edconv.ffmpeg.common.MediaType
-import edneyosf.edconv.ffmpeg.data.AudioData
-import edneyosf.edconv.ffmpeg.data.ContentTypeData
-import edneyosf.edconv.ffmpeg.data.InputMedia
-import edneyosf.edconv.ffmpeg.data.SubtitleData
-import edneyosf.edconv.ffmpeg.data.VideoData
 import edneyosf.edconv.features.converter.events.ConverterEvent
-import edneyosf.edconv.features.converter.events.ConverterEvent.OnStart
-import edneyosf.edconv.features.converter.events.ConverterEvent.SetStatus
-import edneyosf.edconv.features.converter.events.ConverterEvent.SetDialog
 import edneyosf.edconv.features.converter.states.ConverterDialog
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatus
@@ -52,12 +45,12 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import java.io.File
 
 @Composable
-fun ConverterState.Dialogs(onEvent: (ConverterEvent) -> Unit) {
+fun ConverterState.Dialogs(event: ConverterEvent) {
     when (this.status) {
         is ConverterStatus.Error -> {
             ErrorDialog(
                 message = status.message ?: strings[DEFAULT_ERROR],
-                onFinish = { onEvent(SetStatus(ConverterStatus.Initial)) }
+                onFinish = { event.setStatus(ConverterStatus.Initial) }
             )
         }
 
@@ -66,14 +59,14 @@ fun ConverterState.Dialogs(onEvent: (ConverterEvent) -> Unit) {
                 startTime = status.startTime,
                 finishTime = status.finishTime,
                 duration = status.duration,
-                onFinish = { onEvent(SetStatus(ConverterStatus.Initial)) }
+                onFinish = { event.setStatus(ConverterStatus.Initial) }
             )
         }
 
         is ConverterStatus.FileExists -> {
             OverwriteFileDialog(
-                onCancel = { onEvent(SetStatus(ConverterStatus.Initial)) },
-                onConfirmation = { onEvent(OnStart(overwrite = true)) }
+                onCancel = { event.setStatus(ConverterStatus.Initial) },
+                onConfirmation = { event.start(overwrite = true) }
             )
         }
 
@@ -81,11 +74,11 @@ fun ConverterState.Dialogs(onEvent: (ConverterEvent) -> Unit) {
     }
 
     when(this.dialog) {
-        is ConverterDialog.Settings -> SettingsDialog { onEvent(SetDialog(ConverterDialog.None)) }
+        is ConverterDialog.Settings -> SettingsDialog { event.setDialog(ConverterDialog.None) }
 
         is ConverterDialog.MediaInfo -> {
             dialog.inputMedia.MediaInfoDialog(
-                onFinish = { onEvent(SetDialog(ConverterDialog.None)) }
+                onFinish = { event.setDialog(ConverterDialog.None) }
             )
         }
 
@@ -181,25 +174,25 @@ private fun InputMedia.MediaInfoDialog(onFinish: () -> Unit) {
                         }
                         ItemMediaInfo(label = strings[TYPE_MEDIA_INFO], value = type.TypeMediaInfoString())
                         ItemMediaInfo(label = strings[FORMAT_MEDIA_INFO], value = formatName)
-                        ItemMediaInfo(label = strings[DURATION_MEDIA_INFO], value = duration?.toDurationString())
-                        ItemMediaInfo(label = strings[BITRATE_MEDIA_INFO], value = bitRate?.toReadableBitrate())
-                        ItemMediaInfo(label = strings[SIZE_MEDIA_INFO], value = size.toReadableSize())
-                        if(contentType.video || contentType.audio || contentType.subtitle) {
+                        ItemMediaInfo(label = strings[DURATION_MEDIA_INFO], value = durationText)
+                        ItemMediaInfo(label = strings[BITRATE_MEDIA_INFO], value = bitrateText)
+                        ItemMediaInfo(label = strings[SIZE_MEDIA_INFO], value = sizeText)
+                        if(videos.isNotEmpty() || audios.isNotEmpty() || subtitles.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(dimens.xl))
                         }
-                        if(contentType.video) {
+                        if(videos.isNotEmpty()) {
                             TitleMediaInfo(strings[VIDEO_MEDIA_INFO])
                             Spacer(modifier = Modifier.height(dimens.md))
-                            videoStreams.forEachIndexed { index, it ->
+                            videos.forEachIndexed { index, it ->
                                 ItemMediaInfo(label = strings[INDEX_MEDIA_INFO], value = index.toString())
                                 ItemMediaInfo(label = strings[CODEC_MEDIA_INFO], value = it.codec)
                                 ItemMediaInfo(label = strings[TITLE_MEDIA_INFO], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE_MEDIA_INFO], value = it.language)
                                 ItemMediaInfo(label = strings[PROFILE_MEDIA_INFO], value = it.profile)
-                                ItemMediaInfo(label = strings[WIDTH_MEDIA_INFO], value = it.width?.toString())
+                                ItemMediaInfo(label = strings[WIDTH_MEDIA_INFO], value = it.width.toString())
                                 ItemMediaInfo(
                                     label = strings[HEIGHT_MEDIA_INFO],
-                                    value = it.height?.toString()
+                                    value = it.height.toString()
                                 )
                                 ItemMediaInfo(
                                     label = strings[BIT_DEPTH_MEDIA_INFO],
@@ -217,17 +210,17 @@ private fun InputMedia.MediaInfoDialog(onFinish: () -> Unit) {
                                 Spacer(modifier = Modifier.height(dimens.sm))
                             }
                         }
-                        if(contentType.video) Spacer(modifier = Modifier.height(dimens.md))
-                        if(contentType.audio) {
+                        if(videos.isNotEmpty()) Spacer(modifier = Modifier.height(dimens.md))
+                        if(audios.isNotEmpty()) {
                             TitleMediaInfo(strings[AUDIO_MEDIA_INFO])
                             Spacer(modifier = Modifier.height(dimens.md))
-                            audioStreams.forEachIndexed { index, it ->
+                            audios.forEachIndexed { index, it ->
                                 ItemMediaInfo(label = strings[INDEX_MEDIA_INFO], value = index.toString())
                                 ItemMediaInfo(label = strings[CODEC_MEDIA_INFO], value = it.codec)
                                 ItemMediaInfo(label = strings[TITLE_MEDIA_INFO], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE_MEDIA_INFO], value = it.language)
                                 ItemMediaInfo(label = strings[PROFILE_MEDIA_INFO], value = it.profile)
-                                ItemMediaInfo(label = strings[CHANNELS_MEDIA_INFO], value = it.channels?.toString())
+                                ItemMediaInfo(label = strings[CHANNELS_MEDIA_INFO], value = it.channels.toString())
                                 ItemMediaInfo(
                                     label = strings[SAMPLE_RATE_MEDIA_INFO],
                                     value = it.sampleRate?.let { "$it Hz" }
@@ -239,13 +232,13 @@ private fun InputMedia.MediaInfoDialog(onFinish: () -> Unit) {
                                 Spacer(modifier = Modifier.height(dimens.sm))
                             }
                         }
-                        if(contentType.video || contentType.audio) {
+                        if(videos.isNotEmpty() || audios.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(dimens.md))
                         }
-                        if(contentType.subtitle) {
+                        if(subtitles.isNotEmpty()) {
                             TitleMediaInfo(strings[SUBTITLE_MEDIA_INFO])
                             Spacer(modifier = Modifier.height(dimens.md))
-                            subtitleStreams.forEachIndexed { index, it ->
+                            subtitles.forEachIndexed { index, it ->
                                 ItemMediaInfo(label = strings[INDEX_MEDIA_INFO], value = index.toString())
                                 ItemMediaInfo(label = strings[CODEC_MEDIA_INFO], value = it.codec)
                                 ItemMediaInfo(label = strings[TITLE_MEDIA_INFO], value = it.title)
@@ -303,6 +296,7 @@ private fun ItemMediaInfo(label: String, value: String?) {
 private fun MediaType.TypeMediaInfoString() = when(this) {
     MediaType.VIDEO -> strings[VIDEO_MEDIA_INFO]
     MediaType.AUDIO -> strings[AUDIO_MEDIA_INFO]
+    MediaType.SUBTITLE -> strings[SUBTITLE_MEDIA_INFO]
 }
 
 @Composable
@@ -320,7 +314,7 @@ private fun CompletePreview() = CompleteDialog(startTime = "123", finishTime = "
 @Composable
 private fun MediaInfoPreview() {
     val videoStreams = List(2) {
-        VideoData(
+        Video(
             codec = "Sample",
             title = "Sample",
             language = "Sample",
@@ -337,7 +331,7 @@ private fun MediaInfoPreview() {
         )
     }
     val audioStreams = List(2) {
-        AudioData(
+        Audio(
             codec = "Sample",
             title = "Sample",
             language = "Sample",
@@ -347,8 +341,8 @@ private fun MediaInfoPreview() {
             bitDepth = 123
         )
     }
-    val subtitles = List(2) {
-        SubtitleData(
+    val subtitlesStreams = List(2) {
+        Subtitle(
             codec = "Sample",
             title = "Sample",
             language = "Sample"
@@ -358,13 +352,15 @@ private fun MediaInfoPreview() {
         path = "/home/test/sample.mkv",
         type = MediaType.VIDEO,
         formatName = "Sample",
-        contentType = ContentTypeData(video = true, audio = true, subtitle = true),
         duration = 123456L,
+        durationText = "123456",
         bitRate = 12345L,
+        bitrateText = "12345",
         size = 123456L,
-        videoStreams = videoStreams,
-        audioStreams = audioStreams,
-        subtitleStreams = subtitles
+        sizeText = "123456",
+        videos = videoStreams,
+        audios = audioStreams,
+        subtitles = subtitlesStreams
     )
 
     inputMedia.MediaInfoDialog(onFinish = {})

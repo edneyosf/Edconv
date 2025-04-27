@@ -16,11 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edneyosf.edconv.core.extensions.LaunchedEffected
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.*
-import edneyosf.edconv.ffmpeg.data.ContentTypeData
-import edneyosf.edconv.ffmpeg.data.InputMedia
 import edneyosf.edconv.features.converter.events.ConverterEvent
-import edneyosf.edconv.features.converter.events.ConverterEvent.*
 import edneyosf.edconv.features.converter.managers.ConverterManager
 import edneyosf.edconv.features.converter.states.ConverterDialog
 import edneyosf.edconv.features.converter.states.ConverterState
@@ -44,30 +42,31 @@ fun ConverterScreen(state: ConverterState) {
     val state by manager.state
 
     LaunchedEffected(key = state.codec) {
-        manager.onEvent(SetBitrate(bitrate = it?.defaultBitrate))
-        manager.onEvent(SetVbr(it?.defaultVBR))
-        manager.onEvent(SetCrf(it?.defaultCRF))
-        manager.onEvent(SetPreset(it?.defaultPreset))
-        manager.onEvent(SetCompression(compression = it?.compressions?.firstOrNull()))
+        manager.setBitrate(bitrate = it?.defaultBitrate)
+        manager.setVbr(it?.defaultVBR)
+        manager.setCrf(it?.defaultCRF)
+        manager.setPreset(it?.defaultPreset)
+        manager.setCompression(type = it?.compressions?.firstOrNull())
     }
 
     LaunchedEffected(state.mediaType) {
         val defaultCodec = when(it) {
             MediaType.AUDIO -> Codec.OPUS
             MediaType.VIDEO -> Codec.AV1
+            MediaType.SUBTITLE -> null
         }
 
-        manager.onEvent(SetCodec(codec = defaultCodec))
+        manager.setCodec(codec = defaultCodec)
     }
 
     CompositionLocalProvider(stringsComp provides converterScreenStrings) {
-        state.Dialogs(onEvent = manager::onEvent)
-        state.Content(onEvent = manager::onEvent)
+        state.Dialogs(event = manager)
+        state.Content(event = manager)
     }
 }
 
 @Composable
-private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
+private fun ConverterState.Content(event: ConverterEvent) {
     Column(
         modifier = Modifier.padding(dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,9 +74,9 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
     ) {
         Actions(
             startEnabled = canStart(mediaType),
-            onStart = { onEvent(OnStart()) },
-            onStop = { onEvent(OnStop) },
-            onMediaInfo = { onEvent(SetDialog(ConverterDialog.MediaInfo(inputMedia = input)))}
+            onStart = { event.start() },
+            onStop = { event.stop() },
+            onMediaInfo = { event.setDialog(ConverterDialog.MediaInfo(inputMedia = input)) }
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(dimens.xl),
@@ -86,20 +85,20 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
             FormatInput(
                 value = codec,
                 mediaType = mediaType,
-                onValueChange = { onEvent(SetCodec(it)) }
+                onValueChange = { event.setCodec(it) }
             )
             VBRInput(
-                onClick = { onEvent(SetCompression(CompressionType.VBR)) },
-                onValueChange = { onEvent(SetVbr(it)) }
+                onClick = { event.setCompression(CompressionType.VBR) },
+                onValueChange = { event.setVbr(it) }
             )
             CRFInput(
-                onClick = { onEvent(SetCompression(CompressionType.CRF)) },
-                onValueChange = { onEvent(SetCrf(it)) }
+                onClick = { event.setCompression(CompressionType.CRF) },
+                onValueChange = { event.setCrf(it) }
             )
             CBRInput(
                 mediaType = codec?.mediaType,
-                onClick = { onEvent(SetCompression(CompressionType.CBR)) },
-                onValueChange = { onEvent(SetBitrate(it)) }
+                onClick = { event.setCompression(CompressionType.CBR) },
+                onValueChange = { event.setBitrate(it) }
             )
         }
         if(mediaType == MediaType.AUDIO) {
@@ -109,11 +108,11 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
             ) {
                 ChannelsInput(
                     value = channels,
-                    onValueChange = { onEvent(SetChannels(it)) }
+                    onValueChange = { event.setChannels(it) }
                 )
                 SampleRateInput(
                     value = sampleRate,
-                    onValueChange = { onEvent(SetSampleRate(it)) }
+                    onValueChange = { event.setSampleRate(it) }
                 )
             }
         }
@@ -124,13 +123,13 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
             ) {
                 ResolutionInput(
                     value = resolution,
-                    onValueChange = { onEvent(SetResolution(it)) }
+                    onValueChange = { event.setResolution(it) }
                 )
                 PixelFormatInput(
                     value = pixelFormat,
-                    onValueChange = { onEvent(SetPixelFormat(it)) }
+                    onValueChange = { event.setPixelFormat(it) }
                 )
-                PresetInput(onValueChange = { onEvent(SetPreset(it)) })
+                PresetInput(onValueChange = { event.setPreset(it) })
             }
         }
         Row(
@@ -140,18 +139,18 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
             CheckboxInput(
                 checked = noMetadata,
                 label = strings[NO_METADATA_INPUT],
-                onCheckedChange = { onEvent(SetNoMetadata(it)) }
+                onCheckedChange = { event.setNoMetadata(it) }
             )
             if(mediaType == MediaType.VIDEO) {
                 CheckboxInput(
                     checked = noAudio,
                     label = strings[NO_AUDIO_INPUT],
-                    onCheckedChange = { onEvent(SetNoAudio(it)) }
+                    onCheckedChange = { event.setNoAudio(it) }
                 )
                 CheckboxInput(
                     checked = noSubtitle,
                     label = strings[NO_SUBTITLE_INPUT],
-                    onCheckedChange = { onEvent(SetNoSubtitle(it)) }
+                    onCheckedChange = { event.setNoSubtitle(it) }
                 )
             }
         }
@@ -166,7 +165,7 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
                     textStyle = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     colors = TextFieldDefaults.colors().custom(),
-                    onValueChange = { onEvent(SetCmd(it)) },
+                    onValueChange = { event.setCmd(it) },
                     label = { Text(strings[COMMAND_INPUT]) }
                 )
             }
@@ -176,7 +175,7 @@ private fun ConverterState.Content(onEvent: (ConverterEvent) -> Unit) {
             value = output ?: "",
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors().custom(),
-            onValueChange = { onEvent(SetOutput(it)) },
+            onValueChange = { event.setOutput(it) },
             label = { Text(strings[OUTPUT_FILE]) }
         )
     }
@@ -635,6 +634,7 @@ private fun ConverterState.canStart(mediaType: MediaType?): Boolean {
     return when (mediaType) {
         MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
         MediaType.VIDEO -> preset != null && crf != null
+        MediaType.SUBTITLE -> false
     }
 }
 
@@ -645,11 +645,14 @@ private fun DefaultPreview() {
         val inputMedia = InputMedia(
             path = "/sdfsd",
             type = type,
-            contentType = ContentTypeData(video = true, audio = true, subtitle = true),
-            size = 123456L
+            size = 123456L,
+            sizeText = "123456",
+            duration = 123456L,
+            durationText = "123456"
         )
 
-        ConverterState(input = inputMedia, mediaType = type).Content(onEvent = {})
+        ConverterState(input = inputMedia, mediaType = type)
+            .Content(event = object : ConverterEvent {})
     }
 }
 

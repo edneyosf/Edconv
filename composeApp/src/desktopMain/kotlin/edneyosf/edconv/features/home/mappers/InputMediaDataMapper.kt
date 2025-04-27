@@ -1,9 +1,9 @@
-package edneyosf.edconv.features.converter.data.mappers
+package edneyosf.edconv.features.home.mappers
 
 import edneyosf.edconv.core.extensions.toDurationString
 import edneyosf.edconv.core.extensions.toReadableBitrate
 import edneyosf.edconv.core.extensions.toReadableSize
-import edneyosf.edconv.features.converter.domain.model.InputMedia
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.data.InputMediaData
 
 @Throws(IllegalStateException::class)

@@ -1,6 +1,6 @@
-package edneyosf.edconv.features.converter.data.mappers
+package edneyosf.edconv.features.home.mappers
 
-import edneyosf.edconv.features.converter.domain.model.Video
+import edneyosf.edconv.features.common.models.Video
 import edneyosf.edconv.ffmpeg.data.VideoData
 
 fun List<VideoData>.toVideoList() = mapNotNull { data ->

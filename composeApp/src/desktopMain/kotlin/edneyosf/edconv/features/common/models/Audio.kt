@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.converter.domain.model
+package edneyosf.edconv.features.common.models
 
 data class Audio(
     val codec: String? = null,

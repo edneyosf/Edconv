@@ -8,7 +8,7 @@ import edneyosf.edconv.core.common.Errors
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
-import edneyosf.edconv.features.converter.data.mappers.toInputMedia
+import edneyosf.edconv.features.home.mappers.toInputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ffmpeg.data.InputMediaData
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobe

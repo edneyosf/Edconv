@@ -1,6 +1,6 @@
-package edneyosf.edconv.features.converter.data.mappers
+package edneyosf.edconv.features.home.mappers
 
-import edneyosf.edconv.features.converter.domain.model.Audio
+import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.ffmpeg.data.AudioData
 
 fun List<AudioData>.toAudioList() = mapNotNull { data ->
