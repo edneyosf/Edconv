@@ -14,9 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import edneyosf.edconv.features.converter.domain.model.Audio
+import edneyosf.edconv.features.converter.domain.model.InputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType
-import edneyosf.edconv.ffmpeg.data.ContentTypeData
-import edneyosf.edconv.ffmpeg.data.InputMedia
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
@@ -72,20 +72,21 @@ fun HomeState.HomeNavigation(
             }
             Spacer(modifier = Modifier.height(height = dimens.xl))
             items.forEachIndexed { index, item ->
-                val enabled = input?.contentType.let {
-                    when(item.first) {
-                        is HomeNavigationState.Audio -> it?.audio == true
-                        is HomeNavigationState.Video -> it?.video == true
-                        is HomeNavigationState.VMAF -> it?.video == true
-                        else -> false
-                    }
+                val state = item.first
+                val hasAudio = input?.audios?.isNotEmpty()
+                val hasVideo = input?.videos?.isNotEmpty()
+                val enabled = when(state) {
+                    is HomeNavigationState.Audio -> hasAudio == true
+                    is HomeNavigationState.Video -> hasVideo == true
+                    is HomeNavigationState.VMAF -> hasVideo == true
+                    else -> false
                 }
 
                 NavigationRailItem(
                     label = { Text(text = item.third) },
                     enabled = enabled && !loading,
-                    selected = navigation == item.first,
-                    onClick = { onSelected(item.first) },
+                    selected = navigation == state,
+                    onClick = { onSelected(state) },
                     icon = {
                         Icon(
                             imageVector = item.second,
@@ -112,10 +113,13 @@ fun HomeState.HomeNavigation(
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
         val inputData = InputMedia(
-            path = "sample",
+            path = "Sample",
             type = MediaType.AUDIO,
-            contentType = ContentTypeData(audio = true),
-            size = 123L
+            size = 123L,
+            sizeText = "123",
+            duration = 123L,
+            durationText = "123",
+            audios = listOf(Audio(channels = 2))
         )
 
         HomeState(navigation = HomeNavigationState.Audio, input = inputData)

@@ -4,10 +4,9 @@ import edneyosf.edconv.ffmpeg.common.MediaType
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InputMedia(
+data class InputMediaData(
     val path: String,
     val type: MediaType,
-    val contentType: ContentTypeData,
     val size: Long,
     val formatName: String? = null,
     val duration: Long? = null,

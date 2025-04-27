@@ -4,8 +4,7 @@ import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.ffmpeg.common.FFLogLevel
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ffmpeg.data.AudioData
-import edneyosf.edconv.ffmpeg.data.ContentTypeData
-import edneyosf.edconv.ffmpeg.data.InputMedia
+import edneyosf.edconv.ffmpeg.data.InputMediaData
 import edneyosf.edconv.ffmpeg.data.SubtitleData
 import edneyosf.edconv.ffmpeg.data.VideoData
 import kotlinx.serialization.json.Json
@@ -22,12 +21,8 @@ import java.io.InputStreamReader
 
 object FFprobe {
 
-    private const val AUDIO_TYPE = "audio"
-    private const val VIDEO_TYPE = "video"
-    private const val SUBTITLE_TYPE = "subtitle"
-
-    fun analyze(file: File): InputMedia? {
-        var inputMedia: InputMedia? = null
+    fun analyze(file: File): InputMediaData? {
+        var inputMedia: InputMediaData? = null
 
         try {
             val command = arrayOf(
@@ -51,13 +46,12 @@ object FFprobe {
             val subtitleStreams = mutableListOf<SubtitleData>()
             val videoStreams = mutableListOf<VideoData>()
             val audioStreams = mutableListOf<AudioData>()
-            var hasSubtitle = false
             var hasVideo = false
             var hasAudio = false
 
             output.streams.forEach { stream ->
                 when (stream.codecType) {
-                    VIDEO_TYPE -> {
+                    MediaType.VIDEO.name.lowercase() -> {
                         val frameRate = stream.frameRate
                             ?.split('/')
                             ?.takeIf { it.size == 2 && it[1] != "0" }
@@ -84,7 +78,7 @@ object FFprobe {
                         )
                     }
 
-                    AUDIO_TYPE -> {
+                    MediaType.AUDIO.name.lowercase() -> {
                         hasAudio = true
                         audioStreams.add(
                             AudioData(
@@ -99,8 +93,7 @@ object FFprobe {
                         )
                     }
 
-                    SUBTITLE_TYPE -> {
-                        hasSubtitle = true
+                    MediaType.SUBTITLE.name.lowercase() -> {
                         subtitleStreams.add(
                             SubtitleData(
                                 codec = stream.codecLongName,
@@ -120,11 +113,10 @@ object FFprobe {
 
             val format = output.format
 
-            inputMedia = InputMedia(
+            inputMedia = InputMediaData(
                 path = file.path,
                 type = type,
                 formatName = format.formatLongName,
-                contentType = ContentTypeData(audio = hasAudio, video = hasVideo, subtitle = hasSubtitle),
                 duration = format.duration?.let { (it * 1000).toLong() },
                 bitRate = format.bitRate,
                 size = file.length(),
@@ -143,7 +135,7 @@ object FFprobe {
     private fun formatEntries(): String {
         val entries = mutableListOf("duration", "format_long_name", "bit_rate")
 
-        return "$FORMAT=${entries.joinToString(",")}"
+        return "$FORMAT=${entries.joinToString(separator = ",")}"
     }
 
     private fun streamEntries(): String {
@@ -153,12 +145,12 @@ object FFprobe {
             "display_aspect_ratio"
         )
 
-        return "$STREAM=${entries.joinToString(",")}"
+        return "$STREAM=${entries.joinToString(separator = ",")}"
     }
 
     private fun streamTagsEntries(): String {
         val entries = mutableListOf("title", "language")
 
-        return "$STREAM_TAGS=${entries.joinToString(",")}"
+        return "$STREAM_TAGS=${entries.joinToString(separator = ",")}"
     }
 }

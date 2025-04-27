@@ -8,8 +8,9 @@ import edneyosf.edconv.core.common.Errors
 import edneyosf.edconv.core.common.Manager
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
+import edneyosf.edconv.features.converter.data.mappers.toInputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType
-import edneyosf.edconv.ffmpeg.data.InputMedia
+import edneyosf.edconv.ffmpeg.data.InputMediaData
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
 import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.states.HomeDialogState
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.String
 
 class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent {
 
@@ -34,7 +36,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
         }
         catch (e: Exception) {
             e.printStackTrace()
-            onError(id = Errors.LOAD_CONFIGS)
+            setDialog(HomeDialogState.Error(id = Errors.LOAD_CONFIGS))
         }
     }
 
@@ -67,13 +69,11 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
     }
 
     private fun setInput(path: String) {
-        val inputFile = File(path)
-
-        setLoading(status = true)
+        _state.update { copy(loading = true) }
 
         scope.launch(context = Dispatchers.IO) {
-            val inputMedia = FFprobe.analyze(inputFile)
-            val error = inputMedia.run {
+            val data = FFprobe.analyze(File(path))
+            val error = data.run {
                 when {
                     this == null -> Errors.UNKNOWN_INPUT_MEDIA
                     duration == null -> Errors.NO_DURATION_INPUT_MEDIA
@@ -83,19 +83,27 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
                 }
             }
 
+            val dialog = error
+                ?.let { HomeDialogState.Error(id = it) }
+                ?: HomeDialogState.None
+
+            val input = data
+                .takeIf { error == null }
+                ?.toInputMedia()
+
             notifyMain {
                 _state.update {
                     copy(
-                        dialog = error?.let { HomeDialogState.Error(id = it) } ?: HomeDialogState.None,
                         loading = false,
-                        input = inputMedia.takeIf { error == null }
+                        dialog = dialog,
+                        input = input
                     )
                 }
             }
         }
     }
 
-    private fun InputMedia.validateAudioStream(): String? {
+    private fun InputMediaData.validateAudioStream(): String? {
         val stream = audioStreams.firstOrNull()
 
         return when {
@@ -105,7 +113,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
         }
     }
 
-    private fun InputMedia.validateVideoStream(): String? {
+    private fun InputMediaData.validateVideoStream(): String? {
         val stream = videoStreams.firstOrNull()
 
         return when {
@@ -114,10 +122,4 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
             else -> null
         }
     }
-
-    @Suppress("SameParameterValue")
-    private fun setLoading(status: Boolean) = _state.update { copy(loading = status) }
-
-    @Suppress("SameParameterValue")
-    private fun onError(id: String) = setDialog(state = HomeDialogState.Error(id = id))
 }
