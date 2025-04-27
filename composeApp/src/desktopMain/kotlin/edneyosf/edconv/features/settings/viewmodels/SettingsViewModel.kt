@@ -1,10 +1,12 @@
-package edneyosf.edconv.features.settings.managers
+package edneyosf.edconv.features.settings.viewmodels
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.common.Errors
-import edneyosf.edconv.core.common.Manager
+import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.settings.events.SettingsEvent
 import edneyosf.edconv.features.settings.states.SettingsState
@@ -12,7 +14,7 @@ import edneyosf.edconv.features.settings.states.SettingsStatus
 import kotlinx.coroutines.*
 import java.io.File
 
-class SettingsManager(override val scope: CoroutineScope): Manager(scope), SettingsEvent {
+class SettingsViewModel(): ViewModel(), SettingsEvent {
 
     private val _state = mutableStateOf(value = SettingsState())
     val state: State<SettingsState> = _state
@@ -37,7 +39,7 @@ class SettingsManager(override val scope: CoroutineScope): Manager(scope), Setti
 
         setStatus(SettingsStatus.Loading)
 
-        scope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(context = Dispatchers.IO) {
             try {
                 ConfigManager.setFFmpegPath(ffmpegPath)
                 ConfigManager.setFFprobePath(ffprobePath)

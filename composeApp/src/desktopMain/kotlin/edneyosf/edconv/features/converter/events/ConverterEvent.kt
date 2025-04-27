@@ -1,12 +1,12 @@
 package edneyosf.edconv.features.converter.events
 
 import edneyosf.edconv.ffmpeg.common.*
-import edneyosf.edconv.features.converter.states.ConverterDialog
-import edneyosf.edconv.features.converter.states.ConverterStatus
+import edneyosf.edconv.features.converter.states.ConverterDialogState
+import edneyosf.edconv.features.converter.states.ConverterStatusState
 
 interface ConverterEvent {
-    fun setStatus(status: ConverterStatus) = Unit
-    fun setDialog(dialog: ConverterDialog) = Unit
+    fun setStatus(status: ConverterStatusState) = Unit
+    fun setDialog(dialog: ConverterDialogState) = Unit
     fun setCmd(cmd: String) = Unit
     fun setOutput(path: String) = Unit
     fun setCodec(codec: Codec?) = Unit

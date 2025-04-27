@@ -1,41 +1,44 @@
-package edneyosf.edconv.features.converter.managers
+package edneyosf.edconv.features.converter.viewmodels
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.common.DateTimePattern
-import edneyosf.edconv.core.common.Manager
+import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.DateTimeUtils
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.ffmpeg.converter.Converter
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpeg
 import edneyosf.edconv.features.converter.events.ConverterEvent
-import edneyosf.edconv.features.converter.states.ConverterDialog
+import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
-import edneyosf.edconv.features.converter.states.ConverterStatus
+import edneyosf.edconv.features.converter.states.ConverterStatusState
 import kotlinx.coroutines.*
 import java.io.File
 import java.time.Instant
 
-class ConverterManager(
-    val defaultState: ConverterState,
-    override val scope: CoroutineScope
-): Manager(scope), ConverterEvent {
+class ConverterViewModel: ViewModel(), ConverterEvent {
+
+    lateinit var input: InputMedia
+    lateinit var mediaType: MediaType
 
     private var startTime: Instant? = null
     private var conversion: Job? = null
     private val converter: Converter
 
-    private val _state = mutableStateOf(value = stateByInputMedia())
+    private val _state = mutableStateOf(value = ConverterState())
     val state: State<ConverterState> = _state
 
     init {
         converter = Converter(
-            scope = scope,
+            scope = viewModelScope,
             onStart = ::onStart,
             onStdout = ::onStdout,
             onError = ::onError,
@@ -44,12 +47,20 @@ class ConverterManager(
         )
     }
 
-    private fun stateByInputMedia(): ConverterState {
-        val steam = defaultState.input.videos.firstOrNull()
-        val resolution = Resolution.entries.find { it.width == steam?.width } ?: Resolution.entries.find { it.height == steam?.height }
+    /*private fun defaultState() = defaultState.run {
+        val steam = input.videos.firstOrNull()
+        val defaultResolution = Resolution.entries.find { it.width == steam?.width } ?: Resolution.entries.find { it.height == steam?.height }
+        val defaultCodec = when(mediaType) {
+            MediaType.AUDIO -> Codec.OPUS
+            MediaType.VIDEO -> Codec.AV1
+            MediaType.SUBTITLE -> null
+        }.takeIf { codec == null }
 
-        return defaultState.copy(resolution = resolution)
-    }
+        copy(
+            codec = defaultCodec,
+            resolution = defaultResolution
+        )
+    }*/
 
     private fun buildCommand() = _state.value.run {
         if (input.path.isBlank() || codec == null || output.isNullOrBlank()) {
@@ -132,7 +143,7 @@ class ConverterManager(
                 val outputExists = outputFile.exists()
 
                 if(!overwrite && outputExists) {
-                    setStatus(ConverterStatus.FileExists)
+                    setStatus(ConverterStatusState.FileExists)
                     return
                 }
 
@@ -159,13 +170,13 @@ class ConverterManager(
     }
 
     override fun stop() {
-        scope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(context = Dispatchers.IO) {
             try {
-                notifyMain { setStatus(ConverterStatus.Loading) }
+                notifyMain { setStatus(ConverterStatusState.Loading) }
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
-                notifyMain { setStatus(ConverterStatus.Initial) }
+                notifyMain { setStatus(ConverterStatusState.Initial) }
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -176,20 +187,19 @@ class ConverterManager(
 
     private fun onStart() {
         startTime = Instant.now()
-        setStatus(ConverterStatus.Loading)
-        setLogs(_state.value.input.toString() + "\n")
+        setStatus(ConverterStatusState.Loading)
+        setLogs(input.toString() + "\n")
     }
 
     private fun onStdout(it: String) = setLogs(_state.value.logs + "$it\n")
 
-    private fun onError(it: Throwable) = setStatus(ConverterStatus.Error(it.message))
+    private fun onError(it: Throwable) = setStatus(ConverterStatusState.Error(it.message))
 
     private fun onProgress(it: ProgressData) {
-        val inputFile = _state.value.input
-        val duration = inputFile.duration
+        val duration = input.duration
         val percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
 
-        setStatus(ConverterStatus.Progress(percentage, it.speed))
+        setStatus(ConverterStatusState.Progress(percentage, it.speed))
     }
 
     private fun onStop() {
@@ -201,8 +211,8 @@ class ConverterManager(
 
             startTime = null
 
-            if(_state.value.status !is ConverterStatus.Error) {
-                setStatus(ConverterStatus.Complete(startText, finishText, duration))
+            if(_state.value.status !is ConverterStatusState.Error) {
+                setStatus(ConverterStatusState.Complete(startText, finishText, duration))
             }
         } ?: run {
             onError(Throwable("Start time is null"))
@@ -210,7 +220,7 @@ class ConverterManager(
     }
 
     override fun setCodec(codec: Codec?) {
-        val inputPath = _state.value.input.path
+        val inputPath = input.path
         var output: String? = null
 
         if(!inputPath.isBlank() && codec != null) {
@@ -225,9 +235,9 @@ class ConverterManager(
 
     override fun setCmd(cmd: String) = _state.update { copy(cmd = cmd) }
 
-    override fun setStatus(status: ConverterStatus) = _state.update { copy(status = status) }
+    override fun setStatus(status: ConverterStatusState) = _state.update { copy(status = status) }
 
-    override fun setDialog(dialog: ConverterDialog) = _state.update { copy(dialog = dialog) }
+    override fun setDialog(dialog: ConverterDialogState) = _state.update { copy(dialog = dialog) }
 
     override fun setOutput(path: String) = _state.update { copy(output = path) }
 

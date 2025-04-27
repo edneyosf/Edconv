@@ -15,14 +15,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.converter.ConverterArgs
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.events.ConverterEvent
-import edneyosf.edconv.features.converter.managers.ConverterManager
-import edneyosf.edconv.features.converter.states.ConverterDialog
+import edneyosf.edconv.features.converter.viewmodels.ConverterViewModel
+import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
-import edneyosf.edconv.features.converter.states.ConverterStatus
+import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
 import edneyosf.edconv.ui.components.Selector
@@ -36,9 +38,11 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
 
 @Composable
-fun ConverterScreen(state: ConverterState) {
-    val coroutineScope = rememberCoroutineScope()
-    val manager = remember { ConverterManager(defaultState = state, scope = coroutineScope) }
+fun ConverterScreen(argument: ConverterArgs) {
+    val manager = viewModel { ConverterViewModel() }.apply {
+        input = argument.input
+        mediaType = argument.mediaType
+    }
     val state by manager.state
 
     LaunchedEffected(key = state.codec) {
@@ -49,24 +53,14 @@ fun ConverterScreen(state: ConverterState) {
         manager.setCompression(type = it?.compressions?.firstOrNull())
     }
 
-    LaunchedEffected(state.mediaType) {
-        val defaultCodec = when(it) {
-            MediaType.AUDIO -> Codec.OPUS
-            MediaType.VIDEO -> Codec.AV1
-            MediaType.SUBTITLE -> null
-        }
-
-        manager.setCodec(codec = defaultCodec)
-    }
-
     CompositionLocalProvider(stringsComp provides converterScreenStrings) {
         state.Dialogs(event = manager)
-        state.Content(event = manager)
+        state.Content(input = manager.input, mediaType = manager.mediaType, event = manager)
     }
 }
 
 @Composable
-private fun ConverterState.Content(event: ConverterEvent) {
+private fun ConverterState.Content(input: InputMedia, mediaType: MediaType, event: ConverterEvent) {
     Column(
         modifier = Modifier.padding(dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,7 +70,7 @@ private fun ConverterState.Content(event: ConverterEvent) {
             startEnabled = canStart(mediaType),
             onStart = { event.start() },
             onStop = { event.stop() },
-            onMediaInfo = { event.setDialog(ConverterDialog.MediaInfo(inputMedia = input)) }
+            onMediaInfo = { event.setDialog(ConverterDialogState.MediaInfo(inputMedia = input)) }
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(dimens.xl),
@@ -183,7 +177,7 @@ private fun ConverterState.Content(event: ConverterEvent) {
 
 @Composable
 private fun ConverterState.Actions(startEnabled: Boolean, onStart: () -> Unit, onStop: () -> Unit, onMediaInfo: () -> Unit) {
-    val stopEnabled = status is ConverterStatus.Progress
+    val stopEnabled = status is ConverterStatusState.Progress
     val modifier =  Modifier
         .fillMaxWidth()
         .padding(bottom = dimens.sm)
@@ -591,7 +585,7 @@ private fun RowScope.LogsView(text: String) {
 }
 
 @Composable
-private fun Progress(status: ConverterStatus) {
+private fun Progress(status: ConverterStatusState) {
     val modifier = Modifier
         .fillMaxWidth()
         .height(dimens.xxl)
@@ -600,7 +594,7 @@ private fun Progress(status: ConverterStatus) {
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
-        if(status is ConverterStatus.Progress) {
+        if(status is ConverterStatusState.Progress) {
             val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
             LinearProgressIndicator(
@@ -616,7 +610,7 @@ private fun Progress(status: ConverterStatus) {
                 )
             )
         }
-        else if(status is ConverterStatus.Loading) {
+        else if(status is ConverterStatusState.Loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
@@ -627,8 +621,8 @@ private fun ConverterState.canStart(mediaType: MediaType?): Boolean {
         mediaType == null ||
         output.isNullOrBlank() ||
         codec == null ||
-        status is ConverterStatus.Loading ||
-        status is ConverterStatus.Progress
+        status is ConverterStatusState.Loading ||
+        status is ConverterStatusState.Progress
     ) return false
 
     return when (mediaType) {
@@ -642,7 +636,7 @@ private fun ConverterState.canStart(mediaType: MediaType?): Boolean {
 private fun DefaultPreview() {
     CompositionLocalProvider(stringsComp provides converterScreenStrings) {
         val type = MediaType.VIDEO
-        val inputMedia = InputMedia(
+        val input = InputMedia(
             path = "/sdfsd",
             type = type,
             size = 123456L,
@@ -651,8 +645,8 @@ private fun DefaultPreview() {
             durationText = "123456"
         )
 
-        ConverterState(input = inputMedia, mediaType = type)
-            .Content(event = object : ConverterEvent {})
+        ConverterState()
+            .Content(input = input, mediaType = type, event = object : ConverterEvent {})
     }
 }
 

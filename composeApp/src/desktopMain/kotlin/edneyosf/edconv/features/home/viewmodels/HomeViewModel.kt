@@ -1,11 +1,13 @@
-package edneyosf.edconv.features.home.manager
+package edneyosf.edconv.features.home.viewmodels
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.common.Errors
-import edneyosf.edconv.core.common.Manager
+import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.home.mappers.toInputMedia
@@ -16,13 +18,12 @@ import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.String
 
-class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent {
+class HomeViewModel(): ViewModel(), HomeEvent {
 
     private val _state = mutableStateOf(value = HomeState())
     val state: State<HomeState> = _state
@@ -71,7 +72,7 @@ class HomeManager(override val scope: CoroutineScope): Manager(scope), HomeEvent
     private fun setInput(path: String) {
         _state.update { copy(loading = true) }
 
-        scope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(context = Dispatchers.IO) {
             val ffprobe = FFprobe(file = File(path))
             val data = ffprobe.analyze()
             val error = data.run {

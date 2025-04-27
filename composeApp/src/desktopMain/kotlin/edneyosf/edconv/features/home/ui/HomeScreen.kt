@@ -13,15 +13,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.converter.ui.ConverterScreen
 import edneyosf.edconv.features.home.events.HomeEvent
-import edneyosf.edconv.features.home.manager.HomeManager
+import edneyosf.edconv.features.home.viewmodels.HomeViewModel
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
@@ -38,12 +38,11 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
-import edneyosf.edconv.features.converter.states.ConverterState
+import edneyosf.edconv.features.converter.ConverterArgs
 
 @Composable
 fun HomeScreen() {
-    val scope = rememberCoroutineScope()
-    val manager = remember { HomeManager(scope) }
+    val manager = viewModel { HomeViewModel() }
     val state by manager.state
 
     LaunchedEffected(key = state.input) {
@@ -78,10 +77,20 @@ private fun HomeState.Content(event: HomeEvent) {
                 loading -> Loading(appVersion = version)
                 input == null -> NoMediaScreen(appVersion = version)
                 navigation is HomeNavigationState.Audio -> {
-                    ConverterScreen(state = ConverterState(input = input, mediaType = MediaType.AUDIO))
+                    val argument = ConverterArgs(
+                        input = input,
+                        mediaType = MediaType.AUDIO
+                    )
+
+                    ConverterScreen(argument = argument)
                 }
                 navigation is HomeNavigationState.Video -> {
-                    ConverterScreen(state = ConverterState(input = input, mediaType = MediaType.VIDEO))
+                    val argument = ConverterArgs(
+                        input = input,
+                        mediaType = MediaType.VIDEO
+                    )
+
+                    ConverterScreen(argument = argument)
                 }
                 navigation is HomeNavigationState.VMAF -> VMAFScreen()
             }

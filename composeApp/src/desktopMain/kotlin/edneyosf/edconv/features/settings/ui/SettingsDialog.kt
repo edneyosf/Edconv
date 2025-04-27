@@ -10,12 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edneyosf.edconv.core.common.Errors
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.events.SettingsEvent
-import edneyosf.edconv.features.settings.managers.SettingsManager
+import edneyosf.edconv.features.settings.viewmodels.SettingsViewModel
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatus
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
@@ -33,8 +34,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun SettingsDialog(onComplete: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val manager = remember { SettingsManager(scope) }
+    val manager = viewModel { SettingsViewModel() }
     val state by manager.state
     val status = state.status
 

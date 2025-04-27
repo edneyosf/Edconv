@@ -27,9 +27,9 @@ import edneyosf.edconv.features.common.models.Subtitle
 import edneyosf.edconv.features.common.models.Video
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.converter.events.ConverterEvent
-import edneyosf.edconv.features.converter.states.ConverterDialog
+import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
-import edneyosf.edconv.features.converter.states.ConverterStatus
+import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterDialogStrings
 import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.*
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.DEFAULT_ERROR
@@ -47,25 +47,25 @@ import java.io.File
 @Composable
 fun ConverterState.Dialogs(event: ConverterEvent) {
     when (this.status) {
-        is ConverterStatus.Error -> {
+        is ConverterStatusState.Error -> {
             ErrorDialog(
                 message = status.message ?: strings[DEFAULT_ERROR],
-                onFinish = { event.setStatus(ConverterStatus.Initial) }
+                onFinish = { event.setStatus(ConverterStatusState.Initial) }
             )
         }
 
-        is ConverterStatus.Complete -> {
+        is ConverterStatusState.Complete -> {
             CompleteDialog(
                 startTime = status.startTime,
                 finishTime = status.finishTime,
                 duration = status.duration,
-                onFinish = { event.setStatus(ConverterStatus.Initial) }
+                onFinish = { event.setStatus(ConverterStatusState.Initial) }
             )
         }
 
-        is ConverterStatus.FileExists -> {
+        is ConverterStatusState.FileExists -> {
             OverwriteFileDialog(
-                onCancel = { event.setStatus(ConverterStatus.Initial) },
+                onCancel = { event.setStatus(ConverterStatusState.Initial) },
                 onConfirmation = { event.start(overwrite = true) }
             )
         }
@@ -74,11 +74,11 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
     }
 
     when(this.dialog) {
-        is ConverterDialog.Settings -> SettingsDialog { event.setDialog(ConverterDialog.None) }
+        is ConverterDialogState.Settings -> SettingsDialog { event.setDialog(ConverterDialogState.None) }
 
-        is ConverterDialog.MediaInfo -> {
+        is ConverterDialogState.MediaInfo -> {
             dialog.inputMedia.MediaInfoDialog(
-                onFinish = { event.setDialog(ConverterDialog.None) }
+                onFinish = { event.setDialog(ConverterDialogState.None) }
             )
         }
 
