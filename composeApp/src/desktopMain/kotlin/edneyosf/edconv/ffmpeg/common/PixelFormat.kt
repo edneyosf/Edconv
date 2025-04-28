@@ -12,5 +12,11 @@ enum class PixelFormat(val value: String, val text: String) {
             10 -> BIT_10
             else -> null
         }
+
+        fun fromValue(value: String?) = when(value) {
+            BIT_8.value -> BIT_8
+            BIT_10.value -> BIT_10
+            else -> null
+        }
     }
 }
