@@ -11,7 +11,7 @@ fun HomeState.Dialogs(event: HomeEvent) = dialog.run {
     when(this) {
         is HomeDialogState.Error -> {
             HomeErrorDialog(
-                error = id,
+                error = error,
                 onFinish = { event.setDialog(HomeDialogState.None) }
             )
         }

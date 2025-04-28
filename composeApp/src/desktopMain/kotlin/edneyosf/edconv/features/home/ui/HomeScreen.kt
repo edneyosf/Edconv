@@ -77,20 +77,20 @@ private fun HomeState.Content(event: HomeEvent) {
                 loading -> Loading(appVersion = version)
                 input == null -> NoMediaScreen(appVersion = version)
                 navigation is HomeNavigationState.Audio -> {
-                    val argument = ConverterArgs(
+                    val args = ConverterArgs(
                         input = input,
                         mediaType = MediaType.AUDIO
                     )
 
-                    ConverterScreen(argument = argument)
+                    ConverterScreen(args = args)
                 }
                 navigation is HomeNavigationState.Video -> {
-                    val argument = ConverterArgs(
+                    val args = ConverterArgs(
                         input = input,
                         mediaType = MediaType.VIDEO
                     )
 
-                    ConverterScreen(argument = argument)
+                    ConverterScreen(args = args)
                 }
                 navigation is HomeNavigationState.VMAF -> VMAFScreen()
             }

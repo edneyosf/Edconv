@@ -37,7 +37,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         }
         catch (e: Exception) {
             e.printStackTrace()
-            setDialog(HomeDialogState.Error(id = Errors.LOAD_CONFIGS))
+            setDialog(HomeDialogState.Error(error = Errors.LOAD_CONFIGS))
         }
     }
 
@@ -59,16 +59,6 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         }
     }
 
-    override fun setNavigation(state: HomeNavigationState) = _state.update { copy(navigation = state) }
-
-    override fun setDialog(state: HomeDialogState) = _state.update { copy(dialog = state) }
-
-    override fun pickFile(title: String) {
-        FileUtils.pickFile(title = title)?.let {
-            setInput(path = it)
-        }
-    }
-
     private fun setInput(path: String) {
         _state.update { copy(loading = true) }
 
@@ -86,7 +76,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
             }
 
             val dialog = error
-                ?.let { HomeDialogState.Error(id = it) }
+                ?.let { HomeDialogState.Error(error = it) }
                 ?: HomeDialogState.None
 
             val input = data
@@ -122,6 +112,16 @@ class HomeViewModel(): ViewModel(), HomeEvent {
             stream == null -> Errors.NO_STREAM_FOUND_INPUT_MEDIA
             stream.width == null || stream.height == null -> Errors.NO_RESOLUTION_INPUT_MEDIA
             else -> null
+        }
+    }
+
+    override fun setNavigation(state: HomeNavigationState) = _state.update { copy(navigation = state) }
+
+    override fun setDialog(state: HomeDialogState) = _state.update { copy(dialog = state) }
+
+    override fun pickFile(title: String) {
+        FileUtils.pickFile(title = title)?.let {
+            setInput(path = it)
         }
     }
 }

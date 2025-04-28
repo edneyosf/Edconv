@@ -16,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.common.models.Video
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
@@ -119,7 +120,8 @@ private fun DefaultPreview() {
             sizeText = "123",
             duration = 123L,
             durationText = "123",
-            audios = listOf(Audio(channels = 2))
+            audios = listOf(Audio(channels = 2)),
+            videos = listOf(Video(height = 123, width = 123))
         )
 
         HomeState(navigation = HomeNavigationState.Audio, input = inputData)
