@@ -1,7 +1,5 @@
 package edneyosf.edconv.features.home.viewmodels
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
@@ -10,6 +8,7 @@ import edneyosf.edconv.core.common.Errors
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.home.mappers.toInputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ffmpeg.data.InputMediaData
@@ -19,16 +18,31 @@ import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.String
 
 class HomeViewModel(): ViewModel(), HomeEvent {
 
-    private val _state = mutableStateOf(value = HomeState())
-    val state: State<HomeState> = _state
+    private val _state = MutableStateFlow(value = HomeState())
+    val state: StateFlow<HomeState> = _state
 
-    init { loadConfigs() }
+    private val inputFlow: Flow<InputMedia?> = state
+        .map { it.input }
+        .distinctUntilChanged()
+        .drop(count = 1)
+
+    init {
+        loadConfigs()
+        observeInputFlow()
+    }
 
     private fun loadConfigs() {
         try {
@@ -38,6 +52,20 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         catch (e: Exception) {
             e.printStackTrace()
             setDialog(HomeDialogState.Error(error = Errors.LOAD_CONFIGS))
+        }
+    }
+
+    private fun observeInputFlow() {
+        viewModelScope.launch {
+            inputFlow.collectLatest {
+                val navigation = when(it?.type) {
+                    MediaType.AUDIO -> HomeNavigationState.Audio
+                    MediaType.VIDEO -> HomeNavigationState.Video
+                    else -> HomeNavigationState.Initial
+                }
+
+                setNavigation(navigation)
+            }
         }
     }
 

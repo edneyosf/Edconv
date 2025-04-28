@@ -11,12 +11,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.converter.ui.ConverterScreen
@@ -43,17 +43,7 @@ import edneyosf.edconv.features.converter.ConverterArgs
 @Composable
 fun HomeScreen() {
     val manager = viewModel { HomeViewModel() }
-    val state by manager.state
-
-    LaunchedEffected(key = state.input) {
-        val navigation = when(it?.type) {
-            MediaType.AUDIO -> HomeNavigationState.Audio
-            MediaType.VIDEO -> HomeNavigationState.Video
-            else -> HomeNavigationState.Initial
-        }
-
-        manager.setNavigation(navigation)
-    }
+    val state by manager.state.collectAsState()
 
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
         state.Content(event = manager)
