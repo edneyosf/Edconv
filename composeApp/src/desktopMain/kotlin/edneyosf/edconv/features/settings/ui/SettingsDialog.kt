@@ -86,7 +86,7 @@ private fun SettingsState.Content(event: SettingsEvent) {
                     )
                 }
                 if(status is SettingsStatus.Error) {
-                    val error = status.id
+                    val error = status.error
                     val message = when(error) {
                         Errors.FFMPEG_OR_FFPROBE_VERIFICATION -> strings[FFMPEG_OR_FFPROBE_VERIFICATION]
                         Errors.CONFIGURATION_SAVE -> strings[CONFIGURATION_SAVE]
@@ -108,7 +108,7 @@ private fun SettingsState.Content(event: SettingsEvent) {
 @Composable
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
-        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatus.Error(id = "0001"))
+        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatus.Error(error = "0001"))
             .Content(event = object : SettingsEvent {})
     }
 }

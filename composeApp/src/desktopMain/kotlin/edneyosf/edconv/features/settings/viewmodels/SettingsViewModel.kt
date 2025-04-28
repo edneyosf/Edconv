@@ -58,5 +58,5 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
 
     override fun setFFprobePath(path: String) = _state.update { copy(ffprobePath = path) }
 
-    private fun onError(id: String) = setStatus(SettingsStatus.Error(id = id))
+    private fun onError(id: String) = setStatus(SettingsStatus.Error(error = id))
 }
