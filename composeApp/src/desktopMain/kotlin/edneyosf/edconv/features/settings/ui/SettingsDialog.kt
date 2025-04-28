@@ -36,9 +36,8 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 fun SettingsDialog(onComplete: () -> Unit) {
     val manager = viewModel { SettingsViewModel() }
     val state by manager.state
-    val status = state.status
 
-    LaunchedEffected(key = status) {
+    LaunchedEffected(key = state.status) {
         if(it is SettingsStatus.Complete) {
             onComplete()
             manager.setStatus(status = SettingsStatus.Initial)
