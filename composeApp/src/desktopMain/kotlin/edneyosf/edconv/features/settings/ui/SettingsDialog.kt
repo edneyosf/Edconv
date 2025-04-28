@@ -39,7 +39,10 @@ fun SettingsDialog(onComplete: () -> Unit) {
     val status = state.status
 
     LaunchedEffected(key = status) {
-        if(it is SettingsStatus.Complete) onComplete()
+        if(it is SettingsStatus.Complete) {
+            onComplete()
+            manager.setStatus(status = SettingsStatus.Initial)
+        }
     }
 
     CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
