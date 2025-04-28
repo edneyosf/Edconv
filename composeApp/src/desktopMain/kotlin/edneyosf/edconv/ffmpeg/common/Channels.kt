@@ -34,6 +34,14 @@ enum class Channels(val value: String, val text: String) {
                 else -> null
             }
         }
+
+        fun fromValue(value: Int?) = when(value) {
+            1 -> MONO
+            2 -> STEREO
+            6 -> SURROUND_51
+            8 -> SURROUND_71
+            else -> null
+        }
     }
 }
 

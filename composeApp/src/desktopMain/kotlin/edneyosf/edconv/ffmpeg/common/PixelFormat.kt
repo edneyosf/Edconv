@@ -6,5 +6,11 @@ enum class PixelFormat(val value: String, val text: String) {
 
     companion object {
         fun getAll() = entries.toList()
+
+        fun fromValue(value: Int?) = when(value) {
+            8 -> BIT_8
+            10 -> BIT_10
+            else -> null
+        }
     }
 }

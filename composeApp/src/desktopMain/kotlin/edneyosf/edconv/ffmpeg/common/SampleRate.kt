@@ -7,5 +7,12 @@ enum class SampleRate(val value: String, val text: String) {
 
     companion object {
         fun getAll() = entries.toList()
+
+        fun fromValue(value: Int?) = when(value) {
+            44100 -> HZ_44100
+            48000 -> HZ_48000
+            96000 -> HZ_96000
+            else -> null
+        }
     }
 }
