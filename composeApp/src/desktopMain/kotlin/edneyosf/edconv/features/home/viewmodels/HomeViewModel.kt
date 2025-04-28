@@ -41,7 +41,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
 
     init {
         loadConfigs()
-        observeInputFlow()
+        observeInput()
     }
 
     private fun loadConfigs() {
@@ -55,7 +55,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         }
     }
 
-    private fun observeInputFlow() {
+    private fun observeInput() {
         viewModelScope.launch {
             inputFlow.collectLatest {
                 val navigation = when(it?.type) {
