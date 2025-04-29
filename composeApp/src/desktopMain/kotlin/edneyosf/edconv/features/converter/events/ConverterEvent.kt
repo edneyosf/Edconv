@@ -7,7 +7,7 @@ import edneyosf.edconv.features.converter.states.ConverterStatusState
 interface ConverterEvent {
     fun setStatus(status: ConverterStatusState) = Unit
     fun setDialog(dialog: ConverterDialogState) = Unit
-    fun setCmd(cmd: String) = Unit
+    fun setCommand(cmd: String) = Unit
     fun setOutput(path: String) = Unit
     fun setCodec(codec: Codec?) = Unit
     fun setCompression(type: CompressionType?) = Unit

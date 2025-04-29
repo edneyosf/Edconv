@@ -1,12 +1,15 @@
 package edneyosf.edconv.features.converter.states
 
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.*
 
 data class ConverterState(
     val status: ConverterStatusState = ConverterStatusState.Initial,
     val dialog: ConverterDialogState = ConverterDialogState.None,
     val logs: String = "",
-    val cmd: String = "",
+    val command: String = "",
+    val input: InputMedia,
+    val type: MediaType,
     val output: String? = null,
     val codec: Codec? = null,
     val compression: CompressionType? = null,

@@ -1,14 +1,14 @@
 package edneyosf.edconv.features.converter.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.common.DateTimePattern
+import edneyosf.edconv.core.common.Error
+import edneyosf.edconv.core.extensions.normalizeCommand
 import edneyosf.edconv.core.extensions.notifyMain
+import edneyosf.edconv.core.extensions.toReadableCommand
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.features.common.models.InputMedia
@@ -21,20 +21,29 @@ import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import java.io.File
 import java.time.Instant
 
-class ConverterViewModel: ViewModel(), ConverterEvent {
-
-    lateinit var input: InputMedia
-    lateinit var mediaType: MediaType
+class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), ConverterEvent {
 
     private var startTime: Instant? = null
     private var conversion: Job? = null
     private val converter: Converter
 
-    private val _state = mutableStateOf(value = ConverterState())
-    val state: State<ConverterState> = _state
+    private val _state = MutableStateFlow(value = ConverterState(input = input, type = type))
+    val state: StateFlow<ConverterState> = _state
+
+    private val codecFlow: Flow<Codec?> = state
+        .map { it.codec }
+        .distinctUntilChanged()
+        .drop(count = 1)
 
     init {
         converter = Converter(
@@ -45,100 +54,140 @@ class ConverterViewModel: ViewModel(), ConverterEvent {
             onProgress = ::onProgress,
             onStop = ::onStop
         )
+        observeCodec()
     }
 
-    /*private fun defaultState() = defaultState.run {
-        val steam = input.videos.firstOrNull()
-        val defaultResolution = Resolution.entries.find { it.width == steam?.width } ?: Resolution.entries.find { it.height == steam?.height }
-        val defaultCodec = when(mediaType) {
+    private fun observeCodec() {
+        viewModelScope.launch {
+            codecFlow.collectLatest {
+                _state.updateAndSync {
+                    copy(
+                        bitrate = it?.defaultBitrate,
+                        vbr = it?.defaultVBR,
+                        crf = it?.defaultCRF,
+                        preset = it?.defaultPreset,
+                        compression = it?.compressions?.firstOrNull()
+                    )
+                }
+            }
+        }
+    }
+
+    fun refresh(newInput: InputMedia, newType: MediaType) = _state.updateAndSync {
+        val video = newInput.videos.firstOrNull()
+        val audio = newInput.audios.firstOrNull()
+
+        val resolvedResolution = resolution
+            ?: Resolution.fromValues(width = video?.width, height = video?.height)
+
+        val resolvedPixelFormat = pixelFormat
+            ?: PixelFormat.fromValue(value = video?.bitDepth)
+            ?: PixelFormat.fromValue(value = video?.pixFmt)
+
+        val resolvedChannels = channels
+            ?: Channels.fromValue(value = audio?.channels)
+
+        val resolvedSampleRate = sampleRate
+            ?: SampleRate.fromValue(value = audio?.sampleRate)
+
+        val defaultCodec = when (newType) {
             MediaType.AUDIO -> Codec.OPUS
             MediaType.VIDEO -> Codec.AV1
             MediaType.SUBTITLE -> null
-        }.takeIf { codec == null }
+        }
+
+        val resolvedCodec = codec.takeIf { type == newType } ?: defaultCodec
 
         copy(
-            codec = defaultCodec,
-            resolution = defaultResolution
+            input = newInput,
+            type = newType,
+            codec = resolvedCodec,
+            resolution = resolvedResolution,
+            pixelFormat = resolvedPixelFormat,
+            channels = resolvedChannels,
+            sampleRate = resolvedSampleRate
         )
-    }*/
+    }
 
-    private fun buildCommand() = _state.value.run {
-        if (input.path.isBlank() || codec == null || output.isNullOrBlank()) {
-            setCmd("")
-            return Unit
+    private fun buildCommand() {
+        val state = _state.value
+        val codec = state.codec
+
+        if (codec == null || state.output.isNullOrBlank()) {
+            setCommand("")
+            return
         }
 
-        val ffmpeg = when (codec.mediaType) {
-            MediaType.AUDIO -> {
-                val stream = input.audios.firstOrNull()
+        state.run {
+            val ffmpeg = when (type) {
+                MediaType.AUDIO -> {
+                    val stream = input.audios.firstOrNull()
 
-                stream?.let {
-                    val inputChannels = stream.channels
+                    if(stream != null) {
+                        val inputChannels = stream.channels
+                        val filter = channels?.downmixingFilter(sourceChannels = inputChannels)
+                        val customChannelsArgs = Channels.customArguments(
+                            channels = channels?.value?.toInt(),
+                            inputChannels = inputChannels,
+                            codec = codec
+                        )
 
-                    val filter = channels?.downmixingFilter(inputChannels)
-                    val customChannelsArgs = Channels.customArguments(
-                        channels = channels?.value?.toInt(),
-                        inputChannels = inputChannels,
-                        codec = codec
-                    )
-
-                    FFmpeg.createAudio(
-                        logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
-                        codec = codec.value,
-                        compressionType = compression,
-                        sampleRate = sampleRate?.value,
-                        channels = channels?.value,
-                        vbr = vbr?.toString(),
-                        bitrate = bitrate?.value,
-                        filter = filter,
-                        noMetadata = noMetadata,
-                        custom = customChannelsArgs
-                    )
+                        FFmpeg.createAudio(
+                            logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
+                            codec = codec.value,
+                            compressionType = compression,
+                            sampleRate = sampleRate?.value,
+                            channels = channels?.value,
+                            vbr = vbr?.toString(),
+                            bitrate = bitrate?.value,
+                            filter = filter,
+                            noMetadata = noMetadata,
+                            custom = customChannelsArgs
+                        )
+                    }
+                    else return@run
                 }
-            }
-            MediaType.VIDEO -> {
-                if(preset.isNullOrBlank() || (crf == null && bitrate == null)) return@run
 
-                val stream = input.videos.firstOrNull()
+                MediaType.VIDEO -> {
+                    if(preset.isNullOrBlank() || (crf == null && bitrate == null)) return@run
 
-                stream?.let {
-                    val width = stream.width
-                    val height = stream.height
-                    val filter = resolution?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height)
+                    val stream = input.videos.firstOrNull()
 
-                    FFmpeg.createVideo(
-                        logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
-                        codec = codec.value,
-                        compressionType = compression,
-                        preset = preset,
-                        crf = crf,
-                        bitrate = bitrate?.value,
-                        profile = codec.getVideoProfile(pixelFormat),
-                        pixelFormat = pixelFormat?.value,
-                        filter = filter,
-                        noAudio = noAudio,
-                        noSubtitle = noSubtitle,
-                        noMetadata = noMetadata
-                    )
+                    if(stream != null) {
+                        val width = stream.width
+                        val height = stream.height
+                        val filter = resolution
+                            ?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height)
+
+                        FFmpeg.createVideo(
+                            logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
+                            codec = codec.value,
+                            compressionType = compression,
+                            preset = preset,
+                            crf = crf,
+                            bitrate = bitrate?.value,
+                            profile = codec.getVideoProfile(pixelFormat),
+                            pixelFormat = pixelFormat?.value,
+                            filter = filter,
+                            noAudio = noAudio,
+                            noSubtitle = noSubtitle,
+                            noMetadata = noMetadata
+                        )
+                    }
+                    else return@run
                 }
+
+                MediaType.SUBTITLE -> return@run
             }
-            else -> null
-        }
-        val cmd = ffmpeg?.build()
 
-        cmd?.let {
-            val regex = Regex(" (?=-[a-zA-Z])")
-            val command = cmd.replace(regex, "\n")
-
-            setCmd(command)
+            setCommand(ffmpeg.build().toReadableCommand())
         }
     }
 
     override fun start(overwrite: Boolean) = _state.value.run {
-        val inputPath = input.path
-
-        if(!inputPath.isBlank() && !output.isNullOrBlank() && cmd.isNotBlank()) {
+        if(!output.isNullOrBlank() && command.isNotBlank()) {
             try {
+                val inputFile = File(input.path)
                 val outputFile = File(output)
                 val outputExists = outputFile.exists()
 
@@ -147,32 +196,26 @@ class ConverterViewModel: ViewModel(), ConverterEvent {
                     return
                 }
 
-                val command = cmd
-                    .replace("\n", " ")
-                    .replace(Regex("\\s+"), " ")
-                    .trim()
-
                 conversion = converter.run(
                     source = ConfigManager.getFFmpegPath(),
-                    inputFile = File(inputPath),
-                    cmd = command,
+                    inputFile = inputFile,
+                    cmd = command.normalizeCommand(),
                     outputFile = outputFile
                 )
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                onError(e)
+                onError(Error.ON_STARTING_CONVERSION)
             }
         }
         else {
-            onError(Throwable("Input file, command or output file is invalid"))
+            onError(Error.ON_STARTING_CONVERSION_REQUIREMENTS)
         }
     }
 
     override fun stop() {
         viewModelScope.launch(context = Dispatchers.IO) {
             try {
-                notifyMain { setStatus(ConverterStatusState.Loading) }
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
@@ -180,50 +223,58 @@ class ConverterViewModel: ViewModel(), ConverterEvent {
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                notifyMain { onError(e) }
+                notifyMain { onError(Error.ON_STOPPING_CONVERSION) }
             }
         }
     }
 
     private fun onStart() {
         startTime = Instant.now()
-        setStatus(ConverterStatusState.Loading)
-        setLogs(input.toString() + "\n")
+        _state.update {
+            copy(
+                status = ConverterStatusState.Loading,
+                logs = input.toString() + "\n"
+            )
+        }
     }
 
     private fun onStdout(it: String) = setLogs(_state.value.logs + "$it\n")
 
-    private fun onError(it: Throwable) = setStatus(ConverterStatusState.Error(it.message))
+    private fun onError(error: Error) = setStatus(ConverterStatusState.Failure(error = error))
 
     private fun onProgress(it: ProgressData) {
-        val duration = input.duration
+        val duration = _state.value.input.duration
         val percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
 
-        setStatus(ConverterStatusState.Progress(percentage, it.speed))
+        setStatus(ConverterStatusState.Progress(percentage, speed = it.speed))
     }
 
     private fun onStop() {
         startTime?.let {
             val finishTime = Instant.now()
-            val startText = DateTimeUtils.instantToText(instant = it, DateTimePattern.TIME_HMS)
-            val finishText = DateTimeUtils.instantToText(instant = finishTime, DateTimePattern.TIME_HMS)
+            val startText = DateTimeUtils.instantToText(instant = it, pattern = DateTimePattern.TIME_HMS)
+            val finishText = DateTimeUtils.instantToText(instant = finishTime, pattern = DateTimePattern.TIME_HMS)
             val duration = DateTimeUtils.durationText(it, finishTime)
 
             startTime = null
 
-            if(_state.value.status !is ConverterStatusState.Error) {
-                setStatus(ConverterStatusState.Complete(startText, finishText, duration))
+            if(_state.value.status !is ConverterStatusState.Failure) {
+                setStatus(ConverterStatusState.Complete(
+                    startTime = startText,
+                    finishTime = finishText,
+                    duration = duration
+                ))
             }
         } ?: run {
-            onError(Throwable("Start time is null"))
+            onError(Error.START_TIME_NULL)
         }
     }
 
     override fun setCodec(codec: Codec?) {
-        val inputPath = input.path
+        val inputPath = _state.value.input.path
         var output: String? = null
 
-        if(!inputPath.isBlank() && codec != null) {
+        if(codec != null) {
             val outputName = File(inputPath).nameWithoutExtension
             val outputExtension = codec.toFileExtension()
 
@@ -233,7 +284,7 @@ class ConverterViewModel: ViewModel(), ConverterEvent {
         _state.updateAndSync { copy(codec = codec, output = output) }
     }
 
-    override fun setCmd(cmd: String) = _state.update { copy(cmd = cmd) }
+    override fun setCommand(cmd: String) = _state.update { copy(command = cmd) }
 
     override fun setStatus(status: ConverterStatusState) = _state.update { copy(status = status) }
 
@@ -267,7 +318,7 @@ class ConverterViewModel: ViewModel(), ConverterEvent {
 
     override fun setNoMetadata(noMetadata: Boolean) = _state.updateAndSync { copy(noMetadata = noMetadata) }
 
-    private inline fun <T> MutableState<T>.updateAndSync(block: T.() -> T) {
+    private inline fun <T> MutableStateFlow<T>.updateAndSync(block: T.() -> T) {
         value = value.block()
         buildCommand()
     }
