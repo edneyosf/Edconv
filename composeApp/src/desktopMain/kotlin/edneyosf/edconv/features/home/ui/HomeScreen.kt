@@ -69,7 +69,7 @@ private fun HomeState.Content(event: HomeEvent) {
                 navigation is HomeNavigationState.Audio -> {
                     val args = ConverterArgs(
                         input = input,
-                        mediaType = MediaType.AUDIO
+                        type = MediaType.AUDIO
                     )
 
                     ConverterScreen(args = args)
@@ -77,7 +77,7 @@ private fun HomeState.Content(event: HomeEvent) {
                 navigation is HomeNavigationState.Video -> {
                     val args = ConverterArgs(
                         input = input,
-                        mediaType = MediaType.VIDEO
+                        type = MediaType.VIDEO
                     )
 
                     ConverterScreen(args = args)
