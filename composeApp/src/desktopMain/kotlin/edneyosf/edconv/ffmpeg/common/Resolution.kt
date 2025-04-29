@@ -19,5 +19,15 @@ enum class Resolution(val width: Int, val height: Int, val text: String) {
 
     companion object {
         fun getAll() = entries.toList()
+
+        fun fromValues(width: Int?, height: Int?): Resolution? {
+            val resolutions = Resolution.entries
+
+            return when {
+                width != null -> resolutions.firstOrNull { it.width == width }
+                height != null -> resolutions.firstOrNull { it.height == height }
+                else -> null
+            }
+        }
     }
 }
