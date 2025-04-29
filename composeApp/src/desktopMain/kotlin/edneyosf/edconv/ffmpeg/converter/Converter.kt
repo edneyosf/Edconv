@@ -1,5 +1,6 @@
 package edneyosf.edconv.ffmpeg.converter
 
+import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs
@@ -11,7 +12,7 @@ import java.io.InputStreamReader
 
 class Converter(
     private val scope: CoroutineScope, private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
-    private val onError: (Throwable) -> Unit, private val onProgress: (ProgressData) -> Unit,
+    private val onError: (Error) -> Unit, private val onProgress: (ProgressData) -> Unit,
     private val onStop: () -> Unit
 ) {
     private var process: Process? = null
@@ -25,11 +26,11 @@ class Converter(
             outputFile.parentFile?.mkdirs()
 
             if(!inputFile.exists()) {
-                notify { onError(Throwable("Input file does not exist")) }
+                notify { onError(Error.INPUT_FILE_NOT_EXIST) }
                 return@launch
             }
             else if(!inputFile.isFile) {
-                notify { onError(Throwable("Input is not a file")) }
+                notify { onError(Error.INPUT_NOT_FILE) }
                 return@launch
             }
 
@@ -51,15 +52,16 @@ class Converter(
                 }
 
                 val exitCode = it.waitFor()
-                if (exitCode != 0) notify { onError(Throwable("Process exited with code $exitCode")) }
+                if (exitCode != 0) notify { onError(Error.CONVERSION_PROCESS_COMPLETED) }
 
             } ?: run {
-                notify { onError(Throwable("Process is null")) }
+                notify { onError(Error.PROCESS_NULL) }
             }
         }
         catch (e: Exception) {
+            e.printStackTrace()
             destroyProcess()
-            notify { onError(e) }
+            notify { onError(Error.CONVERSION_PROCESS) }
         }
         finally {
             process = null
