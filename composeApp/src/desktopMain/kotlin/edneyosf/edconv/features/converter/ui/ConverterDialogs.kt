@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +31,6 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterDialogStrings
 import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.*
-import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.DEFAULT_ERROR
 import edneyosf.edconv.features.settings.ui.SettingsDialog
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.dimens
@@ -46,56 +44,47 @@ import java.io.File
 
 @Composable
 fun ConverterState.Dialogs(event: ConverterEvent) {
-    when (this.status) {
-        is ConverterStatusState.Error -> {
-            ErrorDialog(
-                message = status.message ?: strings[DEFAULT_ERROR],
-                onFinish = { event.setStatus(ConverterStatusState.Initial) }
-            )
-        }
+    status.run {
+        when (this) {
+            is ConverterStatusState.Failure -> {
+                ConverterErrorDialog(
+                    error = error,
+                    onFinish = { event.setStatus(ConverterStatusState.Initial) }
+                )
+            }
 
-        is ConverterStatusState.Complete -> {
-            CompleteDialog(
-                startTime = status.startTime,
-                finishTime = status.finishTime,
-                duration = status.duration,
-                onFinish = { event.setStatus(ConverterStatusState.Initial) }
-            )
-        }
+            is ConverterStatusState.Complete -> {
+                CompleteDialog(
+                    startTime = startTime,
+                    finishTime = finishTime,
+                    duration = duration,
+                    onFinish = { event.setStatus(ConverterStatusState.Initial) }
+                )
+            }
 
-        is ConverterStatusState.FileExists -> {
-            OverwriteFileDialog(
-                onCancel = { event.setStatus(ConverterStatusState.Initial) },
-                onConfirmation = { event.start(overwrite = true) }
-            )
-        }
+            is ConverterStatusState.FileExists -> {
+                OverwriteFileDialog(
+                    onCancel = { event.setStatus(ConverterStatusState.Initial) },
+                    onConfirmation = { event.start(overwrite = true) }
+                )
+            }
 
-        else -> Unit
+            else -> Unit
+        }
     }
 
-    when(this.dialog) {
-        is ConverterDialogState.Settings -> SettingsDialog { event.setDialog(ConverterDialogState.None) }
+    dialog.run {
+        when(this) {
+            is ConverterDialogState.Settings -> SettingsDialog { event.setDialog(ConverterDialogState.None) }
 
-        is ConverterDialogState.MediaInfo -> {
-            dialog.inputMedia.MediaInfoDialog(
-                onFinish = { event.setDialog(ConverterDialogState.None) }
-            )
+            is ConverterDialogState.MediaInfo -> {
+                inputMedia.MediaInfoDialog(
+                    onFinish = { event.setDialog(ConverterDialogState.None) }
+                )
+            }
+
+            else -> Unit
         }
-
-        else -> Unit
-    }
-}
-
-@Composable
-private fun ErrorDialog(message: String, onFinish: () -> Unit) {
-    CompositionLocalProvider(stringsComp provides converterDialogStrings) {
-        SimpleDialog(
-            icon = Icons.Rounded.Error,
-            title = strings[ERROR_TITLE],
-            content = { Text(message) },
-            onConfirmation = onFinish,
-            confirmationText = strings[CONFIRMATION_BUTTON]
-        )
     }
 }
 
@@ -303,9 +292,6 @@ private fun MediaType.TypeMediaInfoString() = when(this) {
 private fun Boolean.toText() = if(this) strings[YES_MEDIA_INFO] else strings[NO_MEDIA_INFO]
 
 @Composable
-private fun ErrorPreview() = ErrorDialog("Sample", onFinish = {})
-
-@Composable
 private fun OverwriteFilePreview() = OverwriteFileDialog(onConfirmation = {}, onCancel = {})
 
 @Composable
@@ -365,22 +351,6 @@ private fun MediaInfoPreview() {
 
     inputMedia.MediaInfoDialog(onFinish = {})
 }
-
-@Preview
-@Composable
-private fun ErrorEnglishLight() = EnglishLightPreview { ErrorPreview() }
-
-@Preview
-@Composable
-private fun ErrorEnglishDark() = EnglishDarkPreview { ErrorPreview() }
-
-@Preview
-@Composable
-private fun ErrorPortugueseLight() = PortugueseLightPreview { ErrorPreview() }
-
-@Preview
-@Composable
-private fun ErrorPortugueseDark() = PortugueseDarkPreview { ErrorPreview() }
 
 @Preview
 @Composable
