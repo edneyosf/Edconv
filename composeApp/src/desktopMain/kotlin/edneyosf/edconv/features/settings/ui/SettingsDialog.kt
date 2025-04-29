@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edneyosf.edconv.core.common.Errors
+import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.commonStrings
@@ -87,11 +87,11 @@ private fun SettingsState.Content(event: SettingsEvent) {
                         }
                     )
                 }
-                if(status is SettingsStatus.Error) {
+                if(status is SettingsStatus.Failure) {
                     val error = status.error
                     val message = when(error) {
-                        Errors.FFMPEG_OR_FFPROBE_VERIFICATION -> strings[FFMPEG_OR_FFPROBE_VERIFICATION]
-                        Errors.CONFIGURATION_SAVE -> strings[CONFIGURATION_SAVE]
+                        Error.FFMPEG_OR_FFPROBE_VERIFICATION -> strings[FFMPEG_OR_FFPROBE_VERIFICATION]
+                        Error.CONFIGURATION_SAVE -> strings[CONFIGURATION_SAVE]
                         else -> commonStrings[ERROR_DEFAULT]
                     }
 
@@ -110,7 +110,7 @@ private fun SettingsState.Content(event: SettingsEvent) {
 @Composable
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
-        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatus.Error(error = "0001"))
+        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatus.Failure(Error.DEFAULT))
             .Content(event = object : SettingsEvent {})
     }
 }

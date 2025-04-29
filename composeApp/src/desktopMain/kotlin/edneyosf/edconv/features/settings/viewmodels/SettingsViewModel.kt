@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.core.ConfigManager
-import edneyosf.edconv.core.common.Errors
+import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.settings.events.SettingsEvent
@@ -29,7 +29,7 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
         }
         catch (e: Exception) {
             e.printStackTrace()
-            onError(id = Errors.FFMPEG_OR_FFPROBE_VERIFICATION)
+            onError(Error.FFMPEG_OR_FFPROBE_VERIFICATION)
         }
     }
 
@@ -47,7 +47,7 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                onError(id = Errors.CONFIGURATION_SAVE)
+                onError(Error.CONFIGURATION_SAVE)
             }
         }
     }
@@ -58,5 +58,5 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
 
     override fun setFFprobePath(path: String) = _state.update { copy(ffprobePath = path) }
 
-    private fun onError(id: String) = setStatus(SettingsStatus.Error(error = id))
+    private fun onError(error: Error) = setStatus(SettingsStatus.Failure(error))
 }

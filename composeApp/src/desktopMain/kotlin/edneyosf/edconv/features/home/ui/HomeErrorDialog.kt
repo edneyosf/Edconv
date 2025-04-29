@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import edneyosf.edconv.core.common.Errors
+import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_TITLE
 import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
@@ -24,21 +24,21 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
-fun HomeErrorDialog(error: String, onFinish: () -> Unit) {
+fun HomeErrorDialog(error: Error, onFinish: () -> Unit) {
     CompositionLocalProvider(value = stringsComp provides homeErrorDialogStrings) {
         val description = when(error) {
-            Errors.LOAD_CONFIGS -> strings[LOAD_CONFIGS]
-            Errors.UNKNOWN_INPUT_MEDIA -> strings[UNKNOWN_INPUT_MEDIA]
-            Errors.NO_DURATION_INPUT_MEDIA -> strings[NO_DURATION_INPUT_MEDIA]
-            Errors.NO_STREAM_FOUND_INPUT_MEDIA -> strings[NO_STREAM_FOUND_INPUT_MEDIA]
-            Errors.NO_CHANNELS_INPUT_MEDIA -> strings[NO_CHANNELS_INPUT_MEDIA]
-            Errors.NO_RESOLUTION_INPUT_MEDIA -> strings[NO_RESOLUTION_INPUT_MEDIA]
+            Error.LOAD_CONFIGS -> strings[LOAD_CONFIGS]
+            Error.UNKNOWN_INPUT_MEDIA -> strings[UNKNOWN_INPUT_MEDIA]
+            Error.NO_DURATION_INPUT_MEDIA -> strings[NO_DURATION_INPUT_MEDIA]
+            Error.NO_STREAM_FOUND_INPUT_MEDIA -> strings[NO_STREAM_FOUND_INPUT_MEDIA]
+            Error.NO_CHANNELS_INPUT_MEDIA -> strings[NO_CHANNELS_INPUT_MEDIA]
+            Error.NO_RESOLUTION_INPUT_MEDIA -> strings[NO_RESOLUTION_INPUT_MEDIA]
             else -> commonStrings[ERROR_DEFAULT]
         }
 
         SimpleDialog(
             icon = Icons.Rounded.Error,
-            iconDescription = error.takeIf { it.isNotBlank() },
+            iconDescription = error.code,
             title = commonStrings[ERROR_TITLE],
             content = {
                 Text(
@@ -53,7 +53,7 @@ fun HomeErrorDialog(error: String, onFinish: () -> Unit) {
 }
 
 @Composable
-private fun DefaultPreview() = HomeErrorDialog(error = "0001", onFinish = {})
+private fun DefaultPreview() = HomeErrorDialog(error = Error.DEFAULT, onFinish = {})
 
 @Preview
 @Composable

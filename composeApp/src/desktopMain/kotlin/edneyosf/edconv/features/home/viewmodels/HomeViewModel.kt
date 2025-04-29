@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.core.ConfigManager
-import edneyosf.edconv.core.common.Errors
+import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
@@ -51,7 +51,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         }
         catch (e: Exception) {
             e.printStackTrace()
-            setDialog(HomeDialogState.Error(error = Errors.LOAD_CONFIGS))
+            setDialog(HomeDialogState.Failure(Error.LOAD_CONFIGS))
         }
     }
 
@@ -95,8 +95,8 @@ class HomeViewModel(): ViewModel(), HomeEvent {
             val data = ffprobe.analyze()
             val error = data.run {
                 when {
-                    this == null -> Errors.UNKNOWN_INPUT_MEDIA
-                    duration == null -> Errors.NO_DURATION_INPUT_MEDIA
+                    this == null -> Error.UNKNOWN_INPUT_MEDIA
+                    duration == null -> Error.NO_DURATION_INPUT_MEDIA
                     type == MediaType.AUDIO -> validateAudioStream()
                     type == MediaType.VIDEO -> validateVideoStream()
                     else -> null
@@ -104,7 +104,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
             }
 
             val dialog = error
-                ?.let { HomeDialogState.Error(error = it) }
+                ?.let { HomeDialogState.Failure(error = it) }
                 ?: HomeDialogState.None
 
             val input = data
@@ -123,22 +123,22 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         }
     }
 
-    private fun InputMediaData.validateAudioStream(): String? {
+    private fun InputMediaData.validateAudioStream(): Error? {
         val stream = audioStreams.firstOrNull()
 
         return when {
-            stream == null -> Errors.NO_STREAM_FOUND_INPUT_MEDIA
-            stream.channels == null -> Errors.NO_CHANNELS_INPUT_MEDIA
+            stream == null -> Error.NO_STREAM_FOUND_INPUT_MEDIA
+            stream.channels == null -> Error.NO_CHANNELS_INPUT_MEDIA
             else -> null
         }
     }
 
-    private fun InputMediaData.validateVideoStream(): String? {
+    private fun InputMediaData.validateVideoStream(): Error? {
         val stream = videoStreams.firstOrNull()
 
         return when {
-            stream == null -> Errors.NO_STREAM_FOUND_INPUT_MEDIA
-            stream.width == null || stream.height == null -> Errors.NO_RESOLUTION_INPUT_MEDIA
+            stream == null -> Error.NO_STREAM_FOUND_INPUT_MEDIA
+            stream.width == null || stream.height == null -> Error.NO_RESOLUTION_INPUT_MEDIA
             else -> null
         }
     }

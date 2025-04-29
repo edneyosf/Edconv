@@ -9,7 +9,7 @@ import edneyosf.edconv.features.settings.ui.SettingsDialog
 @Composable
 fun HomeState.Dialogs(event: HomeEvent) = dialog.run {
     when(this) {
-        is HomeDialogState.Error -> {
+        is HomeDialogState.Failure -> {
             HomeErrorDialog(
                 error = error,
                 onFinish = { event.setDialog(HomeDialogState.None) }
