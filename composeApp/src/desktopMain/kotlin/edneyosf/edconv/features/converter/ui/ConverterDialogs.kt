@@ -89,21 +89,6 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
 }
 
 @Composable
-private fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
-    CompositionLocalProvider(stringsComp provides converterDialogStrings) {
-        SimpleDialog(
-            icon = Icons.Rounded.Warning,
-            title = strings[WARNING_TITLE],
-            content = { Text(strings[OVERWRITE_FILE]) },
-            confirmationText = strings[CONFIRMATION_BUTTON],
-            onConfirmation = onConfirmation,
-            cancelText = strings[CANCEL_BUTTON],
-            onCancel = onCancel
-        )
-    }
-}
-
-@Composable
 private fun CompleteDialog(startTime: String, finishTime: String, duration: String, onFinish: () -> Unit) {
     CompositionLocalProvider(stringsComp provides converterDialogStrings) {
         SimpleDialog(
@@ -292,9 +277,6 @@ private fun MediaType.TypeMediaInfoString() = when(this) {
 private fun Boolean.toText() = if(this) strings[YES_MEDIA_INFO] else strings[NO_MEDIA_INFO]
 
 @Composable
-private fun OverwriteFilePreview() = OverwriteFileDialog(onConfirmation = {}, onCancel = {})
-
-@Composable
 private fun CompletePreview() = CompleteDialog(startTime = "123", finishTime = "123", duration = "123", onFinish = {})
 
 @Composable
@@ -351,22 +333,6 @@ private fun MediaInfoPreview() {
 
     inputMedia.MediaInfoDialog(onFinish = {})
 }
-
-@Preview
-@Composable
-private fun OverwriteFileEnglishLight() = EnglishLightPreview { OverwriteFilePreview() }
-
-@Preview
-@Composable
-private fun OverwriteFileEnglishDark() = EnglishDarkPreview { OverwriteFilePreview() }
-
-@Preview
-@Composable
-private fun OverwriteFilePortugueseLight() = PortugueseLightPreview { OverwriteFilePreview() }
-
-@Preview
-@Composable
-private fun OverwriteFilePortugueseDark() = PortugueseDarkPreview { OverwriteFilePreview() }
 
 @Preview
 @Composable

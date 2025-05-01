@@ -38,47 +38,40 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
 
 @Composable
-fun ConverterScreen(argument: ConverterArgs) {
-    val manager = viewModel { ConverterViewModel() }.apply {
-        input = argument.input
-        mediaType = argument.mediaType
-    }
-    val state by manager.state
+fun ConverterScreen(args: ConverterArgs) {
+    val manager = viewModel { ConverterViewModel(input = args.input, type = args.type) }
+    val state by manager.state.collectAsState()
 
-    LaunchedEffected(key = state.codec) {
-        manager.setBitrate(bitrate = it?.defaultBitrate)
-        manager.setVbr(it?.defaultVBR)
-        manager.setCrf(it?.defaultCRF)
-        manager.setPreset(it?.defaultPreset)
-        manager.setCompression(type = it?.compressions?.firstOrNull())
+    LaunchedEffected(key = args) {
+        manager.refresh(newInput = it.input, newType = it.type)
     }
 
-    CompositionLocalProvider(stringsComp provides converterScreenStrings) {
+    CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = manager)
-        state.Content(input = manager.input, mediaType = manager.mediaType, event = manager)
+        state.Content(event = manager)
     }
 }
 
 @Composable
-private fun ConverterState.Content(input: InputMedia, mediaType: MediaType, event: ConverterEvent) {
+private fun ConverterState.Content(event: ConverterEvent) {
     Column(
-        modifier = Modifier.padding(dimens.md),
+        modifier = Modifier.padding(all = dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dimens.xl)
+        verticalArrangement = Arrangement.spacedBy(space = dimens.xl)
     ) {
         Actions(
-            startEnabled = canStart(mediaType),
+            startEnabled = canStart(),
             onStart = { event.start() },
             onStop = { event.stop() },
             onMediaInfo = { event.setDialog(ConverterDialogState.MediaInfo(inputMedia = input)) }
         )
         Row(
-            horizontalArrangement = Arrangement.spacedBy(dimens.xl),
+            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
             verticalAlignment = Alignment.CenterVertically
         ) {
             FormatInput(
                 value = codec,
-                mediaType = mediaType,
+                mediaType = type,
                 onValueChange = { event.setCodec(it) }
             )
             VBRInput(
@@ -95,7 +88,7 @@ private fun ConverterState.Content(input: InputMedia, mediaType: MediaType, even
                 onValueChange = { event.setBitrate(it) }
             )
         }
-        if(mediaType == MediaType.AUDIO) {
+        if(type == MediaType.AUDIO) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(dimens.xl)
@@ -110,7 +103,7 @@ private fun ConverterState.Content(input: InputMedia, mediaType: MediaType, even
                 )
             }
         }
-        else if(mediaType == MediaType.VIDEO) {
+        else if(type == MediaType.VIDEO) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(dimens.xl)
@@ -135,7 +128,7 @@ private fun ConverterState.Content(input: InputMedia, mediaType: MediaType, even
                 label = strings[NO_METADATA_INPUT],
                 onCheckedChange = { event.setNoMetadata(it) }
             )
-            if(mediaType == MediaType.VIDEO) {
+            if(type == MediaType.VIDEO) {
                 CheckboxInput(
                     checked = noAudio,
                     label = strings[NO_AUDIO_INPUT],
@@ -153,13 +146,13 @@ private fun ConverterState.Content(input: InputMedia, mediaType: MediaType, even
             horizontalArrangement = Arrangement.spacedBy(dimens.md)
         ) {
             LogsView(logs)
-            if(cmd.isNotBlank()) {
+            if(command.isNotBlank()) {
                 TextField(
-                    value = cmd,
+                    value = command,
                     textStyle = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     colors = TextFieldDefaults.colors().custom(),
-                    onValueChange = { event.setCmd(it) },
+                    onValueChange = { event.setCommand(it) },
                     label = { Text(strings[COMMAND_INPUT]) }
                 )
             }
@@ -616,16 +609,16 @@ private fun Progress(status: ConverterStatusState) {
     }
 }
 
-private fun ConverterState.canStart(mediaType: MediaType?): Boolean {
+private fun ConverterState.canStart(): Boolean {
     if (
-        mediaType == null ||
         output.isNullOrBlank() ||
+        command.isBlank() ||
         codec == null ||
         status is ConverterStatusState.Loading ||
         status is ConverterStatusState.Progress
     ) return false
 
-    return when (mediaType) {
+    return when (type) {
         MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
         MediaType.VIDEO -> preset != null && crf != null
         MediaType.SUBTITLE -> false
@@ -645,8 +638,8 @@ private fun DefaultPreview() {
             durationText = "123456"
         )
 
-        ConverterState()
-            .Content(input = input, mediaType = type, event = object : ConverterEvent {})
+        ConverterState(input = input, type = type)
+            .Content(event = object : ConverterEvent {})
     }
 }
 
