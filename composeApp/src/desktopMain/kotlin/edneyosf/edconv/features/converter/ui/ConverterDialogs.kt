@@ -8,9 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +34,6 @@ import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
-import edneyosf.edconv.ui.previews.EnglishDarkPreview
-import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import java.io.File
@@ -54,7 +50,7 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
             }
 
             is ConverterStatusState.Complete -> {
-                CompleteDialog(
+                ConverterCompleteDialog(
                     startTime = startTime,
                     finishTime = finishTime,
                     duration = duration,
@@ -63,7 +59,7 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
             }
 
             is ConverterStatusState.FileExists -> {
-                OverwriteFileDialog(
+                ConverterOverwriteFileDialog(
                     onCancel = { event.setStatus(ConverterStatusState.Initial) },
                     onConfirmation = { event.start(overwrite = true) }
                 )
@@ -85,43 +81,6 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
 
             else -> Unit
         }
-    }
-}
-
-@Composable
-private fun CompleteDialog(startTime: String, finishTime: String, duration: String, onFinish: () -> Unit) {
-    CompositionLocalProvider(stringsComp provides converterDialogStrings) {
-        SimpleDialog(
-            title = strings[COMPLETE_TITLE],
-            content = {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = strings[START_TIME])
-                        Spacer(modifier = Modifier.width(dimens.xxs))
-                        Text(text = startTime, style = MaterialTheme.typography.labelLarge)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = strings[END_TIME])
-                        Spacer(modifier = Modifier.width(dimens.xxs))
-                        Text(text = finishTime, style = MaterialTheme.typography.labelLarge)
-                    }
-                    Spacer(modifier = Modifier.height(dimens.xs))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        val color = MaterialTheme.colorScheme.tertiary
-
-                        Text(
-                            text = strings[DURATION_TIME],
-                            style = MaterialTheme.typography.bodyLarge.copy(color = color)
-                        )
-                        Spacer(modifier = Modifier.width(dimens.xxs))
-                        Text(text = duration, style = MaterialTheme.typography.titleMedium.copy(color = color))
-                    }
-                }
-            },
-            icon = Icons.Rounded.CheckCircle,
-            onConfirmation = onFinish,
-            confirmationText = strings[CONFIRMATION_BUTTON]
-        )
     }
 }
 
@@ -277,9 +236,6 @@ private fun MediaType.TypeMediaInfoString() = when(this) {
 private fun Boolean.toText() = if(this) strings[YES_MEDIA_INFO] else strings[NO_MEDIA_INFO]
 
 @Composable
-private fun CompletePreview() = CompleteDialog(startTime = "123", finishTime = "123", duration = "123", onFinish = {})
-
-@Composable
 private fun MediaInfoPreview() {
     val videoStreams = List(2) {
         Video(
@@ -333,22 +289,6 @@ private fun MediaInfoPreview() {
 
     inputMedia.MediaInfoDialog(onFinish = {})
 }
-
-@Preview
-@Composable
-private fun CompleteEnglishLight() = EnglishLightPreview { CompletePreview() }
-
-@Preview
-@Composable
-private fun CompleteEnglishDark() = EnglishDarkPreview { CompletePreview() }
-
-@Preview
-@Composable
-private fun CompletePortugueseLight() = PortugueseLightPreview { CompletePreview() }
-
-@Preview
-@Composable
-private fun CompletePortugueseDark() = PortugueseDarkPreview { CompletePreview() }
 
 @Preview
 @Composable
