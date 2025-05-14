@@ -21,7 +21,7 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
-fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
+fun ConverterOverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
     CompositionLocalProvider(value = stringsComp provides converterOverwriteFileDialogStrings) {
         SimpleDialog(
             icon = Icons.Rounded.Warning,
@@ -36,20 +36,20 @@ fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
 }
 
 @Composable
-private fun OverwriteFilePreview() = OverwriteFileDialog(onConfirmation = {}, onCancel = {})
+private fun DefaultPreview() = ConverterOverwriteFileDialog(onConfirmation = {}, onCancel = {})
 
 @Preview
 @Composable
-private fun OverwriteFileEnglishLight() = EnglishLightPreview { OverwriteFilePreview() }
+private fun EnglishLight() = EnglishLightPreview { DefaultPreview() }
 
 @Preview
 @Composable
-private fun OverwriteFileEnglishDark() = EnglishDarkPreview { OverwriteFilePreview() }
+private fun EnglishDark() = EnglishDarkPreview { DefaultPreview() }
 
 @Preview
 @Composable
-private fun OverwriteFilePortugueseLight() = PortugueseLightPreview { OverwriteFilePreview() }
+private fun PortugueseLight() = PortugueseLightPreview { DefaultPreview() }
 
 @Preview
 @Composable
-private fun OverwriteFilePortugueseDark() = PortugueseDarkPreview { OverwriteFilePreview() }
+private fun PortugueseDark() = PortugueseDarkPreview { DefaultPreview() }
