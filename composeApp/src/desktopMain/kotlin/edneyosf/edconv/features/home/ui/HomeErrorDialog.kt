@@ -57,16 +57,16 @@ private fun DefaultPreview() = HomeErrorDialog(error = Error.DEFAULT, onFinish =
 
 @Preview
 @Composable
-private fun ErrorEnglishLight() = EnglishLightPreview { DefaultPreview() }
+private fun EnglishLight() = EnglishLightPreview { DefaultPreview() }
 
 @Preview
 @Composable
-private fun ErrorEnglishDark() = EnglishDarkPreview { DefaultPreview() }
+private fun EnglishDark() = EnglishDarkPreview { DefaultPreview() }
 
 @Preview
 @Composable
-private fun ErrorPortugueseLight() = PortugueseLightPreview { DefaultPreview() }
+private fun PortugueseLight() = PortugueseLightPreview { DefaultPreview() }
 
 @Preview
 @Composable
-private fun ErrorPortugueseDark() = PortugueseDarkPreview { DefaultPreview() }
+private fun PortugueseDark() = PortugueseDarkPreview { DefaultPreview() }
