@@ -10,7 +10,7 @@ import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.settings.events.SettingsEvent
 import edneyosf.edconv.features.settings.states.SettingsState
-import edneyosf.edconv.features.settings.states.SettingsStatus
+import edneyosf.edconv.features.settings.states.SettingsStatusState
 import kotlinx.coroutines.*
 import java.io.File
 
@@ -37,13 +37,13 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
         val ffmpegPath = _state.value.ffmpegPath
         val ffprobePath = _state.value.ffprobePath
 
-        setStatus(SettingsStatus.Loading)
+        setStatus(SettingsStatusState.Loading)
 
         viewModelScope.launch(context = Dispatchers.IO) {
             try {
                 ConfigManager.setFFmpegPath(ffmpegPath)
                 ConfigManager.setFFprobePath(ffprobePath)
-                notifyMain { setStatus(SettingsStatus.Complete) }
+                notifyMain { setStatus(SettingsStatusState.Complete) }
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -52,11 +52,11 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
         }
     }
 
-    override fun setStatus(status: SettingsStatus) = _state.update { copy(status = status) }
+    override fun setStatus(status: SettingsStatusState) = _state.update { copy(status = status) }
 
     override fun setFFmpegPath(path: String) = _state.update { copy(ffmpegPath = path) }
 
     override fun setFFprobePath(path: String) = _state.update { copy(ffprobePath = path) }
 
-    private fun onError(error: Error) = setStatus(SettingsStatus.Failure(error))
+    private fun onError(error: Error) = setStatus(SettingsStatusState.Failure(error))
 }

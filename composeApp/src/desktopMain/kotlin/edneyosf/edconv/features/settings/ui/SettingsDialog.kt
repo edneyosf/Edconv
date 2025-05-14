@@ -18,7 +18,7 @@ import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.events.SettingsEvent
 import edneyosf.edconv.features.settings.viewmodels.SettingsViewModel
 import edneyosf.edconv.features.settings.states.SettingsState
-import edneyosf.edconv.features.settings.states.SettingsStatus
+import edneyosf.edconv.features.settings.states.SettingsStatusState
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
 import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
@@ -38,9 +38,9 @@ fun SettingsDialog(onComplete: () -> Unit) {
     val state by manager.state
 
     LaunchedEffected(key = state.status) {
-        if(it is SettingsStatus.Complete) {
+        if(it is SettingsStatusState.Complete) {
             onComplete()
-            manager.setStatus(status = SettingsStatus.Initial)
+            manager.setStatus(status = SettingsStatusState.Initial)
         }
     }
 
@@ -52,7 +52,7 @@ fun SettingsDialog(onComplete: () -> Unit) {
 @Composable
 private fun SettingsState.Content(event: SettingsEvent) {
     val defined = !(ffmpegPath.isBlank() || ffprobePath.isBlank())
-    val isLoading = status is SettingsStatus.Loading
+    val isLoading = status is SettingsStatusState.Loading
     val pickFFmpegTitle = strings[PICK_FFMPEG_TITLE]
     val pickFFprobeTitle = strings[PICK_FFPROBE_TITLE]
 
@@ -87,7 +87,7 @@ private fun SettingsState.Content(event: SettingsEvent) {
                         }
                     )
                 }
-                if(status is SettingsStatus.Failure) {
+                if(status is SettingsStatusState.Failure) {
                     val error = status.error
                     val message = when(error) {
                         Error.FFMPEG_OR_FFPROBE_VERIFICATION -> strings[FFMPEG_OR_FFPROBE_VERIFICATION]
@@ -110,7 +110,7 @@ private fun SettingsState.Content(event: SettingsEvent) {
 @Composable
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
-        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatus.Failure(Error.DEFAULT))
+        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatusState.Failure(Error.DEFAULT))
             .Content(event = object : SettingsEvent {})
     }
 }

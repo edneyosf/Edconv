@@ -20,7 +20,7 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
-private fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
+fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
     CompositionLocalProvider(stringsComp provides converterDialogStrings) {
         SimpleDialog(
             icon = Icons.Rounded.Warning,
