@@ -6,11 +6,12 @@ import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.CANCEL_BUTTON
-import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.CONFIRMATION_BUTTON
-import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.OVERWRITE_FILE
-import edneyosf.edconv.features.converter.strings.ConverterDialogStrings.Keys.WARNING_TITLE
-import edneyosf.edconv.features.converter.strings.converterDialogStrings
+import edneyosf.edconv.features.common.commonStrings
+import edneyosf.edconv.features.common.CommonStrings.Keys.WARNING_TITLE
+import edneyosf.edconv.features.common.CommonStrings.Keys.CANCEL_BUTTON
+import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
+import edneyosf.edconv.features.converter.strings.ConverterOverwriteFileDialogStrings.Keys.DESCRIPTION
+import edneyosf.edconv.features.converter.strings.converterOverwriteFileDialogStrings
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
@@ -21,14 +22,14 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun OverwriteFileDialog(onCancel: () -> Unit, onConfirmation: () -> Unit) {
-    CompositionLocalProvider(stringsComp provides converterDialogStrings) {
+    CompositionLocalProvider(value = stringsComp provides converterOverwriteFileDialogStrings) {
         SimpleDialog(
             icon = Icons.Rounded.Warning,
-            title = strings[WARNING_TITLE],
-            content = { Text(strings[OVERWRITE_FILE]) },
-            confirmationText = strings[CONFIRMATION_BUTTON],
+            title = commonStrings[WARNING_TITLE],
+            content = { Text(text = strings[DESCRIPTION]) },
+            confirmationText = commonStrings[CONFIRMATION_BUTTON],
             onConfirmation = onConfirmation,
-            cancelText = strings[CANCEL_BUTTON],
+            cancelText = commonStrings[CANCEL_BUTTON],
             onCancel = onCancel
         )
     }
