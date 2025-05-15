@@ -66,7 +66,8 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                         vbr = it?.defaultVBR,
                         crf = it?.defaultCRF,
                         preset = it?.defaultPreset,
-                        compression = it?.compressions?.firstOrNull()
+                        compression = it?.compressions?.firstOrNull(),
+                        output = it?.toOutput(inputMedia = input)
                     )
                 }
             }
@@ -77,17 +78,17 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         val video = newInput.videos.firstOrNull()
         val audio = newInput.audios.firstOrNull()
 
-        val resolvedResolution = resolution
+        val newResolution = resolution
             ?: Resolution.fromValues(width = video?.width, height = video?.height)
 
-        val resolvedPixelFormat = pixelFormat
+        val newPixelFormat = pixelFormat
             ?: PixelFormat.fromValue(value = video?.bitDepth)
             ?: PixelFormat.fromValue(value = video?.pixFmt)
 
-        val resolvedChannels = channels
+        val newChannels = channels
             ?: Channels.fromValue(value = audio?.channels)
 
-        val resolvedSampleRate = sampleRate
+        val newSampleRate = sampleRate
             ?: SampleRate.fromValue(value = audio?.sampleRate)
 
         val defaultCodec = when (newType) {
@@ -96,16 +97,18 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
             MediaType.SUBTITLE -> null
         }
 
-        val resolvedCodec = codec.takeIf { type == newType } ?: defaultCodec
+        val newCodec = codec.takeIf { type == newType } ?: defaultCodec
+        val newOutput = newCodec.toOutput(inputMedia = newInput)
 
         copy(
             input = newInput,
             type = newType,
-            codec = resolvedCodec,
-            resolution = resolvedResolution,
-            pixelFormat = resolvedPixelFormat,
-            channels = resolvedChannels,
-            sampleRate = resolvedSampleRate
+            codec = newCodec,
+            resolution = newResolution,
+            pixelFormat = newPixelFormat,
+            channels = newChannels,
+            sampleRate = newSampleRate,
+            output = newOutput
         )
     }
 
@@ -270,19 +273,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         }
     }
 
-    override fun setCodec(codec: Codec?) {
-        val inputPath = _state.value.input.path
-        var output: String? = null
-
-        if(codec != null) {
-            val outputName = File(inputPath).nameWithoutExtension
-            val outputExtension = codec.toFileExtension()
-
-            output = "${AppConfigs.outputDefault}$outputName.$outputExtension"
-        }
-
-        _state.updateAndSync { copy(codec = codec, output = output) }
-    }
+    override fun setCodec(codec: Codec?) = _state.updateAndSync { copy(codec = codec) }
 
     override fun setCommand(cmd: String) = _state.update { copy(command = cmd) }
 
@@ -317,6 +308,20 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
     override fun setNoSubtitle(noSubtitle: Boolean) = _state.updateAndSync { copy(noSubtitle = noSubtitle) }
 
     override fun setNoMetadata(noMetadata: Boolean) = _state.updateAndSync { copy(noMetadata = noMetadata) }
+
+    private fun Codec?.toOutput(inputMedia: InputMedia): String? {
+        var output: String? = null
+
+        if(this != null) {
+            val inputPath = inputMedia.path
+            val outputName = File(inputPath).nameWithoutExtension
+            val outputExtension = toFileExtension()
+
+            output = "${AppConfigs.outputDefault}$outputName.$outputExtension"
+        }
+
+        return output
+    }
 
     private inline fun <T> MutableStateFlow<T>.updateAndSync(block: T.() -> T) {
         value = value.block()
