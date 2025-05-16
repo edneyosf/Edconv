@@ -1,8 +1,10 @@
 package edneyosf.edconv.features.converter.viewmodels
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
+import edneyosf.edconv.app.AppConfigs.LOG_MONITOR_DELAY
 import edneyosf.edconv.core.ConfigManager
 import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Error
@@ -35,10 +37,15 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
 
     private var startTime: Instant? = null
     private var conversion: Job? = null
+    private var logMonitor: Job? = null
     private val converter: Converter
 
     private val _state = MutableStateFlow(value = ConverterState(input = input, type = type))
     val state: StateFlow<ConverterState> = _state
+
+    private val _logsState = mutableStateListOf<String>()
+    val logsState: List<String> get() = _logsState
+    private val logsCache = mutableListOf<String>()
 
     private val codecFlow: Flow<Codec?> = state
         .map { it.codec }
@@ -217,11 +224,13 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
     }
 
     override fun stop() {
-        viewModelScope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(context = Dispatchers.Default) {
             try {
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
+                logMonitor?.cancelAndJoin()
+                logMonitor = null
                 notifyMain { setStatus(ConverterStatusState.Initial) }
             }
             catch (e: Exception) {
@@ -232,24 +241,32 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
     }
 
     private fun onStart() {
+        val inputMediaString = _state.value.input.toString()
+
         startTime = Instant.now()
-        _state.update {
-            copy(
-                status = ConverterStatusState.Loading,
-                logs = input.toString() + "\n"
-            )
-        }
+        logsCache.clear()
+        _logsState.clear()
+        _logsState.add(inputMediaString + "\n")
+        _state.update { copy(status = ConverterStatusState.Loading) }
+        startLogMonitor()
     }
 
-    private fun onStdout(it: String) = setLogs(_state.value.logs + "$it\n")
+    private fun onStdout(it: String) { logsCache.add(it) }
 
     private fun onError(error: Error) = setStatus(ConverterStatusState.Failure(error = error))
 
-    private fun onProgress(it: ProgressData) {
-        val duration = _state.value.input.duration
-        val percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
+    private fun onProgress(it: ProgressData?) {
+        var percentage = 0f
+        var speed = ""
 
-        setStatus(ConverterStatusState.Progress(percentage, speed = it.speed))
+        if(it != null) {
+            val duration = _state.value.input.duration
+
+            percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
+            speed = it.speed
+        }
+
+        setStatus(ConverterStatusState.Progress(percentage, speed))
     }
 
     private fun onStop() {
@@ -273,7 +290,19 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         }
     }
 
-    override fun setCodec(codec: Codec?) = _state.updateAndSync { copy(codec = codec) }
+    private fun startLogMonitor() {
+        if (logMonitor?.isActive == true) return
+
+        logMonitor = viewModelScope.launch(context = Dispatchers.Default) {
+            while (true) {
+                val cache = logsCache.toList()
+
+                logsCache.clear()
+                notifyMain { _logsState.addAll(elements = cache) }
+                delay(timeMillis = LOG_MONITOR_DELAY)
+            }
+        }
+    }
 
     override fun setCommand(cmd: String) = _state.update { copy(command = cmd) }
 
@@ -283,7 +312,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
 
     override fun setOutput(path: String) = _state.update { copy(output = path) }
 
-    private fun setLogs(log: String) = _state.update { copy(logs = log) }
+    override fun setCodec(codec: Codec?) = _state.updateAndSync { copy(codec = codec) }
 
     override fun setCompression(type: CompressionType?) = _state.updateAndSync { copy(compression = type) }
 

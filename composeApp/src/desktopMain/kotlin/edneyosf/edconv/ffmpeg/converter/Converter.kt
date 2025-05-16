@@ -12,14 +12,14 @@ import java.io.InputStreamReader
 
 class Converter(
     private val scope: CoroutineScope, private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
-    private val onError: (Error) -> Unit, private val onProgress: (ProgressData) -> Unit,
+    private val onError: (Error) -> Unit, private val onProgress: (ProgressData?) -> Unit,
     private val onStop: () -> Unit
 ) {
     private var process: Process? = null
 
     fun run(source: String, inputFile: File, cmd: String, outputFile: File) = scope.launch(context = Dispatchers.IO) {
         notify { onStart() }
-        notify { onStdout("Command = { $cmd }") }
+        onStdout("Command = { $cmd }")
 
         try {
             if (outputFile.exists() && outputFile.isFile) outputFile.delete()
@@ -42,12 +42,14 @@ class Converter(
             ).start()
 
             process?.let {
+                notify { onProgress(null) }
+
                 BufferedReader(InputStreamReader(it.errorStream)).useLines { lines ->
                     lines.forEach { line ->
                         val progress = line.getProgressData()
 
                         if (progress != null) notify { onProgress(progress) }
-                        else notify { onStdout(line) }
+                        else onStdout(line)
                     }
                 }
 
@@ -71,7 +73,7 @@ class Converter(
         return@launch
     }
 
-    private suspend fun String.getProgressData(): ProgressData? {
+    private fun String.getProgressData(): ProgressData? {
         var progress: ProgressData? = null
 
         try {
@@ -92,7 +94,7 @@ class Converter(
         }
         catch (e: Exception) {
             e.printStackTrace()
-            notify { onStdout("Error = { " + e.message + " }") }
+            onStdout("Error = { " + e.message + " }")
         }
 
         return progress

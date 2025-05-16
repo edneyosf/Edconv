@@ -3,6 +3,9 @@ package edneyosf.edconv.features.converter.ui
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -42,18 +45,16 @@ fun ConverterScreen(args: ConverterArgs) {
     val manager = viewModel { ConverterViewModel(input = args.input, type = args.type) }
     val state by manager.state.collectAsState()
 
-    LaunchedEffected(key = args) {
-        manager.refresh(newInput = it.input, newType = it.type)
-    }
+    LaunchedEffected(key = args) { manager.refresh(newInput = it.input, newType = it.type) }
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = manager)
-        state.Content(event = manager)
+        state.Content(logs = manager.logsState, event = manager)
     }
 }
 
 @Composable
-private fun ConverterState.Content(event: ConverterEvent) {
+private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
     Column(
         modifier = Modifier.padding(all = dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -91,7 +92,7 @@ private fun ConverterState.Content(event: ConverterEvent) {
         if(type == MediaType.AUDIO) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
             ) {
                 ChannelsInput(
                     value = channels,
@@ -106,7 +107,7 @@ private fun ConverterState.Content(event: ConverterEvent) {
         else if(type == MediaType.VIDEO) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
             ) {
                 ResolutionInput(
                     value = resolution,
@@ -121,7 +122,7 @@ private fun ConverterState.Content(event: ConverterEvent) {
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimens.xl)
+            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
         ) {
             CheckboxInput(
                 checked = noMetadata,
@@ -142,18 +143,18 @@ private fun ConverterState.Content(event: ConverterEvent) {
             }
         }
         Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(dimens.md)
+            modifier = Modifier.weight(weight = 1f),
+            horizontalArrangement = Arrangement.spacedBy(space = dimens.md)
         ) {
-            LogsView(logs)
+            LogsView(data = logs)
             if(command.isNotBlank()) {
                 TextField(
                     value = command,
                     textStyle = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier.weight(weight = 1f).fillMaxHeight(),
                     colors = TextFieldDefaults.colors().custom(),
                     onValueChange = { event.setCommand(it) },
-                    label = { Text(strings[COMMAND_INPUT]) }
+                    label = { Text(text = strings[COMMAND_INPUT]) }
                 )
             }
         }
@@ -163,7 +164,7 @@ private fun ConverterState.Content(event: ConverterEvent) {
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors().custom(),
             onValueChange = { event.setOutput(it) },
-            label = { Text(strings[OUTPUT_FILE]) }
+            label = { Text(text = strings[OUTPUT_FILE]) }
         )
     }
 }
@@ -176,7 +177,7 @@ private fun ConverterState.Actions(startEnabled: Boolean, onStart: () -> Unit, o
         .padding(bottom = dimens.sm)
 
     Row(modifier = modifier) {
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(weight = 1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledIconButton(
                 enabled = startEnabled,
@@ -192,7 +193,7 @@ private fun ConverterState.Actions(startEnabled: Boolean, onStart: () -> Unit, o
                 style = MaterialTheme.typography.bodySmall
             )
         }
-        Spacer(modifier = Modifier.width(dimens.md))
+        Spacer(modifier = Modifier.width(width = dimens.md))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledTonalIconButton(
                 enabled = stopEnabled,
@@ -208,7 +209,7 @@ private fun ConverterState.Actions(startEnabled: Boolean, onStart: () -> Unit, o
                 style = MaterialTheme.typography.bodySmall
             )
         }
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(weight = 1f))
         TextTooltip(text = strings[MEDIA_INFO]) {
             IconButton(onClick = onMediaInfo) {
                 Icon(imageVector = Icons.Rounded.Info, contentDescription = strings[MEDIA_INFO])
@@ -237,7 +238,7 @@ private fun FormatInput(value: Codec?, mediaType: MediaType?, onValueChange: (Co
     ) {
         medias.forEach { item ->
             DropdownMenuItem(
-                text = { Text(item.text) },
+                text = { Text(text = item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -269,7 +270,7 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
-                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
                         text = vbr.toString(),
                         style = TextStyle(
@@ -281,7 +282,7 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                 Box(modifier = Modifier.padding(start = 14.dp)) {
                     Slider(
                         value = vbr.toFloat(),
-                        modifier = Modifier.width(220.dp),
+                        modifier = Modifier.width(width = 220.dp),
                         enabled = isVBR,
                         onValueChange = { onValueChange(it.toInt()) },
                         valueRange = minVBR.toFloat() .. maxVBR.toFloat()
@@ -309,7 +310,7 @@ private fun ConverterState.CBRInput(mediaType: MediaType?, onClick: () -> Unit, 
             ) {
                 Bitrate.getAllByMediaType(mediaType).forEach { item ->
                     DropdownMenuItem(
-                        text = { Text(item.text) },
+                        text = { Text(text = item.text) },
                         onClick = {
                             expanded = false
                             onValueChange(item)
@@ -342,7 +343,7 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
-                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
                         text = crf.toString(),
                         style = TextStyle(
@@ -354,7 +355,7 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                 Box(modifier = Modifier.padding(start = 14.dp)) {
                     Slider(
                         value = crf.toFloat(),
-                        modifier = Modifier.width(320.dp),
+                        modifier = Modifier.width(width = 320.dp),
                         enabled = isCRF,
                         onValueChange = { onValueChange(it.toInt()) },
                         valueRange = minCRF.toFloat() .. maxCRF.toFloat()
@@ -377,7 +378,7 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
     ) {
         Channels.getAll().forEach { item ->
             DropdownMenuItem(
-                text = { Text(item.text) },
+                text = { Text(text = item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -399,7 +400,7 @@ private fun SampleRateInput(value: SampleRate?, onValueChange: (SampleRate) -> U
     ) {
         SampleRate.getAll().forEach { item ->
             DropdownMenuItem(
-                text = { Text(item.text) },
+                text = { Text(text = item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -421,7 +422,7 @@ private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -
     ) {
         PixelFormat.getAll().forEach { item ->
             DropdownMenuItem(
-                text = { Text(item.text) },
+                text = { Text(text = item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -443,7 +444,7 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
     ) {
         Resolution.getAll().forEach { item ->
             DropdownMenuItem(
-                text = { Text(item.text) },
+                text = { Text(text = item.text) },
                 onClick = {
                     expanded = false
                     onValueChange(item)
@@ -468,7 +469,7 @@ private fun ConverterState.PresetInput(onValueChange: (String?) -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
-                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
                         text = preset,
                         style = MaterialTheme.typography.bodyLarge.copy(
@@ -476,12 +477,12 @@ private fun ConverterState.PresetInput(onValueChange: (String?) -> Unit) {
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(dimens.xs))
+                Spacer(modifier = Modifier.height(height = dimens.xs))
                 Slider(
-                    value = codec.indexByPresetValue(preset)?.toFloat() ?: 0f,
-                    modifier = Modifier.width(320.dp),
+                    value = codec.indexByPresetValue(value = preset)?.toFloat() ?: 0f,
+                    modifier = Modifier.width(width = 320.dp),
                     enabled = codec.mediaType == MediaType.VIDEO,
-                    onValueChange = { onValueChange(codec.presetValueByIndex(it.toInt())) },
+                    onValueChange = { onValueChange(codec.presetValueByIndex(index = it.toInt())) },
                     valueRange = minPreset.toFloat() .. maxPreset.toFloat()
                 )
             }
@@ -496,7 +497,7 @@ private fun CheckboxInput(checked: Boolean, label: String, onCheckedChange: (Boo
             checked = checked,
             onCheckedChange = onCheckedChange
         )
-        Spacer(modifier = Modifier.width(dimens.xxs))
+        Spacer(modifier = Modifier.width(width = dimens.xxs))
         Text(
             text = label,
             style = TextStyle(
@@ -507,17 +508,21 @@ private fun CheckboxInput(checked: Boolean, label: String, onCheckedChange: (Boo
 }
 
 @Composable
-private fun RowScope.LogsView(text: String) {
-    val scrollState = rememberScrollState()
+private fun RowScope.LogsView(data: List<String>) {
+    val scrollState = rememberLazyListState()
     val modifier = Modifier
-        .weight(2f)
+        .weight(weight = 2f)
         .fillMaxHeight()
 
-    LaunchedEffect(text) { scrollState.animateScrollTo(scrollState.maxValue) }
+    LaunchedEffect(data.size) {
+        if(data.isNotEmpty()) {
+            scrollState.animateScrollToItem(data.size - 1)
+        }
+    }
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(dimens.xs)
+        shape = RoundedCornerShape(size = dimens.xs)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
@@ -528,11 +533,11 @@ private fun RowScope.LogsView(text: String) {
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Terminal,
-                    modifier = Modifier.size(dimens.lg),
+                    modifier = Modifier.size(size = dimens.lg),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     contentDescription = null
                 )
-                Spacer(modifier = Modifier.width(dimens.xs))
+                Spacer(modifier = Modifier.width(width = dimens.xs))
                 Text(
                     text = strings[LOGS_VIEW],
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -543,7 +548,6 @@ private fun RowScope.LogsView(text: String) {
             Box(modifier = Modifier.fillMaxSize()) {
                 SelectionContainer(
                     modifier = Modifier
-                        .verticalScroll(scrollState)
                         .fillMaxSize()
                         .padding(
                             start = dimens.md,
@@ -552,16 +556,21 @@ private fun RowScope.LogsView(text: String) {
                             bottom = dimens.sm
                         )
                 ) {
-                    Text(
-                        text = text,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 12.sp,
-                            fontFamily = firaCodeFont
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = dimens.md)
-                    )
+                    LazyColumn(state = scrollState) {
+                        items(items = data) {
+                            Text(
+                                text = it,
+                                style = TextStyle(
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 12.sp,
+                                    fontFamily = firaCodeFont
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(bottom = dimens.md)
+                            )
+                            Spacer(modifier = Modifier.height(dimens.xxs))
+                        }
+                    }
                 }
                 VerticalScrollbar(
                     adapter = rememberScrollbarAdapter(scrollState),
@@ -581,13 +590,13 @@ private fun RowScope.LogsView(text: String) {
 private fun Progress(status: ConverterStatusState) {
     val modifier = Modifier
         .fillMaxWidth()
-        .height(dimens.xxl)
+        .height(height = dimens.xxl)
 
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
-        if(status is ConverterStatusState.Progress) {
+        if(status is ConverterStatusState.Progress && status.percentage > 0f) {
             val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
             LinearProgressIndicator(
@@ -595,7 +604,7 @@ private fun Progress(status: ConverterStatusState) {
                 progress = { status.percentage / 100 },
                 strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
             )
-            Spacer(modifier = Modifier.height(dimens.xs))
+            Spacer(modifier = Modifier.height(height = dimens.xs))
             Text(
                 text = text,
                 style = TextStyle(
@@ -603,7 +612,7 @@ private fun Progress(status: ConverterStatusState) {
                 )
             )
         }
-        else if(status is ConverterStatusState.Loading) {
+        else if(status is ConverterStatusState.Progress || status is ConverterStatusState.Loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
@@ -627,8 +636,9 @@ private fun ConverterState.canStart(): Boolean {
 
 @Composable
 private fun DefaultPreview() {
-    CompositionLocalProvider(stringsComp provides converterScreenStrings) {
+    CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         val type = MediaType.VIDEO
+        val logs = listOf<String>()
         val input = InputMedia(
             path = "/sdfsd",
             type = type,
@@ -639,7 +649,7 @@ private fun DefaultPreview() {
         )
 
         ConverterState(input = input, type = type)
-            .Content(event = object : ConverterEvent {})
+            .Content(logs, event = object : ConverterEvent {})
     }
 }
 
