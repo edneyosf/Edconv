@@ -42,16 +42,16 @@ import edneyosf.edconv.ui.theme.firaCodeFont
 
 @Composable
 fun ConverterScreen(args: ConverterArgs) {
-    val manager = viewModel { ConverterViewModel(input = args.input, type = args.type) }
-    val state by manager.state.collectAsState()
+    val viewModel = viewModel { ConverterViewModel(input = args.input, type = args.type) }
+    val state by viewModel.state.collectAsState()
 
-    LaunchedEffected(key = args) { manager.refresh(newInput = it.input, newType = it.type) }
+    LaunchedEffected(key = args) { viewModel.refresh(newInput = it.input, newType = it.type) }
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
-        state.Dialogs(event = manager)
+        state.Dialogs(event = viewModel)
         state.Content(
-            logs = manager.logsState,
-            event = manager
+            logs = viewModel.logsState,
+            event = viewModel
         )
     }
 }

@@ -34,18 +34,18 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun SettingsDialog(onComplete: () -> Unit) {
-    val manager = viewModel { SettingsViewModel() }
-    val state by manager.state
+    val viewModel = viewModel { SettingsViewModel() }
+    val state by viewModel.state
 
     LaunchedEffected(key = state.status) {
         if(it is SettingsStatusState.Complete) {
             onComplete()
-            manager.setStatus(status = SettingsStatusState.Initial)
+            viewModel.setStatus(status = SettingsStatusState.Initial)
         }
     }
 
     CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
-        state.Content(event = manager)
+        state.Content(event = viewModel)
     }
 }
 

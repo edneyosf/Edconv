@@ -42,12 +42,12 @@ import edneyosf.edconv.features.converter.ConverterArgs
 
 @Composable
 fun HomeScreen() {
-    val manager = viewModel { HomeViewModel() }
-    val state by manager.state.collectAsState()
+    val viewModel = viewModel { HomeViewModel() }
+    val state by viewModel.state.collectAsState()
 
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
-        state.Content(event = manager)
-        state.Dialogs(event = manager)
+        state.Content(event = viewModel)
+        state.Dialogs(event = viewModel)
     }
 }
 
