@@ -49,7 +49,10 @@ fun ConverterScreen(args: ConverterArgs) {
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = manager)
-        state.Content(logs = manager.logsState, event = manager)
+        state.Content(
+            logs = manager.logsState,
+            event = manager
+        )
     }
 }
 
@@ -516,7 +519,7 @@ private fun RowScope.LogsView(data: List<String>) {
 
     LaunchedEffect(data.size) {
         if(data.isNotEmpty()) {
-            scrollState.animateScrollToItem(data.size - 1)
+            scrollState.animateScrollToItem(index = data.size - 1)
         }
     }
 
@@ -568,7 +571,6 @@ private fun RowScope.LogsView(data: List<String>) {
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(bottom = dimens.md)
                             )
-                            Spacer(modifier = Modifier.height(dimens.xxs))
                         }
                     }
                 }
