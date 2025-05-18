@@ -81,7 +81,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         }
     }
 
-    fun refresh(newInput: InputMedia, newType: MediaType) = _state.updateAndSync {
+    override fun refresh(newInput: InputMedia, newType: MediaType) = _state.updateAndSync {
         val video = newInput.videos.firstOrNull()
         val audio = newInput.audios.firstOrNull()
 

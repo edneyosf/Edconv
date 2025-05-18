@@ -1,10 +1,12 @@
 package edneyosf.edconv.features.converter.events
 
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 
 interface ConverterEvent {
+    fun refresh(newInput: InputMedia, newType: MediaType) = Unit
     fun setStatus(status: ConverterStatusState) = Unit
     fun setDialog(dialog: ConverterDialogState) = Unit
     fun setCommand(cmd: String) = Unit
