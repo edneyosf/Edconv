@@ -30,6 +30,7 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
+import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.TextTooltip
 import edneyosf.edconv.ui.components.extensions.custom
@@ -64,7 +65,6 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
         verticalArrangement = Arrangement.spacedBy(space = dimens.xl)
     ) {
         Actions(
-            startEnabled = canStart(),
             onStart = { event.start() },
             onStop = { event.stop() },
             onMediaInfo = { event.setDialog(ConverterDialogState.MediaInfo(inputMedia = input)) }
@@ -173,52 +173,25 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
 }
 
 @Composable
-private fun ConverterState.Actions(startEnabled: Boolean, onStart: () -> Unit, onStop: () -> Unit, onMediaInfo: () -> Unit) {
-    val stopEnabled = status is ConverterStatusState.Progress
-    val modifier =  Modifier
-        .fillMaxWidth()
-        .padding(bottom = dimens.sm)
-
-    Row(modifier = modifier) {
-        Spacer(modifier = Modifier.weight(weight = 1f))
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            FilledIconButton(
-                enabled = startEnabled,
-                onClick = onStart
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = strings[START_CONVERSION]
-                )
-            }
-            Text(
-                text = strings[START_CONVERSION],
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-        Spacer(modifier = Modifier.width(width = dimens.md))
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            FilledTonalIconButton(
-                enabled = stopEnabled,
-                onClick = onStop
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Stop,
-                    contentDescription = strings[STOP_CONVERSION]
-                )
-            }
-            Text(
-                text = strings[STOP_CONVERSION],
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-        Spacer(modifier = Modifier.weight(weight = 1f))
-        TextTooltip(text = strings[MEDIA_INFO]) {
-            IconButton(onClick = onMediaInfo) {
-                Icon(imageVector = Icons.Rounded.Info, contentDescription = strings[MEDIA_INFO])
+private fun ConverterState.Actions(onStart: () -> Unit, onStop: () -> Unit, onMediaInfo: () -> Unit) {
+    ActionsTool(
+        startEnabled = canStart(),
+        stopEnabled = canStop(),
+        startDescription = strings[START_CONVERSION],
+        stopDescription = strings[STOP_CONVERSION],
+        onStart = onStart,
+        onStop = onStop,
+        righties = {
+            TextTooltip(text = strings[MEDIA_INFO]) {
+                IconButton(onClick = onMediaInfo) {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = strings[MEDIA_INFO]
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -635,6 +608,8 @@ private fun ConverterState.canStart(): Boolean {
         MediaType.SUBTITLE -> false
     }
 }
+
+private fun ConverterState.canStop(): Boolean = status is ConverterStatusState.Progress
 
 @Composable
 private fun DefaultPreview() {
