@@ -1,6 +1,6 @@
 package edneyosf.edconv.ffmpeg.ffprobe
 
-import edneyosf.edconv.core.ConfigManager
+import edneyosf.edconv.core.config.ConfigManager
 import edneyosf.edconv.ffmpeg.common.FFLogLevel
 import edneyosf.edconv.ffmpeg.data.FFprobeData
 import edneyosf.edconv.ffmpeg.data.InputMediaData

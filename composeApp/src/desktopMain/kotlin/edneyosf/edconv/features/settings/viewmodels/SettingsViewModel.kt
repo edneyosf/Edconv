@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edneyosf.edconv.core.ConfigManager
+import edneyosf.edconv.core.config.ConfigManager
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update

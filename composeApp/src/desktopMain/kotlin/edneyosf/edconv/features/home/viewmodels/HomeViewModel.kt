@@ -3,7 +3,7 @@ package edneyosf.edconv.features.home.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
-import edneyosf.edconv.core.ConfigManager
+import edneyosf.edconv.core.config.ConfigManager
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update

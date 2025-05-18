@@ -1,10 +1,10 @@
-package edneyosf.edconv.core
+package edneyosf.edconv.core.config
 
 import edneyosf.edconv.core.utils.PropertyUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 import kotlinx.serialization.json.Json
+import java.io.File
 
 object ConfigManager {
 
@@ -14,6 +14,8 @@ object ConfigManager {
 
     fun getFFmpegPath(): String = config.ffmpegPath
     fun getFFprobePath(): String = config.ffprobePath
+
+    fun getVMAFModelPath(): String = config.vmafModelPath
 
     suspend fun setFFmpegPath(path: String) {
         val newConfig = config.copy(ffmpegPath = path)
@@ -27,14 +29,20 @@ object ConfigManager {
         config = newConfig
     }
 
+    suspend fun setVMAFModelPath(path: String) {
+        val newConfig = config.copy(vmafModelPath = path)
+        save(newConfig)
+        config = newConfig
+    }
+
     private suspend fun save(config: Config) = withContext(context = Dispatchers.IO) {
-        configFile.writeText(Json.encodeToString(config))
+        configFile.writeText(Json.Default.encodeToString(config))
     }
 
     fun load(appName: String) {
         configFile = File(configDir(appName), FILE_NAME)
 
-        return if (configFile.exists()) config = Json.decodeFromString(configFile.readText())
+        return if (configFile.exists()) config = Json.Default.decodeFromString(configFile.readText())
         else config = Config()
     }
 
