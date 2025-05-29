@@ -3,6 +3,8 @@ package edneyosf.edconv.ffmpeg.ffmpeg
 object FFmpegArgs {
     const val LOG_LEVEL = "-loglevel"
     const val INPUT = "-i"
+    const val OVERRIDE_INPUT = "-r"
+    const val FORCE = "-f"
     const val MAP = "-map"
     const val CODEC_AUDIO = "-c:a"
     const val CODEC_VIDEO = "-c:v"

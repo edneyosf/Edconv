@@ -39,6 +39,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
 import edneyosf.edconv.features.converter.ConverterArgs
+import edneyosf.edconv.features.vmaf.VMAFArgs
 
 @Composable
 fun HomeScreen() {
@@ -72,7 +73,7 @@ private fun HomeState.Content(event: HomeEvent) {
                         type = MediaType.AUDIO
                     )
 
-                    ConverterScreen(args = args)
+                    ConverterScreen(args)
                 }
                 navigation is HomeNavigationState.Video -> {
                     val args = ConverterArgs(
@@ -80,9 +81,13 @@ private fun HomeState.Content(event: HomeEvent) {
                         type = MediaType.VIDEO
                     )
 
-                    ConverterScreen(args = args)
+                    ConverterScreen(args)
                 }
-                navigation is HomeNavigationState.VMAF -> VMAFScreen()
+                navigation is HomeNavigationState.VMAF -> {
+                    val args = VMAFArgs(input = input)
+
+                    VMAFScreen(args)
+                }
             }
         }
     }
