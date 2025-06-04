@@ -48,7 +48,7 @@ fun HomeState.HomeNavigation(
             third = strings[VIDEO_NAVIGATION_ITEM]
         ),
         Triple(
-            first = HomeNavigationState.VMAF,
+            first = HomeNavigationState.Vmaf,
             second =  Icons.Rounded.Visibility,
             third =  strings[VMAF_NAVIGATION_ITEM]
         )
@@ -79,7 +79,7 @@ fun HomeState.HomeNavigation(
                 val enabled = when(state) {
                     is HomeNavigationState.Audio -> hasAudio == true
                     is HomeNavigationState.Video -> hasVideo == true
-                    is HomeNavigationState.VMAF -> hasVideo == true
+                    is HomeNavigationState.Vmaf -> hasVideo == true
                     else -> false
                 }
 
