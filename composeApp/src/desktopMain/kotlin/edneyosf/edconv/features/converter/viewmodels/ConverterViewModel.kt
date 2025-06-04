@@ -207,7 +207,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                 }
 
                 conversion = converter.run(
-                    source = ConfigManager.getFFmpegPath(),
+                    ffmpeg = ConfigManager.getFFmpegPath(),
                     inputFile = inputFile,
                     cmd = command.normalizeCommand(),
                     outputFile = outputFile

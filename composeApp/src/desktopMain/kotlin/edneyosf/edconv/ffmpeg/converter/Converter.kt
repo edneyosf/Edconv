@@ -17,7 +17,7 @@ class Converter(
 ) {
     private var process: Process? = null
 
-    fun run(source: String, inputFile: File, cmd: String, outputFile: File) = scope.launch(context = Dispatchers.IO) {
+    fun run(ffmpeg: String, inputFile: File, cmd: String, outputFile: File) = scope.launch(context = Dispatchers.IO) {
         notify { onStart() }
         onStdout("Command = { $cmd }")
 
@@ -35,7 +35,7 @@ class Converter(
             }
 
             process = ProcessBuilder(
-                source,
+                ffmpeg,
                 FFmpegArgs.INPUT, inputFile.absolutePath,
                 *cmd.normalize(),
                 outputFile.absolutePath
@@ -81,13 +81,11 @@ class Converter(
             val match = regex.find(input = this)
 
             if(match != null) {
-                val (size, rawTime, bitrate, speed) = match.destructured
+                val (_, rawTime, _, speed) = match.destructured
                 val time = DateTimeUtils.timeToLong(time = rawTime, pattern = ConverterPattern.TIME)
 
                 progress = ProgressData(
-                    size = size,
                     time = time,
-                    bitrate = bitrate,
                     speed = speed
                 )
             }
