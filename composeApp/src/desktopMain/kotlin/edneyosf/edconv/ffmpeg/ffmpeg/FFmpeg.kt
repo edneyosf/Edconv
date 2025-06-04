@@ -2,6 +2,7 @@ package edneyosf.edconv.ffmpeg.ffmpeg
 
 import edneyosf.edconv.ffmpeg.common.CompressionType
 import edneyosf.edconv.ffmpeg.common.MediaType
+import edneyosf.edconv.ffmpeg.ffmpeg.extensions.addCmd
 
 class FFmpeg private constructor(
     val logLevel: String,
@@ -98,11 +99,6 @@ class FFmpeg private constructor(
     private fun bitRateArg() = if(isAudio()) FFmpegArgs.BITRATE_AUDIO else FFmpegArgs.BITRATE_VIDEO
     private fun profileArg() = if(isAudio()) FFmpegArgs.PROFILE_AUDIO else FFmpegArgs.PROFILE_VIDEO
     private fun filterArg() = if(isAudio()) FFmpegArgs.FILTER_AUDIO else FFmpegArgs.FILTER_VIDEO
-
-    private fun MutableList<String>.addCmd(param: String, value: String?) = value?.let {
-        add(param)
-        add(it)
-    }
 
     private fun isAudio() = mediaType == MediaType.AUDIO
     private fun isVideo() = mediaType == MediaType.VIDEO
