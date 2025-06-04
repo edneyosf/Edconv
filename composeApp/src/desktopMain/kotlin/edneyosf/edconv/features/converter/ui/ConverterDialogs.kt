@@ -5,6 +5,7 @@ import edneyosf.edconv.features.converter.events.ConverterEvent
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
+import edneyosf.edconv.features.mediainfo.MediaInfoDialog
 import edneyosf.edconv.features.settings.ui.SettingsDialog
 
 @Composable
@@ -43,7 +44,7 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
             is ConverterDialogState.Settings -> SettingsDialog { event.setDialog(ConverterDialogState.None) }
 
             is ConverterDialogState.MediaInfo -> {
-                inputMedia.ConverterMediaInfoDialog(
+                inputMedia.MediaInfoDialog(
                     onFinish = { event.setDialog(ConverterDialogState.None) }
                 )
             }

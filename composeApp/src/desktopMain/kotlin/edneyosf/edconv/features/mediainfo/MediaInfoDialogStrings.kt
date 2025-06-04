@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.converter.strings
+package edneyosf.edconv.features.mediainfo
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -6,14 +6,14 @@ import edneyosf.edconv.core.common.Languages.EN
 import edneyosf.edconv.core.common.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
-import edneyosf.edconv.features.converter.strings.ConverterMediaInfoDialogStrings.Keys.*
+import edneyosf.edconv.features.mediainfo.MediaInfoDialogStrings.Keys.*
 
-inline val converterMediaInfoDialogStrings: ConverterMediaInfoDialogStrings
+inline val mediaInfoDialogStrings: MediaInfoDialogStrings
     @ReadOnlyComposable
     @Composable
-    get() = ConverterMediaInfoDialogStrings(language)
+    get() = MediaInfoDialogStrings(language)
 
-class ConverterMediaInfoDialogStrings(override val language: String): Strings(language) {
+class MediaInfoDialogStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
         TITLE to "Informações da Mídia",

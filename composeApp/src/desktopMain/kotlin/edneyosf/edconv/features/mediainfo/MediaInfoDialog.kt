@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.converter.ui
+package edneyosf.edconv.features.mediainfo
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.LocalScrollbarStyle
@@ -31,8 +31,7 @@ import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.common.models.Subtitle
 import edneyosf.edconv.features.common.models.Video
-import edneyosf.edconv.features.converter.strings.ConverterMediaInfoDialogStrings.Keys.*
-import edneyosf.edconv.features.converter.strings.converterMediaInfoDialogStrings
+import edneyosf.edconv.features.mediainfo.MediaInfoDialogStrings.Keys.*
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.dimens
@@ -45,10 +44,10 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import java.io.File
 
 @Composable
-fun InputMedia.ConverterMediaInfoDialog(onFinish: () -> Unit) {
+fun InputMedia.MediaInfoDialog(onFinish: () -> Unit) {
     val scroll = rememberScrollState()
 
-    CompositionLocalProvider(value = stringsComp provides converterMediaInfoDialogStrings) {
+    CompositionLocalProvider(value = stringsComp provides mediaInfoDialogStrings) {
         SimpleDialog(
             icon = Icons.Rounded.Info,
             title = strings[TITLE],
@@ -244,7 +243,7 @@ private fun DefaultPreview() {
         subtitles = subtitlesStreams
     )
 
-    inputMedia.ConverterMediaInfoDialog(onFinish = {})
+    inputMedia.MediaInfoDialog(onFinish = {})
 }
 
 @Preview
