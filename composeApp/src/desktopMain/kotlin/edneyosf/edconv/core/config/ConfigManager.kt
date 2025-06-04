@@ -15,7 +15,7 @@ object ConfigManager {
     fun getFFmpegPath(): String = config.ffmpegPath
     fun getFFprobePath(): String = config.ffprobePath
 
-    fun getVMAFModelPath(): String = config.vmafModelPath
+    fun getVmafModelPath(): String = config.vmafModelPath
 
     suspend fun setFFmpegPath(path: String) {
         val newConfig = config.copy(ffmpegPath = path)
@@ -29,7 +29,7 @@ object ConfigManager {
         config = newConfig
     }
 
-    suspend fun setVMAFModelPath(path: String) {
+    suspend fun setVmafModelPath(path: String) {
         val newConfig = config.copy(vmafModelPath = path)
         save(newConfig)
         config = newConfig
