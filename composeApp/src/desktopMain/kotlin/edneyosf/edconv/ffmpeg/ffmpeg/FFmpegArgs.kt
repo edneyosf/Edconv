@@ -26,4 +26,5 @@ object FFmpegArgs {
     const val MAPPING_FAMILY = "-mapping_family"
     const val COPY = "copy"
     const val MAP_METADATA = "-map_metadata"
+    const val FILTER_AV = "-lavfi"
 }
