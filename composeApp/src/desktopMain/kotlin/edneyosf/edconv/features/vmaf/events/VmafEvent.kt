@@ -1,7 +1,6 @@
 package edneyosf.edconv.features.vmaf.events
 
 import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.vmaf.states.VmafDialogState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState
 
