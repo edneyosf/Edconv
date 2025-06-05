@@ -61,7 +61,7 @@ class FFprobe(private val file: File) {
         val entries = mutableListOf(
             "codec_type", "codec_name", "codec_long_name", "width", "height", "level", "film_grain",
             "bits_per_raw_sample", "sample_rate", "channels", "r_frame_rate", "pix_fmt", "profile", "field_order",
-            "display_aspect_ratio"
+            "display_aspect_ratio", "bit_rate"
         )
 
         return "$STREAM=${entries.joinToString(separator = ",")}"

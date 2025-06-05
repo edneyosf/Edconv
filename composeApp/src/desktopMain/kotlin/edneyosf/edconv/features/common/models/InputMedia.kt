@@ -11,7 +11,7 @@ data class InputMedia(
     val duration: Long,
     val durationText: String,
     val bitRate: Long? = null,
-    val bitrateText: String? = null,
+    val bitRateText: String? = null,
     val videos: List<Video> = emptyList(),
     val audios: List<Audio> = emptyList(),
     val subtitles: List<Subtitle> = emptyList()

@@ -30,5 +30,7 @@ data class StreamData(
     val fieldOrder: String? = null,
     @SerialName("display_aspect_ratio")
     val displayAspectRatio: String? = null,
-    val tags: StreamTagsData? = null
+    val tags: StreamTagsData? = null,
+    @SerialName("bit_rate")
+    val bitRate: Long? = null
 )

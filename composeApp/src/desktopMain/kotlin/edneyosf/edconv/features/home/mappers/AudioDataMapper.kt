@@ -1,5 +1,6 @@
 package edneyosf.edconv.features.home.mappers
 
+import edneyosf.edconv.core.extensions.toReadableBitrate
 import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.ffmpeg.data.AudioData
 
@@ -12,7 +13,9 @@ fun List<AudioData>.toAudioList() = mapNotNull { data ->
             profile = data.profile,
             channels = it,
             sampleRate = data.sampleRate,
-            bitDepth = data.bitDepth
+            bitDepth = data.bitDepth,
+            bitRate = data.bitRate,
+            bitRateText = data.bitRate?.toReadableBitrate()
         )
     }
 }

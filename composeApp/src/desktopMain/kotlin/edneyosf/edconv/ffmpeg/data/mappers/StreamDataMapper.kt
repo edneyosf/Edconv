@@ -29,7 +29,8 @@ fun StreamData.toAudioStream() = AudioData(
     profile = profile,
     channels = channels,
     sampleRate = sampleRate,
-    bitDepth = bitDepth
+    bitDepth = bitDepth,
+    bitRate = bitRate
 )
 
 fun StreamData.toSubtitleStream() = SubtitleData(

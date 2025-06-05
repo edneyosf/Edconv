@@ -67,7 +67,7 @@ fun InputMedia.MediaInfoDialog(onFinish: () -> Unit) {
                         ItemMediaInfo(label = strings[TYPE], value = type.TypeMediaInfoString())
                         ItemMediaInfo(label = strings[FORMAT], value = formatName)
                         ItemMediaInfo(label = strings[DURATION], value = durationText)
-                        ItemMediaInfo(label = strings[BITRATE], value = bitrateText)
+                        ItemMediaInfo(label = strings[BITRATE], value = bitRateText)
                         ItemMediaInfo(label = strings[SIZE], value = sizeText)
                         if(videos.isNotEmpty() || audios.isNotEmpty() || subtitles.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(height = dimens.xl))
@@ -112,6 +112,7 @@ fun InputMedia.MediaInfoDialog(onFinish: () -> Unit) {
                                 ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
                                 ItemMediaInfo(label = strings[PROFILE], value = it.profile)
+                                ItemMediaInfo(label = strings[BITRATE], value = it.bitRateText)
                                 ItemMediaInfo(label = strings[CHANNELS], value = it.channels.toString())
                                 ItemMediaInfo(
                                     label = strings[SAMPLE_RATE],
@@ -235,7 +236,7 @@ private fun DefaultPreview() {
         duration = 123456L,
         durationText = "123456",
         bitRate = 12345L,
-        bitrateText = "12345",
+        bitRateText = "12345",
         size = 123456L,
         sizeText = "123456",
         videos = videoStreams,

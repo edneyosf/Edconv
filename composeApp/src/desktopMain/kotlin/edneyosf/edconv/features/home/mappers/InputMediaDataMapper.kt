@@ -21,7 +21,7 @@ fun InputMediaData.toInputMedia(): InputMedia {
         duration = safeDuration,
         durationText = safeDuration.toDurationString(),
         bitRate = bitRate,
-        bitrateText = bitRate?.toReadableBitrate(),
+        bitRateText = bitRate?.toReadableBitrate(),
         videos = videoStreams.toVideoList(),
         audios = audioStreams.toAudioList(),
         subtitles = subtitleStreams.toSubtitleList()
