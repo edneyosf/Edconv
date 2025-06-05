@@ -7,5 +7,7 @@ data class Audio(
     val profile: String? = null,
     val channels: Int,
     val sampleRate: Int? = null,
-    val bitDepth: Int? = null
+    val bitDepth: Int? = null,
+    val bitRate: Long? = null,
+    val bitRateText: String? = null
 )
