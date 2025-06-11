@@ -1,11 +1,11 @@
 package edneyosf.edconv.ffmpeg.converter
 
 import edneyosf.edconv.core.common.Error
-import edneyosf.edconv.core.utils.DateTimeUtils
+import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.ffmpeg.data.ProgressData
+import edneyosf.edconv.ffmpeg.extensions.getProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs
 import kotlinx.coroutines.*
-import kotlinx.coroutines.swing.Swing
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -18,7 +18,7 @@ class Converter(
     private var process: Process? = null
 
     fun run(ffmpeg: String, inputFile: File, cmd: String, outputFile: File) = scope.launch(context = Dispatchers.IO) {
-        notify { onStart() }
+        notifyMain { onStart() }
         onStdout("Command = { $cmd }")
 
         try {
@@ -26,11 +26,11 @@ class Converter(
             outputFile.parentFile?.mkdirs()
 
             if(!inputFile.exists()) {
-                notify { onError(Error.INPUT_FILE_NOT_EXIST) }
+                notifyMain { onError(Error.INPUT_FILE_NOT_EXIST) }
                 return@launch
             }
             else if(!inputFile.isFile) {
-                notify { onError(Error.INPUT_NOT_FILE) }
+                notifyMain { onError(Error.INPUT_NOT_FILE) }
                 return@launch
             }
 
@@ -42,60 +42,38 @@ class Converter(
             ).start()
 
             process?.let {
-                notify { onProgress(null) }
+                notifyMain { onProgress(null) }
 
                 BufferedReader(InputStreamReader(it.errorStream)).useLines { lines ->
                     lines.forEach { line ->
-                        val progress = line.getProgressData()
+                        val progress = line.getProgressData(
+                            pattern = ConverterPattern.PROGRESS,
+                            onException = { e -> onStdout("Error = { " + e.message + " }") }
+                        )
 
-                        if (progress != null) notify { onProgress(progress) }
+                        if (progress != null) notifyMain { onProgress(progress) }
                         else onStdout(line)
                     }
                 }
 
                 val exitCode = it.waitFor()
-                if (exitCode != 0) notify { onError(Error.CONVERSION_PROCESS_COMPLETED) }
+                if (exitCode != 0) notifyMain { onError(Error.CONVERSION_PROCESS_COMPLETED) }
 
             } ?: run {
-                notify { onError(Error.PROCESS_NULL) }
+                notifyMain { onError(Error.PROCESS_NULL) }
             }
         }
         catch (e: Exception) {
             e.printStackTrace()
             destroyProcess()
-            notify { onError(Error.CONVERSION_PROCESS) }
+            notifyMain { onError(Error.CONVERSION_PROCESS) }
         }
         finally {
             process = null
-            notify { onStop() }
+            notifyMain { onStop() }
         }
 
         return@launch
-    }
-
-    private fun String.getProgressData(): ProgressData? {
-        var progress: ProgressData? = null
-
-        try {
-            val regex = Regex(pattern = ConverterPattern.PROGRESS)
-            val match = regex.find(input = this)
-
-            if(match != null) {
-                val (_, rawTime, _, speed) = match.destructured
-                val time = DateTimeUtils.timeToLong(time = rawTime, pattern = ConverterPattern.TIME)
-
-                progress = ProgressData(
-                    time = time,
-                    speed = speed
-                )
-            }
-        }
-        catch (e: Exception) {
-            e.printStackTrace()
-            onStdout("Error = { " + e.message + " }")
-        }
-
-        return progress
     }
 
     fun destroyProcess() {
@@ -110,7 +88,4 @@ class Converter(
 
         return filtered.toTypedArray()
     }
-
-    private suspend inline fun <T> notify(crossinline block: () -> T): Unit =
-        withContext(context = Dispatchers.Swing) { block() }
 }

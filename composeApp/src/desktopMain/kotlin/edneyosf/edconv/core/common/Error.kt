@@ -18,5 +18,7 @@ enum class Error(val code: String) {
     INPUT_NOT_FILE(code = "000E"),
     CONVERSION_PROCESS_COMPLETED(code = "000F"),
     PROCESS_NULL(code = "000G"),
-    CONVERSION_PROCESS(code = "000H");
+    CONVERSION_PROCESS(code = "000H"),
+    VMAF_PROCESS_COMPLETED(code = "000I"),
+    VMAF_PROCESS(code = "000J");
 }
