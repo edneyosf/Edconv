@@ -9,8 +9,8 @@ import edneyosf.edconv.ffmpeg.ffmpeg.extensions.addCmd
 class VmafFFmpeg(
     val reference: String,
     val distorted: String,
-    val referenceDimens: Pair<Int, Int>,
-    val distortedDimens: Pair<Int, Int>,
+    val referenceDim: Pair<Int, Int>,
+    val distortedDim: Pair<Int, Int>,
     val fps: Int,
     val model: String,
     val threads: Int
@@ -33,24 +33,24 @@ class VmafFFmpeg(
 
     private fun filter(): String {
         val builder = StringBuilder()
-        val referenceWidth = referenceDimens.first
-        val referenceHeight = referenceDimens.second
-        val distortedWidth = distortedDimens.first
-        val distortedHeight = distortedDimens.second
+        val referenceWidth = referenceDim.first
+        val referenceHeight = referenceDim.second
+        val distortedWidth = distortedDim.first
+        val distortedHeight = distortedDim.second
         val sameWidth = referenceWidth == distortedWidth
         val sameHeight = referenceHeight == distortedHeight
-        val sameDimens = sameWidth && sameHeight
+        val sameDim = sameWidth && sameHeight
         var referenceScale = ""
         var distortedScale = ""
 
-        if(!sameDimens) {
+        if(!sameDim) {
             if(referenceWidth > distortedWidth || referenceHeight > distortedHeight) {
-                referenceScale = scale(distortedDimens)
+                referenceScale = scale(distortedDim)
                 distortedScale = ""
             }
             else {
                 referenceScale = ""
-                distortedScale = scale(referenceDimens)
+                distortedScale = scale(referenceDim)
             }
         }
 

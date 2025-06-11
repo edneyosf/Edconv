@@ -1,13 +1,16 @@
 package edneyosf.edconv.features.vmaf.viewmodels
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.config.ConfigManager
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
+import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.home.mappers.toInputMedia
@@ -24,25 +27,29 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.Instant
 
 class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
 
+    private var startTime: Instant? = null
     private val vmaf: Vmaf
 
     private var analysis: Job? = null
 
-    private val _state = mutableStateOf(value = VmafState(
-        reference = input,
-        model = ConfigManager.getVmafModelPath().takeIf { it.isNotEmpty() },
-        threads = getThreads()
-    ))
-    val state: State<VmafState> = _state
+    private val _state: MutableState<VmafState>
+    val state: State<VmafState>
 
     init {
+        val modelPath = ConfigManager.getVmafModelPath()
+        val model = modelPath.takeIf { it.isNotEmpty() }
+        val stateValue = VmafState(reference = input, model = model, threads = getThreads())
+
+        _state = mutableStateOf(value = stateValue)
+        state = _state
         vmaf = Vmaf(
             scope = viewModelScope,
             onStart = ::onStart,
-            onStdout = ::onStdout,
+            onStdout = {},
             onError = ::onError,
             onProgress = ::onProgress,
             onStop = ::onStop
@@ -50,19 +57,7 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
     }
 
     private fun onStart() {
-        setStatus(VmafStatusState.Loading)
-    }
-
-    private fun onStdout(it: String) {
-        println("onStdout: "+ it)
-    }
-
-    private fun onError(error: Error) = setStatus(status = VmafStatusState.Failure(error))
-
-    private fun onStop() {
-        if(_state.value.status !is VmafStatusState.Failure) {
-            setStatus(VmafStatusState.Complete)
-        }
+        startTime = Instant.now()
     }
 
     private fun onProgress(it: ProgressData?) {
@@ -79,6 +74,32 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
         setStatus(VmafStatusState.Progress(percentage, speed))
     }
 
+    private fun onStop(score: Double?) {
+        startTime?.let {
+            val finishTime = Instant.now()
+            val startText = DateTimeUtils.instantToText(instant = it, pattern = DateTimePattern.TIME_HMS)
+            val finishText = DateTimeUtils.instantToText(instant = finishTime, pattern = DateTimePattern.TIME_HMS)
+            val duration = DateTimeUtils.durationText(it, finishTime)
+
+            startTime = null
+            if(_state.value.status !is VmafStatusState.Failure && score != null) {
+                setStatus(VmafStatusState.Complete(
+                    score = score.toString(),
+                    startTime = startText,
+                    finishTime = finishText,
+                    duration = duration
+                ))
+            }
+            else if(score == null) {
+                onError(Error.VMAF_SCORE_NULL)
+            }
+        } ?: run {
+            onError(Error.START_TIME_NULL)
+        }
+    }
+
+    private fun onError(error: Error) = setStatus(status = VmafStatusState.Failure(error))
+
     override fun setStatus(status: VmafStatusState) = _state.update { copy(status = status) }
 
     override fun setDialog(dialog: VmafDialogState) = _state.update { copy(dialog = dialog) }
@@ -86,25 +107,43 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
     override fun refresh(newInput: InputMedia) = _state.update { copy(reference = newInput) }
 
     override fun start() {
-        val state = _state.value
-        val referenceInfo = state.reference.videos.first()
-        val referenceDimens = Pair(referenceInfo.width, referenceInfo.height)
-        val distortedInfo = FFprobe(File(state.distorted!!)).analyze()!!.toInputMedia().videos.first()
-        val distortedDimens = Pair(distortedInfo.width, distortedInfo.height)
-        val data = VmafFFmpeg(
-            reference = state.reference.path,
-            distorted = state.distorted,
-            referenceDimens = referenceDimens,
-            distortedDimens = distortedDimens,
-            fps = state.fps,
-            threads = state.threads,
-            model = state.model!!
-        )
+        _state.value.run {
+            val referenceInfo = reference.videos.firstOrNull()
 
-        analysis = vmaf.run(
-            ffmpeg = ConfigManager.getFFmpegPath(),
-            data = data
-        )
+            when {
+                referenceInfo != null && distorted != null && model != null -> {
+                    setStatus(VmafStatusState.Loading)
+                    viewModelScope.launch(context = Dispatchers.IO) {
+                        val referenceDim = Pair(first = referenceInfo.width, second = referenceInfo.height)
+                        val distortedFile = File(distorted)
+                        val distortedInputData = FFprobe(distortedFile).analyze()?.toInputMedia()
+                        val distortedInfo = distortedInputData?.videos?.firstOrNull()
+
+                        if(distortedInfo != null) {
+                            val distortedDim = Pair(first = distortedInfo.width, second = distortedInfo.height)
+                            val data = VmafFFmpeg(
+                                reference = reference.path,
+                                distorted = distorted,
+                                referenceDim = referenceDim,
+                                distortedDim = distortedDim,
+                                fps = fps,
+                                threads = threads,
+                                model = model
+                            )
+
+                            analysis = vmaf.run(ffmpeg = ConfigManager.getFFmpegPath(), data = data)
+                        }
+                        else {
+                            notifyMain { onError(Error.NO_VIDEO_INPUT_MEDIA) }
+                        }
+                    }
+                }
+
+                referenceInfo == null -> onError(Error.NO_VIDEO_INPUT_MEDIA)
+
+                else -> onError(Error.ON_STARTING_VMAF_REQUIREMENTS)
+            }
+        }
     }
 
     override fun stop() {
@@ -117,7 +156,7 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                notifyMain { onError(Error.ON_STOPPING_CONVERSION) }
+                notifyMain { onError(Error.ON_STOPPING_VMAF) }
             }
         }
     }
@@ -125,18 +164,16 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
     override fun pickDistortedFile(title: String) {
         val path = FileUtils.pickFile(title)
 
-        if(path != null) {
-            _state.update { copy(distorted = path) }
-        }
+        path?.let { _state.update { copy(distorted = it) } }
     }
 
     override fun pickModelFile(title: String) {
         val path = FileUtils.pickFile(title)
 
-        if(path != null) {
+        path?.let {
             viewModelScope.launch(context = Dispatchers.IO) {
-                ConfigManager.setVmafModelPath(path)
-                notifyMain { _state.update { copy(model = path) } }
+                ConfigManager.setVmafModelPath(it)
+                notifyMain { _state.update { copy(model = it) } }
             }
         }
     }

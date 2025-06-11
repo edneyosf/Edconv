@@ -196,6 +196,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
 
     override fun start(overwrite: Boolean) = _state.value.run {
         if(!output.isNullOrBlank() && command.isNotBlank()) {
+            setStatus(ConverterStatusState.Loading)
             try {
                 val inputFile = File(input.path)
                 val outputFile = File(output)
@@ -247,7 +248,6 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         logsCache.clear()
         _logsState.clear()
         _logsState.add(inputMediaString + "\n")
-        _state.update { copy(status = ConverterStatusState.Loading) }
         startLogMonitor()
     }
 
