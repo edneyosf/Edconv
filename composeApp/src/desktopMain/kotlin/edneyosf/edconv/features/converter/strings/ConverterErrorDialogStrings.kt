@@ -17,7 +17,7 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
 
     override val pt = mapOf(
         ON_STARTING_CONVERSION to "Falha ao iniciar conversão.",
-        ON_STARTING_CONVERSION_REQUIREMENTS to "O comando de entrada ou o arquivo de saída é inválido.",
+        ON_STARTING_CONVERSION_REQUIREMENTS to "O comando de entrada e/ou o arquivo de saída são inválidos.",
         ON_STOPPING_CONVERSION to "Falha ao parar conversão.",
         START_TIME_NULL to "O tempo de início é nulo.",
         INPUT_FILE_NOT_EXIST to "O arquivo de entrada não existe.",
@@ -29,7 +29,7 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
 
     override val en = mapOf(
         ON_STARTING_CONVERSION to "Failed to start conversion.",
-        ON_STARTING_CONVERSION_REQUIREMENTS to "Either the input command or the output file is invalid.",
+        ON_STARTING_CONVERSION_REQUIREMENTS to "Either the input command and/or the output file are invalid.",
         ON_STOPPING_CONVERSION to "Failed to stop conversion.",
         START_TIME_NULL to "The start time is null.",
         INPUT_FILE_NOT_EXIST to "The input file does not exist.",
