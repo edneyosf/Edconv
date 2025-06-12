@@ -172,8 +172,14 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
 
         path?.let {
             viewModelScope.launch(context = Dispatchers.IO) {
-                ConfigManager.setVmafModelPath(it)
-                notifyMain { _state.update { copy(model = it) } }
+                try {
+                    ConfigManager.setVmafModelPath(it)
+                    notifyMain { _state.update { copy(model = it) } }
+                }
+                catch (e: Exception) {
+                    e.printStackTrace()
+                    onError(Error.VMAF_MODEL_SAVE)
+                }
             }
         }
     }
