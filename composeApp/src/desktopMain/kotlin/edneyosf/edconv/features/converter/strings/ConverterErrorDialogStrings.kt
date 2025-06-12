@@ -22,7 +22,7 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
         START_TIME_NULL to "O tempo de início é nulo.",
         INPUT_FILE_NOT_EXIST to "O arquivo de entrada não existe.",
         INPUT_NOT_FILE to "A mídia de entrada não é um arquivo.",
-        CONVERSION_PROCESS_COMPLETED to "A conversão não teve sucesso.",
+        CONVERSION_PROCESS_COMPLETED to "A conversão não pôde ser realizada com sucesso.",
         PROCESS_NULL to "O processo de conversão é nulo.",
         CONVERSION_PROCESS to "Falha na conversão."
     )
@@ -34,7 +34,7 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
         START_TIME_NULL to "The start time is null.",
         INPUT_FILE_NOT_EXIST to "The input file does not exist.",
         INPUT_NOT_FILE to "The input media is not a file.",
-        CONVERSION_PROCESS_COMPLETED to "The conversion was unsuccessful.",
+        CONVERSION_PROCESS_COMPLETED to "The conversion could not be completed successfully.",
         PROCESS_NULL to "The conversion process is null.",
         CONVERSION_PROCESS to "Conversion failed."
     )
