@@ -116,7 +116,9 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
                     viewModelScope.launch(context = Dispatchers.IO) {
                         val referenceDim = Pair(first = referenceInfo.width, second = referenceInfo.height)
                         val distortedFile = File(distorted)
-                        val distortedInputData = FFprobe(distortedFile).analyze()?.toInputMedia()
+                        val distortedData = FFprobe(distortedFile).analyze()
+                        val error = distortedData == null || distortedData.duration == null
+                        val distortedInputData = distortedData.takeIf { !error }?.toInputMedia()
                         val distortedInfo = distortedInputData?.videos?.firstOrNull()
 
                         if(distortedInfo != null) {

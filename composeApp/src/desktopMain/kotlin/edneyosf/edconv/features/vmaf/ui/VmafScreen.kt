@@ -1,5 +1,6 @@
 package edneyosf.edconv.features.vmaf.ui
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,8 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edneyosf.edconv.core.extensions.LaunchedEffected
-import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.MEDIA_INFO
-import edneyosf.edconv.features.vmaf.strings.VMAFScreenStrings.Keys.*
+import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.MEDIA_INFO
+import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.*
 import edneyosf.edconv.features.vmaf.VmafArgs
 import edneyosf.edconv.features.vmaf.events.VmafEvent
 import edneyosf.edconv.features.vmaf.states.VmafDialogState
@@ -34,13 +38,17 @@ import edneyosf.edconv.features.vmaf.states.VmafState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState
 import edneyosf.edconv.features.vmaf.strings.vmafScreenStrings
 import edneyosf.edconv.features.vmaf.viewmodels.VmafViewModel
+import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.TextTooltip
-import edneyosf.edconv.ui.components.buttons.PrimaryButton
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
+import edneyosf.edconv.ui.previews.EnglishDarkPreview
+import edneyosf.edconv.ui.previews.EnglishLightPreview
+import edneyosf.edconv.ui.previews.PortugueseDarkPreview
+import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun VMAFScreen(args: VmafArgs) {
@@ -59,6 +67,8 @@ fun VMAFScreen(args: VmafArgs) {
 
 @Composable
 private fun VmafState.Content(event: VmafEvent) {
+    val stringPickFile = strings[TITLE_PICK_FILE]
+
     Column(
         modifier = Modifier.padding(all = dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -67,13 +77,15 @@ private fun VmafState.Content(event: VmafEvent) {
         ActionsTool(
             startEnabled = canStart(),
             stopEnabled = canStop(),
-            startDescription = strings[START_CONVERSION],
-            stopDescription = strings[STOP_CONVERSION],
+            startDescription = strings[START_ANALYSIS],
+            stopDescription = strings[STOP_ANALYSIS],
             onStart = { event.start() },
             onStop = { event.stop() },
             righties = {
                 TextTooltip(text = strings[MEDIA_INFO]) {
-                    IconButton(onClick = { event.setDialog(VmafDialogState.MediaInfo(reference))}) {
+                    IconButton(
+                        onClick = { event.setDialog(VmafDialogState.MediaInfo(inputMedia = reference)) }
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Info,
                             contentDescription = strings[MEDIA_INFO]
@@ -82,47 +94,82 @@ private fun VmafState.Content(event: VmafEvent) {
                 }
             }
         )
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(
-                value = distorted.toString(),
-                //modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(weight = 1f),
+                value = distorted ?: "",
                 colors = TextFieldDefaults.colors().custom(),
-                onValueChange = { },
+                placeholder = { Text(text = "video.mkv") },
+                readOnly = true,
+                singleLine = true,
+                onValueChange = {},
                 label = { Text(text = strings[DISTORTED_FILE_INPUT]) }
             )
-            PrimaryButton(
-                text = "Confirmar",
-                onClick = {event.pickDistortedFile("Distorcido")}
-            )
+            Spacer(modifier = Modifier.width(width = dimens.xs))
+            TextTooltip(text = strings[SELECT_FILE]) {
+                IconButton(
+                    onClick = { event.pickDistortedFile(title = stringPickFile) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.FileOpen,
+                        contentDescription = strings[SELECT_FILE]
+                    )
+                }
+            }
         }
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(
-                value = model.toString(),
-                //modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(weight = 1f),
+                value = model ?: "",
                 colors = TextFieldDefaults.colors().custom(),
                 onValueChange = { },
+                singleLine = true,
+                readOnly = true,
+                placeholder = { Text(text = "model.json") },
                 label = { Text(text = strings[MODEL_FILE_INPUT]) }
             )
-            PrimaryButton(
-                text = "Confirmar",
-                onClick = {event.pickModelFile("MOdel")}
-            )
+            Spacer(modifier = Modifier.width(width = dimens.xs))
+            TextTooltip(text = strings[SELECT_FILE]) {
+                IconButton(
+                    onClick = { event.pickModelFile(title = stringPickFile) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.FileOpen,
+                        contentDescription = strings[SELECT_FILE]
+                    )
+                }
+            }
         }
         Row {
             TextField(
                 value = fps.toString(),
                 colors = TextFieldDefaults.colors().custom(),
-                onValueChange = { event.setFps(it) },
+                singleLine = true,
+                onValueChange = {
+                    val value = it.toIntOrNull()
+
+                    if(value != null && value > 0 && it.length <= 3) {
+                        event.setFps(it)
+                    }
+                },
                 label = { Text(text = strings[FPS_INPUT]) }
             )
+            Spacer(modifier = Modifier.width(width = dimens.xl))
             TextField(
                 value = threads.toString(),
                 colors = TextFieldDefaults.colors().custom(),
-                onValueChange = { event.setThread(it) },
+                singleLine = true,
+                onValueChange = {
+                    val value = it.toIntOrNull()
+
+                    if(value != null && value > 0 && it.length <= 3) {
+                        event.setThread(it)
+                    }
+                },
                 label = { Text(text = strings[THREAD_INPUT]) }
             )
         }
-
+        Spacer(modifier = Modifier.weight(weight = 1f))
         Progress(status)
     }
 }
@@ -169,3 +216,46 @@ private fun VmafState.canStart(): Boolean {
 }
 
 private fun VmafState.canStop(): Boolean = status is VmafStatusState.Progress
+
+@Composable
+private fun DefaultPreview() {
+    CompositionLocalProvider(value = stringsComp provides vmafScreenStrings) {
+        val type = MediaType.VIDEO
+        val input = InputMedia(
+            path = "/dir/video.mkv",
+            type = type,
+            size = 123456L,
+            sizeText = "123456",
+            duration = 123456L,
+            durationText = "123456"
+        )
+        val progressStatus = VmafStatusState.Progress(
+            percentage = 50.0f,
+            speed = "1.6x"
+        )
+        val state = VmafState(
+            status = progressStatus,
+            reference = input,
+            distorted = "/dir/video.mkv",
+            model = "/dir/model.json"
+        )
+
+        state.Content(event = object : VmafEvent {})
+    }
+}
+
+@Preview
+@Composable
+private fun EnglishLight() = EnglishLightPreview { DefaultPreview() }
+
+@Preview
+@Composable
+private fun EnglishDark() = EnglishDarkPreview { DefaultPreview() }
+
+@Preview
+@Composable
+private fun PortugueseLight() = PortugueseLightPreview { DefaultPreview() }
+
+@Preview
+@Composable
+private fun PortugueseDark() = PortugueseDarkPreview { DefaultPreview() }
