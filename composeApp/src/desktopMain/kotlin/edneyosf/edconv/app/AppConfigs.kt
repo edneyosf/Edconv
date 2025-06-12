@@ -1,7 +1,7 @@
 package edneyosf.edconv.app
 
-import edneyosf.edconv.core.Languages
-import edneyosf.edconv.edconv.common.FFLogLevel
+import edneyosf.edconv.core.common.Languages
+import edneyosf.edconv.ffmpeg.common.FFLogLevel
 
 object AppConfigs {
     var outputDefault = ""
@@ -10,4 +10,5 @@ object AppConfigs {
     const val MIN_WINDOW_HEIGHT = 730
     const val LANGUAGE = Languages.EN
     const val FFMPEG_LOG_LEVEL = FFLogLevel.VERBOSE
+    const val LOG_MONITOR_DELAY = 2000L
 }

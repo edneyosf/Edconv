@@ -10,13 +10,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
+import edneyosf.edconv.core.common.Error
+import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
+import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.events.SettingsEvent
-import edneyosf.edconv.features.settings.managers.SettingsManager
+import edneyosf.edconv.features.settings.viewmodels.SettingsViewModel
 import edneyosf.edconv.features.settings.states.SettingsState
-import edneyosf.edconv.features.settings.states.SettingsStatus
+import edneyosf.edconv.features.settings.states.SettingsStatusState
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
 import edneyosf.edconv.features.settings.strings.SettingsDialogStrings.Keys.*
+import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
+import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.ui.components.alerts.ErrorAlertText
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
@@ -28,24 +34,25 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun SettingsDialog(onComplete: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val manager = remember { SettingsManager(scope) }
-    val state by manager.state
-    val status = state.status
+    val viewModel = viewModel { SettingsViewModel() }
+    val state by viewModel.state
 
-    LaunchedEffect(status) {
-        if(status is SettingsStatus.Complete) onComplete()
+    LaunchedEffected(key = state.status) {
+        if(it is SettingsStatusState.Complete) {
+            onComplete()
+            viewModel.setStatus(status = SettingsStatusState.Initial)
+        }
     }
 
-    CompositionLocalProvider(stringsComp provides settingsDialogStrings) {
-        state.Content(onEvent = manager::onEvent)
+    CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
+        state.Content(event = viewModel)
     }
 }
 
 @Composable
-private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
+private fun SettingsState.Content(event: SettingsEvent) {
     val defined = !(ffmpegPath.isBlank() || ffprobePath.isBlank())
-    val isLoading = status is SettingsStatus.Loading
+    val isLoading = status is SettingsStatusState.Loading
     val pickFFmpegTitle = strings[PICK_FFMPEG_TITLE]
     val pickFFprobeTitle = strings[PICK_FFPROBE_TITLE]
 
@@ -58,49 +65,53 @@ private fun SettingsState.Content(onEvent: (SettingsEvent) -> Unit) {
                     text = if(defined) strings[DEFINED] else strings[NO_DEFINED],
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(dimens.xl))
+                Spacer(modifier = Modifier.height(height = dimens.xl))
                 Row {
                     PrimaryButton(
-                        icon = if(ffmpegPath.isNotBlank()) Icons.Rounded.CheckCircle else null,
+                        icon = Icons.Rounded.CheckCircle.takeIf { ffmpegPath.isNotBlank() },
                         text = strings[SELECT_FFMPEG],
                         loading = isLoading,
                         onClick = {
-                            FileUtils.pickFile(title = pickFFmpegTitle)?.let {
-                                onEvent(SettingsEvent.SetFFmpegPath(it))
-                            }
+                            FileUtils.pickFile(title = pickFFmpegTitle)
+                                ?.let { event.setFFmpegPath(it) }
                         }
                     )
-                    Spacer(modifier = Modifier.width(dimens.md))
+                    Spacer(modifier = Modifier.width(width = dimens.md))
                     PrimaryButton(
-                        icon = if(ffprobePath.isNotBlank()) Icons.Rounded.CheckCircle else null,
+                        icon = Icons.Rounded.CheckCircle.takeIf { ffprobePath.isNotBlank() },
                         text = strings[SELECT_FFPROBE],
                         loading = isLoading,
                         onClick = {
-                            FileUtils.pickFile(title = pickFFprobeTitle)?.let {
-                                onEvent(SettingsEvent.SetFFprobePath(it))
-                            }
+                            FileUtils.pickFile(title = pickFFprobeTitle)
+                                ?.let { event.setFFprobePath(it) }
                         }
                     )
                 }
-                if(status is SettingsStatus.Error) {
-                    Spacer(modifier = Modifier.height(dimens.md))
-                    ErrorAlertText(text = status.message ?: strings[DEFAULT_ERROR])
+                if(status is SettingsStatusState.Failure) {
+                    val error = status.error
+                    val message = when(error) {
+                        Error.FFMPEG_OR_FFPROBE_VERIFICATION -> strings[FFMPEG_OR_FFPROBE_VERIFICATION]
+                        Error.CONFIGURATION_SAVE -> strings[CONFIGURATION_SAVE]
+                        else -> commonStrings[ERROR_DEFAULT]
+                    }
+
+                    Spacer(modifier = Modifier.height(height = dimens.md))
+                    ErrorAlertText(text = "$error: $message")
                 }
             }
         },
         confirmationEnabled = defined && !isLoading,
-        confirmationText = settingsDialogStrings[CONFIRMATION_BUTTON],
-        onConfirmation = { onEvent(SettingsEvent.OnSave) },
+        confirmationText = commonStrings[CONFIRMATION_BUTTON],
+        onConfirmation = { event.onSave() },
         onDismissRequest = { }
     )
 }
 
 @Composable
 private fun DefaultPreview() {
-    CompositionLocalProvider(stringsComp provides settingsDialogStrings) {
-        SettingsState.default()
-            .copy(ffmpegPath = "ffmpeg", status = SettingsStatus.Error())
-            .Content(onEvent = {})
+    CompositionLocalProvider(value = stringsComp provides settingsDialogStrings) {
+        SettingsState(ffmpegPath = "ffmpeg", status = SettingsStatusState.Failure(Error.DEFAULT))
+            .Content(event = object : SettingsEvent {})
     }
 }
 

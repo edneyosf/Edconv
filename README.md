@@ -1,4 +1,4 @@
-![Application Preview](assets/edconv-banner.webp)
+![Application Preview](assets/edconv-banner.png)
 
 <div align="center">
   <h1>Edconv</h1>
@@ -20,9 +20,10 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 ## Features ✨
 
 - Convert video and audio using FFmpeg
-- Presets for movies, shows, and music (soon)
 - Custom FFmpeg arguments
 - Clean, intuitive interface
+- VMAF perceptual video quality assessment algorithm
+- Conversion queue (soon)
 
 ## Screenshots
 

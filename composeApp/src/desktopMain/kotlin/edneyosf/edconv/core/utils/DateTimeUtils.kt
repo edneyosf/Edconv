@@ -26,10 +26,10 @@ object DateTimeUtils {
 
     fun durationText(start: Temporal, end: Temporal): String {
         val duration = Duration.between(start, end)
-        val horas = (duration.toHours() % 24).toString().padStart(2, '0')
-        val minutos = (duration.toMinutes() % 60).toString().padStart(2, '0')
-        val segundos = (duration.seconds % 60).toString().padStart(2, '0')
+        val hours = (duration.toHours() % 24).toString().padStart(2, '0')
+        val minutes = (duration.toMinutes() % 60).toString().padStart(2, '0')
+        val seconds = (duration.seconds % 60).toString().padStart(2, '0')
 
-        return "$horas:$minutos:$segundos"
+        return "$hours:$minutes:$seconds"
     }
 }
