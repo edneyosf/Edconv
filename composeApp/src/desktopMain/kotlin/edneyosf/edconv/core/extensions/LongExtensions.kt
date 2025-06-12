@@ -27,7 +27,7 @@ fun Long.toReadableSize(): String {
 fun Long.toReadableBitrate(): String {
     return when {
         this >= 1_000_000 -> "%d Mbps".format((this / 1_000_000.0).toInt())
-        this >= 1_000     -> "%d Kbps".format((this / 1_000.0).toInt())
+        this >= 1_000     -> "%d kbps".format((this / 1_000.0).toInt())
         else -> "$this bps"
     }
 }

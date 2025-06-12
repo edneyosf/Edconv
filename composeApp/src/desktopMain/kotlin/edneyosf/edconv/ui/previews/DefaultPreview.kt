@@ -7,7 +7,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import edneyosf.edconv.core.Languages
+import edneyosf.edconv.core.common.Languages
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.language
 import edneyosf.edconv.ui.compositions.languageComp

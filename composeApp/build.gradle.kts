@@ -29,6 +29,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(compose.materialIconsExtended)
             implementation(libs.serialization.json)
+            implementation(libs.viewmodel)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
