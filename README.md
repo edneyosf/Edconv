@@ -22,6 +22,7 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 - Convert video and audio using FFmpeg
 - Custom FFmpeg arguments
 - Clean, intuitive interface
+- Media Information
 - VMAF perceptual video quality assessment algorithm
 - Conversion queue (soon)
 
