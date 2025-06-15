@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Stop
@@ -26,12 +27,15 @@ import edneyosf.edconv.ui.previews.LightPreview
 
 @Composable
 fun ActionsTool(
+    addToQueueEnabled: Boolean = false,
     startEnabled: Boolean,
     stopEnabled: Boolean,
+    addToQueueDescription: String? = null,
     startDescription: String,
     stopDescription: String,
     righties: @Composable (() -> Unit)? = null,
     lefties: @Composable (() -> Unit)? = null,
+    onAddToQueue: (() -> Unit)? = null,
     onStart: () -> Unit,
     onStop: () -> Unit
 ) {
@@ -42,6 +46,24 @@ fun ActionsTool(
     Row(modifier = modifier) {
         if(lefties != null) lefties()
         Spacer(modifier = Modifier.weight(weight = 1f))
+        if(onAddToQueue != null && addToQueueDescription != null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                FilledTonalIconButton(
+                    enabled = addToQueueEnabled,
+                    onClick = onAddToQueue
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = addToQueueDescription
+                    )
+                }
+                Text(
+                    text = addToQueueDescription,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(modifier = Modifier.width(width = dimens.md))
+        }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FilledIconButton(
                 enabled = startEnabled,
@@ -81,8 +103,10 @@ fun ActionsTool(
 @Composable
 private fun DefaultPreview() {
     ActionsTool(
+        addToQueueEnabled = true,
         startEnabled = true,
         stopEnabled = false,
+        addToQueueDescription = "Add",
         startDescription = "Start",
         stopDescription = "Stop",
         righties = {
@@ -101,6 +125,7 @@ private fun DefaultPreview() {
                 )
             }
         },
+        onAddToQueue = {},
         onStart = {},
         onStop = {}
     )

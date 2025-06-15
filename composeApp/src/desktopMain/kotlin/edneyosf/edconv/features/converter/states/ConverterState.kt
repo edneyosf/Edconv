@@ -22,5 +22,6 @@ data class ConverterState(
     val pixelFormat: PixelFormat? = null,
     val noAudio: Boolean = false,
     val noSubtitle: Boolean = false,
-    val noMetadata: Boolean = false
+    val noMetadata: Boolean = false,
+    val queueSize: Int = 0
 )

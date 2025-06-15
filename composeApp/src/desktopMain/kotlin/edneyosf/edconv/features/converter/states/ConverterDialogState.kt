@@ -5,5 +5,6 @@ import edneyosf.edconv.features.common.models.InputMedia
 sealed interface ConverterDialogState {
     data object None: ConverterDialogState
     data object Settings: ConverterDialogState
+    data object Queue: ConverterDialogState
     data class MediaInfo(val inputMedia: InputMedia): ConverterDialogState
 }

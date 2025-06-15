@@ -65,6 +65,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
         verticalArrangement = Arrangement.spacedBy(space = dimens.xl)
     ) {
         Actions(
+            onAddToQueue = { event.addToQueue() },
             onStart = { event.start() },
             onStop = { event.stop() },
             onMediaInfo = { event.setDialog(ConverterDialogState.MediaInfo(inputMedia = input)) }
@@ -173,14 +174,38 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
 }
 
 @Composable
-private fun ConverterState.Actions(onStart: () -> Unit, onStop: () -> Unit, onMediaInfo: () -> Unit) {
+private fun ConverterState.Actions(
+    onAddToQueue: () -> Unit,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onMediaInfo: () -> Unit
+) {
     ActionsTool(
+        addToQueueEnabled = canAddToQueue(),
         startEnabled = canStart(),
         stopEnabled = canStop(),
+        addToQueueDescription = strings[ADD_TO_QUEUE_CONVERSION],
         startDescription = strings[START_CONVERSION],
         stopDescription = strings[STOP_CONVERSION],
+        onAddToQueue = onAddToQueue,
         onStart = onStart,
         onStop = onStop,
+        lefties = {
+            TextTooltip(text = strings[QUEUE]) {
+                IconButton(
+                    onClick = { } //TODO
+                ) {
+                    BadgedBox(
+                        badge = { if(queueSize > 0) Badge() } //TODO
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Queue,
+                            contentDescription = strings[QUEUE]
+                        )
+                    }
+                }
+            }
+        },
         righties = {
             TextTooltip(text = strings[MEDIA_INFO]) {
                 IconButton(onClick = onMediaInfo) {
@@ -590,6 +615,21 @@ private fun Progress(status: ConverterStatusState) {
         else if(status is ConverterStatusState.Progress || status is ConverterStatusState.Loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
+    }
+}
+
+private fun ConverterState.canAddToQueue(): Boolean {
+    if (
+        output.isNullOrBlank() ||
+        command.isBlank() ||
+        codec == null ||
+        status is ConverterStatusState.Loading
+    ) return false
+
+    return when (type) {
+        MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
+        MediaType.VIDEO -> preset != null && crf != null
+        MediaType.SUBTITLE -> false
     }
 }
 

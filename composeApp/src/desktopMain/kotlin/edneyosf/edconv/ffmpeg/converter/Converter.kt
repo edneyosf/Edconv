@@ -5,19 +5,20 @@ import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.extensions.getProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs
-import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
 class Converter(
-    private val scope: CoroutineScope, private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
-    private val onError: (Error) -> Unit, private val onProgress: (ProgressData?) -> Unit,
-    private val onStop: () -> Unit
+    private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
+    /*private val onError: (Error) -> Unit,*/ private val onProgress: (ProgressData?) -> Unit,
+    //private val onStop: () -> Unit
 ) {
     private var process: Process? = null
 
-    fun run(ffmpeg: String, inputFile: File, cmd: String, outputFile: File) = scope.launch(context = Dispatchers.IO) {
+    suspend fun run(ffmpeg: String, inputFile: File, cmd: String, outputFile: File): Error? {
+        var error: Error? = null
+
         notifyMain { onStart() }
         onStdout("Command = { $cmd }")
 
@@ -25,14 +26,8 @@ class Converter(
             if (outputFile.exists() && outputFile.isFile) outputFile.delete()
             outputFile.parentFile?.mkdirs()
 
-            if(!inputFile.exists()) {
-                notifyMain { onError(Error.INPUT_FILE_NOT_EXIST) }
-                return@launch
-            }
-            else if(!inputFile.isFile) {
-                notifyMain { onError(Error.INPUT_NOT_FILE) }
-                return@launch
-            }
+            if(!inputFile.exists()) return Error.INPUT_FILE_NOT_EXIST
+            else if(!inputFile.isFile) return Error.INPUT_NOT_FILE
 
             process = ProcessBuilder(
                 ffmpeg,
@@ -57,23 +52,22 @@ class Converter(
                 }
 
                 val exitCode = it.waitFor()
-                if (exitCode != 0) notifyMain { onError(Error.CONVERSION_PROCESS_COMPLETED) }
+                if (exitCode != 0) error = Error.CONVERSION_PROCESS_COMPLETED
 
             } ?: run {
-                notifyMain { onError(Error.PROCESS_NULL) }
+                error = Error.PROCESS_NULL
             }
         }
         catch (e: Exception) {
             e.printStackTrace()
             destroyProcess()
-            notifyMain { onError(Error.CONVERSION_PROCESS) }
+            error = Error.CONVERSION_PROCESS
         }
         finally {
             process = null
-            notifyMain { onStop() }
         }
 
-        return@launch
+        return error
     }
 
     fun destroyProcess() {

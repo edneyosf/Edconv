@@ -24,6 +24,7 @@ interface ConverterEvent {
     fun setNoAudio(noAudio: Boolean) = Unit
     fun setNoSubtitle(noSubtitle: Boolean) = Unit
     fun setNoMetadata(noMetadata: Boolean) = Unit
+    fun addToQueue(overwrite: Boolean = false) = Unit
     fun start(overwrite: Boolean = false) = Unit
     fun stop() = Unit
 }
