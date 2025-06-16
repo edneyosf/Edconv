@@ -9,17 +9,12 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class Converter(
-    private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
-    /*private val onError: (Error) -> Unit,*/ private val onProgress: (ProgressData?) -> Unit,
-    //private val onStop: () -> Unit
-) {
+class Converter(private val onStdout: (String) -> Unit, private val onProgress: (ProgressData?) -> Unit) {
     private var process: Process? = null
 
     suspend fun run(ffmpeg: String, inputFile: File, cmd: String, outputFile: File): Error? {
         var error: Error? = null
 
-        notifyMain { onStart() }
         onStdout("Command = { $cmd }")
 
         try {
