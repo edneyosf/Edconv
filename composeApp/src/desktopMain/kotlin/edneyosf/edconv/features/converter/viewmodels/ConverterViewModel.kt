@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.app.AppConfigs.LOG_MONITOR_DELAY
-import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.config.ConfigManager
+import edneyosf.edconv.core.extensions.durationUntil
+import edneyosf.edconv.core.extensions.formatTime
 import edneyosf.edconv.core.extensions.normalizeCommand
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.toReadableCommand
 import edneyosf.edconv.core.extensions.update
-import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.converter.ConverterQueue
 import edneyosf.edconv.features.converter.ConverterQueueStatus
@@ -24,6 +24,7 @@ import edneyosf.edconv.features.converter.events.ConverterEvent
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
+import edneyosf.edconv.features.converter.states.FileExistsAction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,19 +39,19 @@ import java.util.UUID
 
 class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), ConverterEvent {
 
-    private var startTime: Instant? = null
     private var conversion: Job? = null
     private var logMonitor: Job? = null
+
     private val converter: Converter
     private val queue = mutableListOf<ConverterQueue>()
-    private var current: ConverterQueue? = null
-
-    private val _state = MutableStateFlow(value = ConverterState(input = input, type = type))
-    val state: StateFlow<ConverterState> = _state
+    private var currentQueueId: String? = null
 
     private val _logsState = mutableStateListOf<String>()
     val logsState: List<String> get() = _logsState
     private val logsCache = mutableListOf<String>()
+
+    private val _state = MutableStateFlow(value = ConverterState(input = input, type = type))
+    val state: StateFlow<ConverterState> = _state
 
     private val codecFlow: Flow<Codec?> = state
         .map { it.codec }
@@ -58,13 +59,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         .drop(count = 1)
 
     init {
-        converter = Converter(
-            onStart = ::onStart,
-            onStdout = ::onStdout,
-            //onError = ::onError,
-            onProgress = ::onProgress,
-            //onStop = ::onStop
-        )
+        converter = Converter(onStdout = ::onStdout, onProgress = ::onProgress)
         observeCodec()
     }
 
@@ -198,18 +193,22 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         }
     }
 
-    override fun addToQueue(overwrite: Boolean) = _state.value.run {
+    override fun addToQueue(fromStart: Boolean, overwrite: Boolean) = _state.value.run {
         if(!output.isNullOrBlank() && command.isNotBlank()) {
-            //setStatus(ConverterStatusState.Loading)
             try {
-                val inputFile = File(input.path)
                 val outputFile = File(output)
                 val outputExists = outputFile.exists()
 
                 if(!overwrite && outputExists) {
-                    setStatus(ConverterStatusState.FileExists)
+                    val action = if(fromStart) FileExistsAction.START else FileExistsAction.ADD_TO_QUEUE
+
+                    setDialog(ConverterDialogState.FileExists(action))
                     return@run
                 }
+                else if(overwrite) {
+                    setDialog(ConverterDialogState.None)
+                }
+
                 val item = ConverterQueue(
                     id = UUID.randomUUID().toString(),
                     inputMedia = input,
@@ -218,65 +217,56 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                 )
 
                 queue.addLast(item)
-                _state.update { copy(queueSize = queue.size)}
-                //setStatus(ConverterStatusState.Initial)
+                _state.update { copy(pendingQueueSize = pendingQueueSize()) }
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                onError(Error.ON_STARTING_CONVERSION) //TODO
+                onError(Error.ON_ADD_TO_QUEUE)
             }
         }
         else {
-            onError(Error.ON_STARTING_CONVERSION_REQUIREMENTS) //TODO
+            onError(Error.ON_ADD_TO_QUEUE_REQUIREMENTS)
         }
     }
 
     override fun start(overwrite: Boolean) {
-        if(!queue.any { it.status == ConverterQueueStatus.NOT_STARTED }) addToQueue(overwrite)
+        if(queue.none { it.status == ConverterQueueStatus.NOT_STARTED }) {
+            addToQueue(fromStart = true, overwrite = overwrite)
+        }
         if(queue.any { it.status == ConverterQueueStatus.NOT_STARTED }) {
             setStatus(ConverterStatusState.Loading)
             conversion = viewModelScope.launch(context = Dispatchers.IO) {
-                startTime = Instant.now()
+                val startTime = Instant.now()
 
                 while (true) {
                     val item = queue.firstOrNull { it.status == ConverterQueueStatus.NOT_STARTED } ?: break
                     val startTimeItem = Instant.now()
 
-                    current = item
+                    item.status = ConverterQueueStatus.STARTED
+                    currentQueueId = item.id
+                    logsCache.clear()
+                    _logsState.clear()
+                    startLogMonitor()
+
                     val error = converter.run(
                         ffmpeg = ConfigManager.getFFmpegPath(),
                         inputFile = File(item.inputMedia.path),
                         cmd = item.command,
                         outputFile = item.outputFile
                     )
+                    val finishTimeItem = Instant.now()
 
-                    val finishTime = Instant.now()
-                    val startText = DateTimeUtils.instantToText(instant = startTimeItem, pattern = DateTimePattern.TIME_HMS)
-                    val finishText = DateTimeUtils.instantToText(instant = finishTime, pattern = DateTimePattern.TIME_HMS)
-                    val duration = DateTimeUtils.durationText(startTimeItem, finishTime)
-
-                    if(error == null) {
-                        queue.find { it.id == current?.id }?.let {
-                            it.status = ConverterQueueStatus.FINISHED
-                            it.startTime = startText
-                            it.finishTime = finishText
-                            it.duration = duration
-                        }
-                    }
-                    else {
-                        current?.error = error
-                        queue.find { it.id == current?.id }?.let {
-                            it.status = ConverterQueueStatus.ERROR
-                            it.error = error
-                            it.startTime = startText
-                            it.finishTime = finishText
-                            it.duration = duration
-                        }
+                    item.let {
+                        it.status = if(error == null) ConverterQueueStatus.FINISHED else ConverterQueueStatus.ERROR
+                        it.startTime = startTimeItem.formatTime()
+                        it.finishTime = finishTimeItem.formatTime()
+                        it.duration = startTimeItem.durationUntil(end = finishTimeItem)
                     }
                 }
 
-                current = null
-                onStop()
+                currentQueueId = null
+                println(queue.toString())
+                notifyCompletion(startTime)
             }
         }
     }
@@ -287,7 +277,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
-                current = null
+                currentQueueId = null
                 logMonitor?.cancelAndJoin()
                 logMonitor = null
                 notifyMain { setStatus(ConverterStatusState.Initial) }
@@ -299,26 +289,17 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         }
     }
 
-    private fun onStart() {
-        val inputMediaString = current?.inputMedia.toString()
-
-        queue.find { it.id == current?.id }?.status = ConverterQueueStatus.STARTED
-        logsCache.clear()
-        _logsState.clear()
-        _logsState.add(inputMediaString + "\n")
-        startLogMonitor()
-    }
-
     private fun onStdout(it: String) { logsCache.add(it) }
 
     private fun onError(error: Error) = setStatus(ConverterStatusState.Failure(error = error))
 
     private fun onProgress(it: ProgressData?) {
+        val current = queue.find { it.id == currentQueueId }
         val duration = current?.inputMedia?.duration
         var percentage = 0f
         var speed = ""
 
-        queue.find { it.id == current?.id }?.status = ConverterQueueStatus.IN_PROGRESS
+        current?.status = ConverterQueueStatus.IN_PROGRESS
 
         if(it != null && duration != null) {
             percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
@@ -328,23 +309,15 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         setStatus(ConverterStatusState.Progress(percentage, speed))
     }
 
-    private fun onStop() {
-        println("onStop: "+queue.toString())
-        startTime?.let {
-            val finishTime = Instant.now()
-            val startText = DateTimeUtils.instantToText(instant = it, pattern = DateTimePattern.TIME_HMS)
-            val finishText = DateTimeUtils.instantToText(instant = finishTime, pattern = DateTimePattern.TIME_HMS)
-            val duration = DateTimeUtils.durationText(it, finishTime)
+    private fun notifyCompletion(startTime: Instant) {
+        val finishTime = Instant.now()
 
-            if(_state.value.status !is ConverterStatusState.Failure) {
-                setStatus(ConverterStatusState.Complete(
-                    startTime = startText,
-                    finishTime = finishText,
-                    duration = duration
-                ))
-            }
-        } ?: run {
-            onError(Error.START_TIME_NULL)
+        if(_state.value.status !is ConverterStatusState.Failure) {
+            setStatus(ConverterStatusState.Complete(
+                startTime = startTime.formatTime(),
+                finishTime = finishTime.formatTime(),
+                duration = startTime.durationUntil(end = finishTime)
+            ))
         }
     }
 
@@ -413,5 +386,11 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
     private inline fun <T> MutableStateFlow<T>.updateAndSync(block: T.() -> T) {
         value = value.block()
         buildCommand()
+    }
+
+    private fun pendingQueueSize(): Int {
+        val data = queue.filter { it.status == ConverterQueueStatus.NOT_STARTED }
+
+        return data.size
     }
 }

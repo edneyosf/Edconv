@@ -196,7 +196,7 @@ private fun ConverterState.Actions(
                     onClick = { } //TODO
                 ) {
                     BadgedBox(
-                        badge = { if(queueSize > 0) Badge() } //TODO
+                        badge = { if(pendingQueueSize > 0) Badge() } //TODO
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Queue,

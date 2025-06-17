@@ -23,5 +23,5 @@ data class ConverterState(
     val noAudio: Boolean = false,
     val noSubtitle: Boolean = false,
     val noMetadata: Boolean = false,
-    val queueSize: Int = 0
+    val pendingQueueSize: Int = 0
 )

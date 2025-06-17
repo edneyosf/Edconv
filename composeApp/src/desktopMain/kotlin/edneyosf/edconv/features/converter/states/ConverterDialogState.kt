@@ -6,5 +6,6 @@ sealed interface ConverterDialogState {
     data object None: ConverterDialogState
     data object Settings: ConverterDialogState
     data object Queue: ConverterDialogState
+    data class FileExists(val action: FileExistsAction): ConverterDialogState
     data class MediaInfo(val inputMedia: InputMedia): ConverterDialogState
 }

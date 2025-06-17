@@ -7,7 +7,6 @@ import java.io.File
 data class ConverterQueue(
     val id: String,
     var status: ConverterQueueStatus = ConverterQueueStatus.NOT_STARTED,
-    val message: String? = null,
     val inputMedia: InputMedia,
     val command: String,
     val outputFile: File,

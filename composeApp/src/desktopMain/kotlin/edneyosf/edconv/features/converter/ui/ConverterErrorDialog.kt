@@ -25,8 +25,8 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 fun ConverterErrorDialog(error: Error, onFinish: () -> Unit) {
     CompositionLocalProvider(value = stringsComp provides converterErrorDialogStrings) {
         val description = when(error) {
-            Error.ON_STARTING_CONVERSION -> strings[ON_STARTING_CONVERSION]
-            Error.ON_STARTING_CONVERSION_REQUIREMENTS -> strings[ON_STARTING_CONVERSION_REQUIREMENTS]
+            Error.ON_ADD_TO_QUEUE -> strings[ON_ADD_TO_QUEUE]
+            Error.ON_ADD_TO_QUEUE_REQUIREMENTS -> strings[ON_ADD_TO_QUEUE_REQUIREMENTS]
             Error.ON_STOPPING_CONVERSION -> strings[ON_STOPPING_CONVERSION]
             Error.START_TIME_NULL -> strings[START_TIME_NULL]
             Error.INPUT_FILE_NOT_EXIST -> strings[INPUT_FILE_NOT_EXIST]
