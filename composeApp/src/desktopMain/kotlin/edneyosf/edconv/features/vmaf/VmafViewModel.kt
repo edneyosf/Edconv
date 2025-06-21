@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.vmaf.viewmodels
+package edneyosf.edconv.features.vmaf
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -7,14 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.core.common.DateTimePattern
 import edneyosf.edconv.core.common.Error
-import edneyosf.edconv.core.config.ConfigManager
+import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
+import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.core.utils.FileUtils
-import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.home.mappers.toInputMedia
-import edneyosf.edconv.features.vmaf.events.VmafEvent
 import edneyosf.edconv.features.vmaf.states.VmafDialogState
 import edneyosf.edconv.features.vmaf.states.VmafState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState
@@ -25,11 +24,12 @@ import edneyosf.edconv.ffmpeg.vmaf.Vmaf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
 
-class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
+class VmafViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), VmafEvent {
 
     private var startTime: Instant? = null
     private val vmaf: Vmaf
@@ -40,9 +40,9 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
     val state: State<VmafState>
 
     init {
-        val modelPath = ConfigManager.getVmafModelPath()
+        val modelPath = config.vmafModelPath
         val model = modelPath.takeIf { it.isNotEmpty() }
-        val stateValue = VmafState(reference = input, model = model, threads = getThreads())
+        val stateValue = VmafState(reference = process.input.value, model = model, threads = getThreads())
 
         _state = mutableStateOf(value = stateValue)
         state = _state
@@ -54,19 +54,29 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
             onProgress = ::onProgress,
             onStop = ::onStop
         )
+
+        observeInput()
+    }
+
+    private fun observeInput() {
+        viewModelScope.launch {
+            process.input.collectLatest {
+                _state.update { copy(reference = it) }
+            }
+        }
     }
 
     private fun onStart() {
         startTime = Instant.now()
+        process.setAnalysis(true)
     }
 
     private fun onProgress(it: ProgressData?) {
+        val duration = _state.value.reference?.duration
         var percentage = 0f
         var speed = ""
 
-        if(it != null) {
-            val duration = _state.value.reference.duration
-
+        if(it != null && duration != null) {
             percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
             speed = it.speed
         }
@@ -75,6 +85,7 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
     }
 
     private fun onStop(score: Double?) {
+        process.setAnalysis(false)
         startTime?.let {
             val finishTime = Instant.now()
             val startText = DateTimeUtils.instantToText(instant = it, pattern = DateTimePattern.TIME_HMS)
@@ -104,11 +115,9 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
 
     override fun setDialog(dialog: VmafDialogState) = _state.update { copy(dialog = dialog) }
 
-    override fun refresh(newInput: InputMedia) = _state.update { copy(reference = newInput) }
-
     override fun start() {
         _state.value.run {
-            val referenceInfo = reference.videos.firstOrNull()
+            val referenceInfo = reference?.videos?.firstOrNull()
 
             when {
                 referenceInfo != null && distorted != null && model != null -> {
@@ -116,7 +125,8 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
                     viewModelScope.launch(context = Dispatchers.IO) {
                         val referenceDim = Pair(first = referenceInfo.width, second = referenceInfo.height)
                         val distortedFile = File(distorted)
-                        val distortedData = FFprobe(distortedFile).analyze()
+                        val ffprobe = FFprobe(ffprobePath = config.ffprobePath, file = distortedFile)
+                        val distortedData = ffprobe.analyze()
                         val error = distortedData == null || distortedData.duration == null
                         val distortedInputData = distortedData.takeIf { !error }?.toInputMedia()
                         val distortedInfo = distortedInputData?.videos?.firstOrNull()
@@ -133,7 +143,7 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
                                 model = model
                             )
 
-                            analysis = vmaf.run(ffmpeg = ConfigManager.getFFmpegPath(), data = data)
+                            analysis = vmaf.run(ffmpeg = config.ffmpegPath, data = data)
                         }
                         else {
                             notifyMain { onError(Error.NO_VIDEO_INPUT_MEDIA) }
@@ -175,7 +185,7 @@ class VmafViewModel(input: InputMedia): ViewModel(), VmafEvent {
         path?.let {
             viewModelScope.launch(context = Dispatchers.IO) {
                 try {
-                    ConfigManager.setVmafModelPath(it)
+                    config.vmafModelPath = it
                     notifyMain { _state.update { copy(model = it) } }
                 }
                 catch (e: Exception) {
