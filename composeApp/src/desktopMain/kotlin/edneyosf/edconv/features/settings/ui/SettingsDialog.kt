@@ -14,7 +14,7 @@ import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.commonStrings
-import edneyosf.edconv.features.settings.events.SettingsEvent
+import edneyosf.edconv.features.settings.SettingsEvent
 import edneyosf.edconv.features.settings.SettingsViewModel
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatusState

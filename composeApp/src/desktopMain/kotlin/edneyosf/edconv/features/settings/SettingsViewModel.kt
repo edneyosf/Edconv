@@ -8,7 +8,6 @@ import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
-import edneyosf.edconv.features.settings.events.SettingsEvent
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatusState
 import kotlinx.coroutines.Dispatchers
