@@ -42,7 +42,7 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
     init {
         val modelPath = config.vmafModelPath
         val model = modelPath.takeIf { it.isNotEmpty() }
-        val stateValue = VmafState(reference = process.input.value, model = model, threads = getThreads())
+        val stateValue = VmafState(model = model, threads = getThreads())
 
         _state = mutableStateOf(value = stateValue)
         state = _state
