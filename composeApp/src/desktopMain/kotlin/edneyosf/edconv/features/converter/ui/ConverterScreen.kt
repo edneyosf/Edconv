@@ -192,11 +192,17 @@ private fun ConverterState.Actions(
         onStop = onStop,
         lefties = {
             TextTooltip(text = strings[QUEUE]) {
-                IconButton(
-                    onClick = { } //TODO
+                BadgedBox(
+                    badge = {
+                        queueSize.takeIf { it > 0 }?.let {
+                            Badge {
+                                Text(text = if (it > 99) "99+" else it.toString())
+                            }
+                        }
+                    }
                 ) {
-                    BadgedBox(
-                        badge = { if(pendingQueueSize > 0) Badge() } //TODO
+                    IconButton(
+                        onClick = { } //TODO
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Queue,
@@ -597,7 +603,9 @@ private fun Progress(status: ConverterStatusState) {
         verticalArrangement = Arrangement.Center
     ) {
         if(status is ConverterStatusState.Progress && status.percentage > 0f) {
-            val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
+            var text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
+
+            status.step?.let { text += "\t${strings[PENDING_JOBS]} $it" }
 
             LinearProgressIndicator(
                 modifier = Modifier.fillMaxWidth(),

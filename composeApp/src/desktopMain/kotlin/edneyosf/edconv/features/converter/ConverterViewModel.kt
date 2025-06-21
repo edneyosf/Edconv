@@ -248,7 +248,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     )
                 )
 
-                updatePendingSize()
+                updateQueueSize()
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -275,12 +275,11 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     val item = process.queue.value.firstOrNull { it.status == QueueStatus.NOT_STARTED } ?: break
                     val startTimeItem = Instant.now()
 
-                    item.status = QueueStatus.STARTED
                     currentMediaId = item.id
                     logsCache.clear()
                     _logsState.clear()
                     startLogMonitor()
-                    notifyMain { updatePendingSize() }
+                    notifyMain { item.status = QueueStatus.STARTED }
 
                     val error = converter.run(
                         ffmpeg = config.ffmpegPath,
@@ -290,15 +289,15 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     )
                     val finishTimeItem = Instant.now()
 
-                    item.let {
-                        it.status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR
-                        it.startTime = startTimeItem.formatTime()
-                        it.finishTime = finishTimeItem.formatTime()
-                        it.duration = startTimeItem.durationUntil(end = finishTimeItem)
-                        it.error = error
+                    notifyMain {
+                        item.let {
+                            it.status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR
+                            it.startTime = startTimeItem.formatTime()
+                            it.finishTime = finishTimeItem.formatTime()
+                            it.duration = startTimeItem.durationUntil(end = finishTimeItem)
+                            it.error = error
+                        }
                     }
-
-                    notifyMain { updatePendingSize() }
                 }
 
                 notifyMain { process.setConverting(false) }
@@ -311,13 +310,19 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun stop() {
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
+                val currentMedia = process.queue.value.firstOrNull { it.id == currentMediaId }
+
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
                 currentMediaId = null
                 logMonitor?.cancelAndJoin()
                 logMonitor = null
-                notifyMain { setStatus(ConverterStatusState.Initial) }
+                notifyMain {
+                    currentMedia?.status = QueueStatus.NOT_STARTED
+                    process.setConverting(false)
+                    setStatus(ConverterStatusState.Initial)
+                }
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -333,18 +338,21 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     private fun onProgress(it: ProgressData?) {
         val current = process.queue.value.find { it.id == currentMediaId }
         val duration = current?.input?.duration
+        var step: Int? = null
         var percentage = 0f
         var speed = ""
 
         current?.status = QueueStatus.IN_PROGRESS
-        updatePendingSize()
 
         if(it != null && duration != null) {
+            val pendingQueueSize = process.pendingQueueSize()
+
             percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
+            step = pendingQueueSize.takeIf { it > 0 }
             speed = it.speed
         }
 
-        setStatus(ConverterStatusState.Progress(percentage, speed))
+        setStatus(ConverterStatusState.Progress(step, percentage, speed))
     }
 
     private fun notifyCompletion(startTime: Instant) {
@@ -427,8 +435,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         buildCommand()
     }
 
-    private fun updatePendingSize() {
-        val pendingQueue = process.queue.value.filter { it.status == QueueStatus.NOT_STARTED }
-        _state.update { copy(pendingQueueSize = pendingQueue.size) }
+    private fun updateQueueSize() {
+        val size = process.queueSize()
+
+        _state.update { copy(queueSize = size) }
     }
 }

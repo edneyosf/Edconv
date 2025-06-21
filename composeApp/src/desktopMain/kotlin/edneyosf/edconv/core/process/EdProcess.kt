@@ -30,4 +30,8 @@ class EdProcess {
     fun setAnalysis(status: Boolean) { _analysis.value = status }
 
     fun addToQueue(item: MediaQueue) { _queue.value.add(item) }
+
+    fun queueSize() = _queue.value.size
+
+    fun pendingQueueSize() = _queue.value.filter { it.status == QueueStatus.NOT_STARTED }.size
 }
