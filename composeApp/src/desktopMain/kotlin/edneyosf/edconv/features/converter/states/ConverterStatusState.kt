@@ -9,5 +9,3 @@ sealed interface ConverterStatusState {
     data class Complete(val startTime: String, val finishTime: String, val duration: String): ConverterStatusState
     data class Failure(val error: Error): ConverterStatusState
 }
-
-enum class FileExistsAction { ADD_TO_QUEUE, START, ON_CONVERSION }

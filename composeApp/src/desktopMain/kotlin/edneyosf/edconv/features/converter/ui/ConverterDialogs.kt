@@ -1,11 +1,11 @@
 package edneyosf.edconv.features.converter.ui
 
 import androidx.compose.runtime.Composable
-import edneyosf.edconv.features.converter.events.ConverterEvent
+import edneyosf.edconv.features.converter.ConverterEvent
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
-import edneyosf.edconv.features.converter.states.FileExistsAction
+import edneyosf.edconv.features.converter.enums.ConverterFileExistsAction as FileExistsAction
 import edneyosf.edconv.features.mediainfo.MediaInfoDialog
 import edneyosf.edconv.features.settings.ui.SettingsDialog
 

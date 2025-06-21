@@ -18,13 +18,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.features.converter.ConverterArgs
 import edneyosf.edconv.ffmpeg.common.*
-import edneyosf.edconv.features.converter.events.ConverterEvent
-import edneyosf.edconv.features.converter.viewmodels.ConverterViewModel
+import edneyosf.edconv.features.converter.ConverterEvent
+import edneyosf.edconv.features.converter.ConverterViewModel
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
@@ -40,13 +37,12 @@ import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ConverterScreen(args: ConverterArgs) {
-    val viewModel = viewModel { ConverterViewModel(input = args.input, type = args.type) }
+fun ConverterScreen() {
+    val viewModel = koinViewModel<ConverterViewModel>()
     val state by viewModel.state.collectAsState()
-
-    LaunchedEffected(key = args) { viewModel.refresh(newInput = it.input, newType = it.type) }
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = viewModel)
@@ -68,7 +64,11 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             onAddToQueue = { event.addToQueue() },
             onStart = { event.start() },
             onStop = { event.stop() },
-            onMediaInfo = { event.setDialog(ConverterDialogState.MediaInfo(inputMedia = input)) }
+            onMediaInfo = {
+                input?.let {
+                    event.setDialog(ConverterDialogState.MediaInfo(inputMedia = it))
+                }
+            }
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
@@ -629,7 +629,7 @@ private fun ConverterState.canAddToQueue(): Boolean {
     return when (type) {
         MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
         MediaType.VIDEO -> preset != null && crf != null
-        MediaType.SUBTITLE -> false
+        else -> false
     }
 }
 
@@ -645,7 +645,7 @@ private fun ConverterState.canStart(): Boolean {
     return when (type) {
         MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
         MediaType.VIDEO -> preset != null && crf != null
-        MediaType.SUBTITLE -> false
+        else -> false
     }
 }
 

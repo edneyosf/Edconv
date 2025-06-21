@@ -1,12 +1,11 @@
-package edneyosf.edconv.features.converter.viewmodels
+package edneyosf.edconv.features.converter
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
-import edneyosf.edconv.app.AppConfigs.LOG_MONITOR_DELAY
 import edneyosf.edconv.core.common.Error
-import edneyosf.edconv.core.config.ConfigManager
+import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.durationUntil
 import edneyosf.edconv.core.extensions.formatTime
 import edneyosf.edconv.core.extensions.normalizeCommand
@@ -14,108 +13,135 @@ import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.toReadableCommand
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.features.converter.ConverterQueue
-import edneyosf.edconv.features.converter.ConverterQueueStatus
-import edneyosf.edconv.ffmpeg.common.*
-import edneyosf.edconv.ffmpeg.converter.Converter
-import edneyosf.edconv.ffmpeg.data.ProgressData
-import edneyosf.edconv.ffmpeg.ffmpeg.FFmpeg
-import edneyosf.edconv.features.converter.events.ConverterEvent
+import edneyosf.edconv.features.converter.enums.ConverterFileExistsAction
+import edneyosf.edconv.core.process.MediaQueue
+import edneyosf.edconv.core.process.EdProcess
+import edneyosf.edconv.core.process.QueueStatus
+import edneyosf.edconv.core.utils.DirUtils
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
-import edneyosf.edconv.features.converter.states.FileExistsAction
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
+import edneyosf.edconv.ffmpeg.common.Bitrate
+import edneyosf.edconv.ffmpeg.common.Channels
+import edneyosf.edconv.ffmpeg.common.Codec
+import edneyosf.edconv.ffmpeg.common.CompressionType
+import edneyosf.edconv.ffmpeg.common.MediaType
+import edneyosf.edconv.ffmpeg.common.PixelFormat
+import edneyosf.edconv.ffmpeg.common.Resolution
+import edneyosf.edconv.ffmpeg.common.SampleRate
+import edneyosf.edconv.ffmpeg.converter.Converter
+import edneyosf.edconv.ffmpeg.data.ProgressData
+import edneyosf.edconv.ffmpeg.ffmpeg.FFmpeg
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
 import java.util.UUID
 
-class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), ConverterEvent {
+class ConverterViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), ConverterEvent {
 
     private var conversion: Job? = null
     private var logMonitor: Job? = null
 
     private val converter: Converter
-    private val queue = mutableListOf<ConverterQueue>()
-    private var currentQueueId: String? = null
+    private var currentMediaId: String? = null
 
     private val _logsState = mutableStateListOf<String>()
     val logsState: List<String> get() = _logsState
     private val logsCache = mutableListOf<String>()
 
-    private val _state = MutableStateFlow(value = ConverterState(input = input, type = type))
+    private val _state = MutableStateFlow(value = ConverterState())
     val state: StateFlow<ConverterState> = _state
-
-    private val codecFlow: Flow<Codec?> = state
-        .map { it.codec }
-        .distinctUntilChanged()
-        .drop(count = 1)
 
     init {
         converter = Converter(onStdout = ::onStdout, onProgress = ::onProgress)
         observeCodec()
+        observeInput()
+    }
+
+    private fun observeInput() {
+        viewModelScope.launch {
+            combine(
+                flow = process.input,
+                flow2 = process.inputType,
+                transform = ::Pair
+            )
+            .collectLatest { (input, type) ->
+                setInput(newInput = input, newType = type)
+            }
+        }
     }
 
     private fun observeCodec() {
         viewModelScope.launch {
-            codecFlow.collectLatest {
+            _state.map { it.codec }
+            .distinctUntilChanged()
+            .collectLatest {
                 _state.updateAndSync {
-                    copy(
+                    val newState = copy(
                         bitrate = it?.defaultBitrate,
                         vbr = it?.defaultVBR,
                         crf = it?.defaultCRF,
                         preset = it?.defaultPreset,
-                        compression = it?.compressions?.firstOrNull(),
-                        output = it?.toOutput(inputMedia = input)
+                        compression = it?.compressions?.firstOrNull()
                     )
+
+                    if(input != null) newState.copy(output = it?.toOutput(inputMedia = input))
+                    else newState
                 }
             }
         }
     }
 
-    override fun refresh(newInput: InputMedia, newType: MediaType) = _state.updateAndSync {
-        val video = newInput.videos.firstOrNull()
-        val audio = newInput.audios.firstOrNull()
+    fun setInput(newInput: InputMedia?, newType: MediaType?) {
+        if(newInput != null && newType != null) {
+            _state.updateAndSync {
+                val video = newInput.videos.firstOrNull()
+                val audio = newInput.audios.firstOrNull()
 
-        val newResolution = resolution
-            ?: Resolution.fromValues(width = video?.width, height = video?.height)
+                val newResolution = resolution
+                    ?: Resolution.fromValues(width = video?.width, height = video?.height)
 
-        val newPixelFormat = pixelFormat
-            ?: PixelFormat.fromValue(value = video?.bitDepth)
-            ?: PixelFormat.fromValue(value = video?.pixFmt)
+                val newPixelFormat = pixelFormat
+                    ?: PixelFormat.fromValue(value = video?.bitDepth)
+                    ?: PixelFormat.fromValue(value = video?.pixFmt)
 
-        val newChannels = channels
-            ?: Channels.fromValue(value = audio?.channels)
+                val newChannels = channels
+                    ?: Channels.fromValue(value = audio?.channels)
 
-        val newSampleRate = sampleRate
-            ?: SampleRate.fromValue(value = audio?.sampleRate)
+                val newSampleRate = sampleRate
+                    ?: SampleRate.fromValue(value = audio?.sampleRate)
 
-        val defaultCodec = when (newType) {
-            MediaType.AUDIO -> Codec.OPUS
-            MediaType.VIDEO -> Codec.AV1
-            MediaType.SUBTITLE -> null
+                val defaultCodec = when (newType) {
+                    MediaType.AUDIO -> Codec.OPUS
+                    MediaType.VIDEO -> Codec.AV1
+                    MediaType.SUBTITLE -> null
+                }
+
+                val newCodec = codec.takeIf { type == newType } ?: defaultCodec
+                val newOutput = newCodec.toOutput(inputMedia = newInput)
+
+                copy(
+                    input = newInput,
+                    type = newType,
+                    codec = newCodec,
+                    resolution = newResolution,
+                    pixelFormat = newPixelFormat,
+                    channels = newChannels,
+                    sampleRate = newSampleRate,
+                    output = newOutput
+                )
+            }
         }
-
-        val newCodec = codec.takeIf { type == newType } ?: defaultCodec
-        val newOutput = newCodec.toOutput(inputMedia = newInput)
-
-        copy(
-            input = newInput,
-            type = newType,
-            codec = newCodec,
-            resolution = newResolution,
-            pixelFormat = newPixelFormat,
-            channels = newChannels,
-            sampleRate = newSampleRate,
-            output = newOutput
-        )
     }
 
     private fun buildCommand() {
@@ -130,7 +156,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         state.run {
             val ffmpeg = when (type) {
                 MediaType.AUDIO -> {
-                    val stream = input.audios.firstOrNull()
+                    val stream = input?.audios?.firstOrNull()
 
                     if(stream != null) {
                         val inputChannels = stream.channels
@@ -160,7 +186,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                 MediaType.VIDEO -> {
                     if(preset.isNullOrBlank() || (crf == null && bitrate == null)) return@run
 
-                    val stream = input.videos.firstOrNull()
+                    val stream = input?.videos?.firstOrNull()
 
                     if(stream != null) {
                         val width = stream.width
@@ -186,38 +212,43 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                     else return@run
                 }
 
-                MediaType.SUBTITLE -> return@run
+                else -> return@run
             }
 
             setCommand(ffmpeg.build().toReadableCommand())
         }
     }
 
-    override fun addToQueue(fromStart: Boolean, overwrite: Boolean) = _state.value.run {
-        if(!output.isNullOrBlank() && command.isNotBlank()) {
+    override fun addToQueue(fromStart: Boolean, overwrite: Boolean) {
+        val input = _state.value.input
+        val output = _state.value.output
+        val command = _state.value.command
+
+        if(input != null && !output.isNullOrBlank() && command.isNotBlank()) {
             try {
                 val outputFile = File(output)
                 val outputExists = outputFile.exists()
 
                 if(!overwrite && outputExists) {
-                    val action = if(fromStart) FileExistsAction.START else FileExistsAction.ADD_TO_QUEUE
+                    val action = if(fromStart) ConverterFileExistsAction.START else ConverterFileExistsAction.ADD_TO_QUEUE
 
                     setDialog(ConverterDialogState.FileExists(action))
-                    return@run
+                    return
                 }
                 else if(overwrite) {
                     setDialog(ConverterDialogState.None)
                 }
 
-                val item = ConverterQueue(
-                    id = UUID.randomUUID().toString(),
-                    inputMedia = input,
-                    command = command.normalizeCommand(),
-                    outputFile = outputFile
+                process.addToQueue(
+                    MediaQueue(
+                        id = UUID.randomUUID().toString(),
+                        input = input,
+                        command = command.normalizeCommand(),
+                        outputFile = outputFile
+                    )
                 )
 
-                queue.addLast(item)
-                _state.update { copy(pendingQueueSize = pendingQueueSize()) }
+                updatePendingSize()
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -230,42 +261,47 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
     }
 
     override fun start(overwrite: Boolean) {
-        if(queue.none { it.status == ConverterQueueStatus.NOT_STARTED }) {
+        if(process.queue.value.none { it.status == QueueStatus.NOT_STARTED }) {
             addToQueue(fromStart = true, overwrite = overwrite)
         }
-        if(queue.any { it.status == ConverterQueueStatus.NOT_STARTED }) {
+        if(process.queue.value.any { it.status == QueueStatus.NOT_STARTED }) {
             setStatus(ConverterStatusState.Loading)
             conversion = viewModelScope.launch(context = Dispatchers.IO) {
                 val startTime = Instant.now()
 
+                notifyMain { process.setConverting(true) }
+
                 while (true) {
-                    val item = queue.firstOrNull { it.status == ConverterQueueStatus.NOT_STARTED } ?: break
+                    val item = process.queue.value.firstOrNull { it.status == QueueStatus.NOT_STARTED } ?: break
                     val startTimeItem = Instant.now()
 
-                    item.status = ConverterQueueStatus.STARTED
-                    currentQueueId = item.id
+                    item.status = QueueStatus.STARTED
+                    currentMediaId = item.id
                     logsCache.clear()
                     _logsState.clear()
                     startLogMonitor()
+                    notifyMain { updatePendingSize() }
 
                     val error = converter.run(
-                        ffmpeg = ConfigManager.getFFmpegPath(),
-                        inputFile = File(item.inputMedia.path),
+                        ffmpeg = config.ffmpegPath,
+                        inputFile = File(item.input.path),
                         cmd = item.command,
                         outputFile = item.outputFile
                     )
                     val finishTimeItem = Instant.now()
 
                     item.let {
-                        it.status = if(error == null) ConverterQueueStatus.FINISHED else ConverterQueueStatus.ERROR
+                        it.status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR
                         it.startTime = startTimeItem.formatTime()
                         it.finishTime = finishTimeItem.formatTime()
                         it.duration = startTimeItem.durationUntil(end = finishTimeItem)
                     }
+
+                    notifyMain { updatePendingSize() }
                 }
 
-                currentQueueId = null
-                println(queue.toString())
+                notifyMain { process.setConverting(false) }
+                currentMediaId = null
                 notifyCompletion(startTime)
             }
         }
@@ -277,7 +313,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
-                currentQueueId = null
+                currentMediaId = null
                 logMonitor?.cancelAndJoin()
                 logMonitor = null
                 notifyMain { setStatus(ConverterStatusState.Initial) }
@@ -294,12 +330,13 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
     private fun onError(error: Error) = setStatus(ConverterStatusState.Failure(error = error))
 
     private fun onProgress(it: ProgressData?) {
-        val current = queue.find { it.id == currentQueueId }
-        val duration = current?.inputMedia?.duration
+        val current = process.queue.value.find { it.id == currentMediaId }
+        val duration = current?.input?.duration
         var percentage = 0f
         var speed = ""
 
-        current?.status = ConverterQueueStatus.IN_PROGRESS
+        current?.status = QueueStatus.IN_PROGRESS
+        updatePendingSize()
 
         if(it != null && duration != null) {
             percentage = if(duration > 0) ((it.time * 100.0f) / duration) else 0.0f
@@ -313,7 +350,8 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         val finishTime = Instant.now()
 
         if(_state.value.status !is ConverterStatusState.Failure) {
-            setStatus(ConverterStatusState.Complete(
+            setStatus(
+                ConverterStatusState.Complete(
                 startTime = startTime.formatTime(),
                 finishTime = finishTime.formatTime(),
                 duration = startTime.durationUntil(end = finishTime)
@@ -330,7 +368,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
 
                 logsCache.clear()
                 notifyMain { _logsState.addAll(elements = cache) }
-                delay(timeMillis = LOG_MONITOR_DELAY)
+                delay(timeMillis = AppConfigs.LOG_MONITOR_DELAY)
             }
         }
     }
@@ -377,7 +415,7 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
             val outputName = File(inputPath).nameWithoutExtension
             val outputExtension = toFileExtension()
 
-            output = "${AppConfigs.outputDefault}$outputName.$outputExtension"
+            output = "${DirUtils.outputDir}$outputName.$outputExtension"
         }
 
         return output
@@ -388,9 +426,8 @@ class ConverterViewModel(input: InputMedia, type: MediaType) : ViewModel(), Conv
         buildCommand()
     }
 
-    private fun pendingQueueSize(): Int {
-        val data = queue.filter { it.status == ConverterQueueStatus.NOT_STARTED }
-
-        return data.size
+    private fun updatePendingSize() {
+        val pendingQueue = process.queue.value.filter { it.status == QueueStatus.NOT_STARTED }
+        _state.update { copy(pendingQueueSize = pendingQueue.size) }
     }
 }
