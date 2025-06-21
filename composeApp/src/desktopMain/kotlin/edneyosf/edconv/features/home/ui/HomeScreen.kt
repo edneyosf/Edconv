@@ -25,7 +25,7 @@ import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.features.home.strings.homeScreenStrings
-import edneyosf.edconv.features.nomedia.ui.NoMediaScreen
+import edneyosf.edconv.features.nomedia.NoMediaScreen
 import edneyosf.edconv.features.vmaf.ui.VMAFScreen
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
