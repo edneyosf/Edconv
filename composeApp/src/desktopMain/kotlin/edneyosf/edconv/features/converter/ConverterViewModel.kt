@@ -13,7 +13,7 @@ import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.toReadableCommand
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.features.converter.enums.ConverterFileExistsAction
+import edneyosf.edconv.features.converter.enums.ConverterFileExistsAction as FileExistsAction
 import edneyosf.edconv.core.process.MediaQueue
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.process.QueueStatus
@@ -230,7 +230,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 val outputExists = outputFile.exists()
 
                 if(!overwrite && outputExists) {
-                    val action = if(fromStart) ConverterFileExistsAction.START else ConverterFileExistsAction.ADD_TO_QUEUE
+                    val action = if(fromStart) FileExistsAction.START else FileExistsAction.ADD_TO_QUEUE
 
                     setDialog(ConverterDialogState.FileExists(action))
                     return
@@ -240,7 +240,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 }
 
                 process.addToQueue(
-                    MediaQueue(
+                    item = MediaQueue(
                         id = UUID.randomUUID().toString(),
                         input = input,
                         command = command.normalizeCommand(),
@@ -295,6 +295,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                         it.startTime = startTimeItem.formatTime()
                         it.finishTime = finishTimeItem.formatTime()
                         it.duration = startTimeItem.durationUntil(end = finishTimeItem)
+                        it.error = error
                     }
 
                     notifyMain { updatePendingSize() }
