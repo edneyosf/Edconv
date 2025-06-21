@@ -1,43 +1,31 @@
-package edneyosf.edconv.features.home.viewmodels
+package edneyosf.edconv.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edneyosf.edconv.app.AppConfigs
-import edneyosf.edconv.core.config.ConfigManager
+import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.common.Error
+import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.FileUtils
-import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.home.mappers.toInputMedia
-import edneyosf.edconv.ffmpeg.common.MediaType
-import edneyosf.edconv.ffmpeg.data.InputMediaData
-import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
-import edneyosf.edconv.features.home.events.HomeEvent
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
+import edneyosf.edconv.ffmpeg.common.MediaType
+import edneyosf.edconv.ffmpeg.data.InputMediaData
+import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.String
 
-class HomeViewModel(): ViewModel(), HomeEvent {
+class HomeViewModel(private val config: EdConfig, private val process: EdProcess): ViewModel(), HomeEvent {
 
     private val _state = MutableStateFlow(value = HomeState())
     val state: StateFlow<HomeState> = _state
-
-    private val inputFlow: Flow<InputMedia?> = state
-        .map { it.input }
-        .distinctUntilChanged()
-        .drop(count = 1)
 
     init {
         loadConfigs()
@@ -46,7 +34,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
 
     private fun loadConfigs() {
         try {
-            ConfigManager.load(appName = AppConfigs.NAME)
+            config.load()
             setNoConfigStatusIfNecessary()
         }
         catch (e: Exception) {
@@ -57,7 +45,7 @@ class HomeViewModel(): ViewModel(), HomeEvent {
 
     private fun observeInput() {
         viewModelScope.launch {
-            inputFlow.collectLatest {
+            process.input.collectLatest {
                 val navigation = when(it?.type) {
                     MediaType.AUDIO -> HomeNavigationState.Audio
                     MediaType.VIDEO -> HomeNavigationState.Video
@@ -70,8 +58,8 @@ class HomeViewModel(): ViewModel(), HomeEvent {
     }
 
     private fun setNoConfigStatusIfNecessary() {
-        val ffmpegPath = ConfigManager.getFFmpegPath()
-        val ffprobePath = ConfigManager.getFFprobePath()
+        val ffmpegPath = config.ffmpegPath
+        val ffprobePath = config.ffprobePath
 
         if (ffmpegPath.isBlank() || ffprobePath.isBlank()) {
             setDialog(HomeDialogState.Settings)
@@ -91,7 +79,8 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         _state.update { copy(loading = true) }
 
         viewModelScope.launch(context = Dispatchers.IO) {
-            val ffprobe = FFprobe(file = File(path))
+            val inputFile = File(path)
+            val ffprobe = FFprobe(ffprobePath = config.ffprobePath, file = inputFile)
             val data = ffprobe.analyze()
             val error = data.run {
                 when {
@@ -112,13 +101,8 @@ class HomeViewModel(): ViewModel(), HomeEvent {
                 ?.toInputMedia()
 
             notifyMain {
-                _state.update {
-                    copy(
-                        loading = false,
-                        dialog = dialog,
-                        input = input
-                    )
-                }
+                process.setInput(inputMedia = input)
+                _state.update { copy(input = input, loading = false, dialog = dialog) }
             }
         }
     }
@@ -143,7 +127,16 @@ class HomeViewModel(): ViewModel(), HomeEvent {
         }
     }
 
-    override fun setNavigation(state: HomeNavigationState) = _state.update { copy(navigation = state) }
+    override fun setNavigation(state: HomeNavigationState) {
+        val mediaType = when(state) {
+            HomeNavigationState.Audio -> MediaType.AUDIO
+            HomeNavigationState.Video -> MediaType.VIDEO
+            else -> null
+        }
+
+        process.setInputType(mediaType)
+        _state.update { copy(navigation = state) }
+    }
 
     override fun setDialog(state: HomeDialogState) = _state.update { copy(dialog = state) }
 

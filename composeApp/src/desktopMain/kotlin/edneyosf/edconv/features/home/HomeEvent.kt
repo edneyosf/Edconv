@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.home.events
+package edneyosf.edconv.features.home
 
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
