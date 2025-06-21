@@ -1,4 +1,4 @@
-package edneyosf.edconv.core.common
+package edneyosf.edconv.core.process
 
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType

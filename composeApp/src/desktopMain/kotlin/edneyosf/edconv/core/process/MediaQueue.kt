@@ -1,5 +1,6 @@
-package edneyosf.edconv.core.common
+package edneyosf.edconv.core.process
 
+import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.features.common.models.InputMedia
 import java.io.File
 

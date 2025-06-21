@@ -1,4 +1,4 @@
-package edneyosf.edconv.core.common
+package edneyosf.edconv.core.process
 
 enum class QueueStatus {
     NOT_STARTED,
