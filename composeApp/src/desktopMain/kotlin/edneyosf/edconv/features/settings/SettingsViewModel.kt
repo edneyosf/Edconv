@@ -1,31 +1,34 @@
-package edneyosf.edconv.features.settings.viewmodels
+package edneyosf.edconv.features.settings
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edneyosf.edconv.core.config.ConfigManager
 import edneyosf.edconv.core.common.Error
+import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.features.settings.events.SettingsEvent
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatusState
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
-class SettingsViewModel(): ViewModel(), SettingsEvent {
+class SettingsViewModel(private val config: EdConfig) : ViewModel(), SettingsEvent {
 
     private val _state = mutableStateOf(value = SettingsState())
     val state: State<SettingsState> = _state
 
     init {
-        val ffmpegFile = File(ConfigManager.getFFmpegPath())
-        val ffprobeFile = File(ConfigManager.getFFprobePath())
+        val ffmpegPath = config.ffmpegPath
+        val ffprobePath = config.ffprobePath
+        val ffmpegFile = File(ffmpegPath)
+        val ffprobeFile = File(ffprobePath)
 
         try {
-            if(ffmpegFile.exists()) setFFmpegPath(ConfigManager.getFFmpegPath())
-            if(ffprobeFile.exists()) setFFprobePath(ConfigManager.getFFprobePath())
+            if(ffmpegFile.exists()) setFFmpegPath(ffmpegPath)
+            if(ffprobeFile.exists()) setFFprobePath(ffprobePath)
         }
         catch (e: Exception) {
             e.printStackTrace()
@@ -41,8 +44,8 @@ class SettingsViewModel(): ViewModel(), SettingsEvent {
 
         viewModelScope.launch(context = Dispatchers.IO) {
             try {
-                ConfigManager.setFFmpegPath(ffmpegPath)
-                ConfigManager.setFFprobePath(ffprobePath)
+                config.ffmpegPath = ffmpegPath
+                config.ffprobePath = ffprobePath
                 notifyMain { setStatus(SettingsStatusState.Complete) }
             }
             catch (e: Exception) {
