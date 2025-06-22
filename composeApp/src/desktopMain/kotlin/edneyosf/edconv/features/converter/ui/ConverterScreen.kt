@@ -27,6 +27,7 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
+import edneyosf.edconv.features.queue.ui.QueueScreen
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.TextTooltip
@@ -180,6 +181,14 @@ private fun ConverterState.Actions(
     onStop: () -> Unit,
     onMediaInfo: () -> Unit
 ) {
+    var showQueue by remember { mutableStateOf(value = false) }
+
+    if(showQueue) {
+        QueueScreen(
+            onClose = { showQueue = false }
+        )
+    }
+
     ActionsTool(
         addToQueueEnabled = canAddToQueue(),
         startEnabled = canStart(),
@@ -202,7 +211,7 @@ private fun ConverterState.Actions(
                     }
                 ) {
                     IconButton(
-                        onClick = { } //TODO
+                        onClick = { showQueue = true }
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Queue,

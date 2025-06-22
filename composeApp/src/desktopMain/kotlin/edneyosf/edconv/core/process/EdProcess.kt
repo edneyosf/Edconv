@@ -18,7 +18,7 @@ class EdProcess {
     private val _analysis = MutableStateFlow(value = false)
     val analysis = _analysis.asStateFlow()
 
-    private val _queue = MutableStateFlow(value = mutableListOf<MediaQueue>())
+    private val _queue = MutableStateFlow(value = listOf<MediaQueue>())
     val queue = _queue.asStateFlow()
 
     fun setInput(inputMedia: InputMedia?) { _input.value = inputMedia }
@@ -29,7 +29,15 @@ class EdProcess {
 
     fun setAnalysis(status: Boolean) { _analysis.value = status }
 
-    fun addToQueue(item: MediaQueue) { _queue.value.add(item) }
+    fun addToQueue(item: MediaQueue) { _queue.value = _queue.value + item }
+
+    fun updateQueueItemById(id: String?, block: MediaQueue.() -> MediaQueue) {
+        if(id != null) {
+            _queue.value = _queue.value.map {
+                if(it.id == id) it.block() else it
+            }
+        }
+    }
 
     fun queueSize() = _queue.value.size
 

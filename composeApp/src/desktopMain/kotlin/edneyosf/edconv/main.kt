@@ -11,6 +11,7 @@ import edneyosf.edconv.app.AppConfigs.MIN_WINDOW_HEIGHT
 import edneyosf.edconv.core.coreModule
 import edneyosf.edconv.features.converter.converterHomeModule
 import edneyosf.edconv.features.home.homeFeatureModule
+import edneyosf.edconv.features.queue.queueFeatureModule
 import edneyosf.edconv.features.settings.settingsFeatureModule
 import edneyosf.edconv.features.vmaf.vmafFeatureModule
 import org.jetbrains.compose.resources.painterResource
@@ -38,6 +39,7 @@ private fun setModules() {
         modules(modules = homeFeatureModule)
         modules(modules = settingsFeatureModule)
         modules(modules = converterHomeModule)
+        modules(modules = queueFeatureModule)
         modules(modules = vmafFeatureModule)
     }
 }

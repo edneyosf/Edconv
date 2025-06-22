@@ -279,7 +279,11 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     logsCache.clear()
                     _logsState.clear()
                     startLogMonitor()
-                    notifyMain { item.status = QueueStatus.STARTED }
+                    notifyMain {
+                        process.updateQueueItemById(id = item.id) {
+                            copy(status = QueueStatus.STARTED)
+                        }
+                    }
 
                     val error = converter.run(
                         ffmpeg = config.ffmpegPath,
@@ -290,12 +294,14 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     val finishTimeItem = Instant.now()
 
                     notifyMain {
-                        item.let {
-                            it.status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR
-                            it.startTime = startTimeItem.formatTime()
-                            it.finishTime = finishTimeItem.formatTime()
-                            it.duration = startTimeItem.durationUntil(end = finishTimeItem)
-                            it.error = error
+                        process.updateQueueItemById(id = item.id) {
+                            copy(
+                                status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR,
+                                startTime = startTimeItem.formatTime(),
+                                finishTime = finishTimeItem.formatTime(),
+                                duration = startTimeItem.durationUntil(end = finishTimeItem),
+                                error = error
+                            )
                         }
                     }
                 }
@@ -310,7 +316,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun stop() {
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
-                val currentMedia = process.queue.value.firstOrNull { it.id == currentMediaId }
+                val lastMediaId = currentMediaId
 
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
@@ -319,7 +325,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 logMonitor?.cancelAndJoin()
                 logMonitor = null
                 notifyMain {
-                    currentMedia?.status = QueueStatus.NOT_STARTED
+                    process.updateQueueItemById(id = lastMediaId) {
+                        copy(status = QueueStatus.NOT_STARTED)
+                    }
                     process.setConverting(false)
                     setStatus(ConverterStatusState.Initial)
                 }
@@ -342,7 +350,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         var percentage = 0f
         var speed = ""
 
-        current?.status = QueueStatus.IN_PROGRESS
+        process.updateQueueItemById(id = current?.id) {
+            copy(status = QueueStatus.IN_PROGRESS)
+        }
 
         if(it != null && duration != null) {
             val pendingQueueSize = process.pendingQueueSize()
