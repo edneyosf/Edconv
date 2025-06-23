@@ -39,6 +39,10 @@ class EdProcess {
         }
     }
 
+    fun updateQueueItemStatus(id: String?, status: QueueStatus) {
+        updateQueueItemById(id) { copy(status = status) }
+    }
+
     fun queueSize() = _queue.value.size
 
     fun pendingQueueSize() = _queue.value.filter { it.status == QueueStatus.NOT_STARTED }.size

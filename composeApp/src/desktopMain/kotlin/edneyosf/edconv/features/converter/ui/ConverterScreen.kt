@@ -22,7 +22,7 @@ import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.ConverterEvent
 import edneyosf.edconv.features.converter.ConverterViewModel
-import edneyosf.edconv.features.converter.states.ConverterDialogState
+import edneyosf.edconv.features.converter.states.ConverterDialogState as DialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
@@ -62,14 +62,10 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
         verticalArrangement = Arrangement.spacedBy(space = dimens.xl)
     ) {
         Actions(
-            onAddToQueue = { event.addToQueue() },
-            onStart = { event.start() },
-            onStop = { event.stop() },
-            onMediaInfo = {
-                input?.let {
-                    event.setDialog(ConverterDialogState.MediaInfo(inputMedia = it))
-                }
-            }
+            onAddToQueue = event::addToQueue,
+            onStart = event::start,
+            onStop = event::stop,
+            onMediaInfo = { event.setDialog(DialogState.MediaInfo(inputMedia = it)) }
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
@@ -78,20 +74,20 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             FormatInput(
                 value = codec,
                 mediaType = type,
-                onValueChange = { event.setCodec(it) }
+                onValueChange = event::setCodec
             )
             VBRInput(
                 onClick = { event.setCompression(CompressionType.VBR) },
-                onValueChange = { event.setVbr(it) }
+                onValueChange = event::setVbr
             )
             CRFInput(
                 onClick = { event.setCompression(CompressionType.CRF) },
-                onValueChange = { event.setCrf(it) }
+                onValueChange = event::setCrf
             )
             CBRInput(
                 mediaType = codec?.mediaType,
                 onClick = { event.setCompression(CompressionType.CBR) },
-                onValueChange = { event.setBitrate(it) }
+                onValueChange = event::setBitrate
             )
         }
         if(type == MediaType.AUDIO) {
@@ -101,11 +97,11 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             ) {
                 ChannelsInput(
                     value = channels,
-                    onValueChange = { event.setChannels(it) }
+                    onValueChange = event::setChannels
                 )
                 SampleRateInput(
                     value = sampleRate,
-                    onValueChange = { event.setSampleRate(it) }
+                    onValueChange = event::setSampleRate
                 )
             }
         }
@@ -116,13 +112,13 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             ) {
                 ResolutionInput(
                     value = resolution,
-                    onValueChange = { event.setResolution(it) }
+                    onValueChange = event::setResolution
                 )
                 PixelFormatInput(
                     value = pixelFormat,
-                    onValueChange = { event.setPixelFormat(it) }
+                    onValueChange = event::setPixelFormat
                 )
-                PresetInput(onValueChange = { event.setPreset(it) })
+                PresetInput(onValueChange = event::setPreset)
             }
         }
         Row(
@@ -132,18 +128,18 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             CheckboxInput(
                 checked = noMetadata,
                 label = strings[NO_METADATA_INPUT],
-                onCheckedChange = { event.setNoMetadata(it) }
+                onCheckedChange = event::setNoMetadata
             )
             if(type == MediaType.VIDEO) {
                 CheckboxInput(
                     checked = noAudio,
                     label = strings[NO_AUDIO_INPUT],
-                    onCheckedChange = { event.setNoAudio(it) }
+                    onCheckedChange = event::setNoAudio
                 )
                 CheckboxInput(
                     checked = noSubtitle,
                     label = strings[NO_SUBTITLE_INPUT],
-                    onCheckedChange = { event.setNoSubtitle(it) }
+                    onCheckedChange = event::setNoSubtitle
                 )
             }
         }
@@ -158,7 +154,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
                     textStyle = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(weight = 1f).fillMaxHeight(),
                     colors = TextFieldDefaults.colors().custom(),
-                    onValueChange = { event.setCommand(it) },
+                    onValueChange = event::setCommand,
                     label = { Text(text = strings[COMMAND_INPUT]) }
                 )
             }
@@ -168,7 +164,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             value = output ?: "",
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors().custom(),
-            onValueChange = { event.setOutput(it) },
+            onValueChange = event::setOutput,
             label = { Text(text = strings[OUTPUT_FILE]) }
         )
     }
@@ -179,7 +175,7 @@ private fun ConverterState.Actions(
     onAddToQueue: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
-    onMediaInfo: () -> Unit
+    onMediaInfo: (InputMedia) -> Unit
 ) {
     var showQueue by remember { mutableStateOf(value = false) }
 
@@ -222,12 +218,16 @@ private fun ConverterState.Actions(
             }
         },
         righties = {
-            TextTooltip(text = strings[MEDIA_INFO]) {
-                IconButton(onClick = onMediaInfo) {
-                    Icon(
-                        imageVector = Icons.Rounded.Info,
-                        contentDescription = strings[MEDIA_INFO]
-                    )
+            input?.let {
+                TextTooltip(text = strings[MEDIA_INFO]) {
+                    IconButton(
+                        onClick = { onMediaInfo(it) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = strings[MEDIA_INFO]
+                        )
+                    }
                 }
             }
         }
@@ -279,7 +279,9 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    if(codec.compressions.size > 1) RadioButton(selected = isVBR, onClick = onClick)
+                    if(codec.compressions.size > 1) {
+                        RadioButton(selected = isVBR, onClick = onClick)
+                    }
                     Text(
                         text = strings[VBR_INPUT],
                         style = TextStyle(
@@ -316,7 +318,9 @@ private fun ConverterState.CBRInput(mediaType: MediaType?, onClick: () -> Unit, 
         val isCBR = CompressionType.CBR == compression
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if(codec.compressions.size > 1) RadioButton(selected = isCBR, onClick = onClick)
+            if(codec.compressions.size > 1) {
+                RadioButton(selected = isCBR, onClick = onClick)
+            }
             Selector(
                 text = bitrate?.text ?: "",
                 label = strings[CBR_INPUT],
@@ -352,7 +356,9 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    if(codec.compressions.size > 1) RadioButton(selected = isCRF, onClick = onClick)
+                    if(codec.compressions.size > 1) {
+                        RadioButton(selected = isCRF, onClick = onClick)
+                    }
                     Text(
                         text = strings[CRF_INPUT],
                         style = TextStyle(

@@ -276,14 +276,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     val startTimeItem = Instant.now()
 
                     currentMediaId = item.id
+                    notifyMain { updateCurrentStatus(status = QueueStatus.STARTED) }
                     logsCache.clear()
                     _logsState.clear()
                     startLogMonitor()
-                    notifyMain {
-                        process.updateQueueItemById(id = item.id) {
-                            copy(status = QueueStatus.STARTED)
-                        }
-                    }
 
                     val error = converter.run(
                         ffmpeg = config.ffmpegPath,
@@ -294,9 +290,11 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     val finishTimeItem = Instant.now()
 
                     notifyMain {
+                        val status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR
+
                         process.updateQueueItemById(id = item.id) {
                             copy(
-                                status = if(error == null) QueueStatus.FINISHED else QueueStatus.ERROR,
+                                status = status,
                                 startTime = startTimeItem.formatTime(),
                                 finishTime = finishTimeItem.formatTime(),
                                 duration = startTimeItem.durationUntil(end = finishTimeItem),
@@ -306,8 +304,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     }
                 }
 
-                notifyMain { process.setConverting(false) }
                 currentMediaId = null
+                notifyMain { process.setConverting(false) }
                 notifyCompletion(startTime)
             }
         }
@@ -316,18 +314,14 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun stop() {
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
-                val lastMediaId = currentMediaId
-
                 converter.destroyProcess()
                 conversion?.cancelAndJoin()
                 conversion = null
+                notifyMain { updateCurrentStatus(status = QueueStatus.NOT_STARTED) }
                 currentMediaId = null
                 logMonitor?.cancelAndJoin()
                 logMonitor = null
                 notifyMain {
-                    process.updateQueueItemById(id = lastMediaId) {
-                        copy(status = QueueStatus.NOT_STARTED)
-                    }
                     process.setConverting(false)
                     setStatus(ConverterStatusState.Initial)
                 }
@@ -350,9 +344,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         var percentage = 0f
         var speed = ""
 
-        process.updateQueueItemById(id = current?.id) {
-            copy(status = QueueStatus.IN_PROGRESS)
-        }
+        updateCurrentStatus(status = QueueStatus.IN_PROGRESS)
 
         if(it != null && duration != null) {
             val pendingQueueSize = process.pendingQueueSize()
@@ -369,8 +361,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         val finishTime = Instant.now()
 
         if(_state.value.status !is ConverterStatusState.Failure) {
-            setStatus(
-                ConverterStatusState.Complete(
+            setStatus(ConverterStatusState.Complete(
                 startTime = startTime.formatTime(),
                 finishTime = finishTime.formatTime(),
                 duration = startTime.durationUntil(end = finishTime)
@@ -449,5 +440,14 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         val size = process.queueSize()
 
         _state.update { copy(queueSize = size) }
+    }
+
+    private fun updateCurrentStatus(status: QueueStatus) {
+        currentMediaId?.let {
+            process.updateQueueItemStatus(
+                id = it,
+                status = status
+            )
+        }
     }
 }

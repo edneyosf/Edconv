@@ -75,8 +75,8 @@ private fun VmafState.Content(event: VmafEvent) {
             stopEnabled = canStop(),
             startDescription = strings[START_ANALYSIS],
             stopDescription = strings[STOP_ANALYSIS],
-            onStart = { event.start() },
-            onStop = { event.stop() },
+            onStart = event::start,
+            onStop = event::stop,
             righties = {
                 reference?.let {
                     TextTooltip(text = strings[MEDIA_INFO]) {
