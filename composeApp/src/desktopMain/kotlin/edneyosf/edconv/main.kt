@@ -24,22 +24,19 @@ fun main() {
         Window(
             title = AppConfigs.NAME,
             onCloseRequest = ::exitApplication,
-            icon = painterResource(resource = Res.drawable.icon),
-            content = {
-                window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
-                App()
-            }
-        )
+            icon = painterResource(resource = Res.drawable.icon)
+        ) {
+            window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
+            App()
+        }
     }
 }
 
-private fun setModules() {
-    startKoin {
-        modules(modules = coreModule)
-        modules(modules = homeFeatureModule)
-        modules(modules = settingsFeatureModule)
-        modules(modules = converterHomeModule)
-        modules(modules = queueFeatureModule)
-        modules(modules = vmafFeatureModule)
-    }
+private fun setModules() = startKoin {
+    modules(modules = coreModule)
+    modules(modules = homeFeatureModule)
+    modules(modules = settingsFeatureModule)
+    modules(modules = converterHomeModule)
+    modules(modules = queueFeatureModule)
+    modules(modules = vmafFeatureModule)
 }
