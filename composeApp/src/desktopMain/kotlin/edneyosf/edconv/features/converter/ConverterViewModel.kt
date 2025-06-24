@@ -220,11 +220,13 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     }
 
     override fun addToQueue(fromStart: Boolean, overwrite: Boolean) {
-        val input = _state.value.input
-        val output = _state.value.output
-        val command = _state.value.command
+        val state = _state.value
+        val input = state.input
+        val type = state.type
+        val output = state.output
+        val command = state.command
 
-        if(input != null && !output.isNullOrBlank() && command.isNotBlank()) {
+        if(input != null && type != null && !output.isNullOrBlank() && command.isNotBlank()) {
             try {
                 val outputFile = File(output)
                 val outputExists = outputFile.exists()
@@ -243,6 +245,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     item = MediaQueue(
                         id = UUID.randomUUID().toString(),
                         input = input,
+                        type = type,
                         command = command.normalizeCommand(),
                         outputFile = outputFile
                     )
