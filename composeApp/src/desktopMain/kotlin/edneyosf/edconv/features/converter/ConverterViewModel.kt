@@ -66,6 +66,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         converter = Converter(onStdout = ::onStdout, onProgress = ::onProgress)
         observeCodec()
         observeInput()
+        observeQueue()
     }
 
     private fun observeInput() {
@@ -140,6 +141,14 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     sampleRate = newSampleRate,
                     output = newOutput
                 )
+            }
+        }
+    }
+
+    private fun observeQueue() {
+        viewModelScope.launch {
+            process.queue.collectLatest {
+                _state.update { copy(queueSize = it.size) }
             }
         }
     }
@@ -250,8 +259,6 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                         outputFile = outputFile
                     )
                 )
-
-                updateQueueSize()
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -437,12 +444,6 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     private inline fun <T> MutableStateFlow<T>.updateAndSync(block: T.() -> T) {
         value = value.block()
         buildCommand()
-    }
-
-    private fun updateQueueSize() {
-        val size = process.queueSize()
-
-        _state.update { copy(queueSize = size) }
     }
 
     private fun updateCurrentStatus(status: QueueStatus) {

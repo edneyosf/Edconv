@@ -31,6 +31,14 @@ class EdProcess {
 
     fun addToQueue(item: MediaQueue) { _queue.value = _queue.value + item }
 
+    fun removeFromQueue(item: MediaQueue) { _queue.value = _queue.value - item }
+
+    fun clearQueue() {
+        _queue.value = _queue.value.filter {
+            it.status == QueueStatus.STARTED || it.status == QueueStatus.IN_PROGRESS
+        }
+    }
+
     fun updateQueueItemById(id: String?, block: MediaQueue.() -> MediaQueue) {
         if(id != null) {
             _queue.value = _queue.value.map {
@@ -42,8 +50,6 @@ class EdProcess {
     fun updateQueueItemStatus(id: String?, status: QueueStatus) {
         updateQueueItemById(id) { copy(status = status) }
     }
-
-    fun queueSize() = _queue.value.size
 
     fun pendingQueueSize() = _queue.value.filter { it.status == QueueStatus.NOT_STARTED }.size
 }
