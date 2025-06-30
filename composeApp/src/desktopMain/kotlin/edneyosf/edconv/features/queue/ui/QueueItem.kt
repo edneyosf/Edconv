@@ -50,7 +50,7 @@ fun QueueItem(
     onClick: (() -> Unit)? = null,
     onRemove: (() -> Unit)? = null
 ) {
-    val backgroundColor = if(selected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+    val backgroundColor = if(selected) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Transparent
     val modifier = Modifier
         .fillMaxWidth()
         .height(height = dimens.jumbo)
