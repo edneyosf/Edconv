@@ -36,10 +36,7 @@ class Converter(private val onStdout: (String) -> Unit, private val onProgress: 
 
                 BufferedReader(InputStreamReader(it.errorStream)).useLines { lines ->
                     lines.forEach { line ->
-                        val progress = line.getProgressData(
-                            pattern = ConverterPattern.PROGRESS,
-                            onException = { e -> onStdout("Error = { " + e.message + " }") }
-                        )
+                        val progress = line.getProgressData { e -> onStdout("Error = { " + e.message + " }") }
 
                         if (progress != null) notifyMain { onProgress(progress) }
                         else onStdout(line)
@@ -71,7 +68,7 @@ class Converter(private val onStdout: (String) -> Unit, private val onProgress: 
     }
 
     private fun String.normalize(): Array<String> {
-        val regex = Regex(pattern = ConverterPattern.COMMAND)
+        val regex = Regex(pattern = "\\s+")
         val data = this.split(regex)
         val filtered = data.filter { it.isNotBlank() }
 
