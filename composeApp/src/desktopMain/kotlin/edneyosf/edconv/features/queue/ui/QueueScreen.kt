@@ -12,15 +12,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,10 +31,16 @@ import edconv.composeapp.generated.resources.Res
 import edconv.composeapp.generated.resources.icon
 import edneyosf.edconv.core.extensions.toReadableCommand
 import edneyosf.edconv.core.process.MediaQueue
+import edneyosf.edconv.core.process.QueueStatus
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.queue.QueueEvent
 import edneyosf.edconv.features.queue.QueueViewModel
-import edneyosf.edconv.ui.components.TextTooltip
+import edneyosf.edconv.features.queue.strings.QueueScreenStrings.Keys.*
+import edneyosf.edconv.features.queue.strings.queueScreenStrings
+import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
+import edneyosf.edconv.ui.compositions.strings
+import edneyosf.edconv.ui.compositions.stringsComp
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
@@ -51,12 +54,14 @@ fun QueueScreen(onClose: () -> Unit) {
     val viewModel = koinViewModel<QueueViewModel>()
     val state by viewModel.state.collectAsState()
 
-    Window(
-        onCloseRequest = onClose,
-        title = "Fila",
-        icon = painterResource(resource = Res.drawable.icon)
-    ) {
-        state.Content(viewModel)
+    CompositionLocalProvider(value = stringsComp provides queueScreenStrings) {
+        Window(
+            onCloseRequest = onClose,
+            title = strings[WINDOW_TITLE],
+            icon = painterResource(resource = Res.drawable.icon)
+        ) {
+            state.Content(event = viewModel)
+        }
     }
 }
 
@@ -97,7 +102,47 @@ private fun List<MediaQueue>.Content(event: QueueEvent) {
 
 @Composable
 private fun DefaultPreview() {
-    listOf<MediaQueue>().Content(object : QueueEvent {})
+    val queue = mutableListOf<MediaQueue>()
+    val filePath = "/Dir/File.ed"
+    val outputFile = File(filePath)
+    val input = InputMedia(
+        path = filePath,
+        type = MediaType.VIDEO,
+        size = 123456L,
+        sizeText = "123456",
+        duration = 123456L,
+        durationText = "123456"
+    )
+    val item = MediaQueue(
+        id = "1",
+        status = QueueStatus.NOT_STARTED,
+        input = input,
+        type = MediaType.VIDEO,
+        command = "Command",
+        outputFile = outputFile
+    )
+
+    queue.add(item)
+    queue.add(item.copy(
+        id = "2",
+        status = QueueStatus.STARTED,
+        type = MediaType.AUDIO
+    ))
+    queue.add(item.copy(
+        id = "3",
+        status = QueueStatus.IN_PROGRESS
+    ))
+    queue.add(item.copy(
+        id = "4",
+        status = QueueStatus.FINISHED
+    ))
+    queue.add(item.copy(
+        id = "5",
+        status = QueueStatus.ERROR,
+        type = MediaType.AUDIO
+    ))
+
+    queue.Content(event = object : QueueEvent {})
 }
 
 @Preview

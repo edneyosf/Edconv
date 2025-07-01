@@ -136,27 +136,27 @@ private fun DefaultPreview() {
         QueueItem(
             selected = true,
             mediaType = MediaType.SUBTITLE,
-            fileName = "Subtitle.srt",
+            fileName = "File.ed",
             status = QueueStatus.NOT_STARTED,
         )
         QueueItem(
             mediaType = MediaType.AUDIO,
-            fileName = "Audio.opus",
+            fileName = "File.ed",
             status = QueueStatus.STARTED
         )
         QueueItem(
             mediaType = MediaType.AUDIO,
-            fileName = "Audio.opus",
+            fileName = "File.ed",
             status = QueueStatus.IN_PROGRESS
         )
         QueueItem(
             mediaType = MediaType.VIDEO,
-            fileName = "Video.mkv",
+            fileName = "File.ed",
             status = QueueStatus.FINISHED
         )
         QueueItem(
             mediaType = MediaType.VIDEO,
-            fileName = "Video.mkv",
+            fileName = "File.ed",
             status = QueueStatus.ERROR
         )
     }
