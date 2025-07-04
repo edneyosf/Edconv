@@ -1,6 +1,5 @@
 package edneyosf.edconv.ffmpeg.ffprobe
 
-import edneyosf.edconv.core.config.ConfigManager
 import edneyosf.edconv.ffmpeg.common.FFLogLevel
 import edneyosf.edconv.ffmpeg.data.FFprobeData
 import edneyosf.edconv.ffmpeg.data.InputMediaData
@@ -17,14 +16,14 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class FFprobe(private val file: File) {
+class FFprobe(private val ffprobePath: String, private val file: File) {
 
     fun analyze(): InputMediaData? {
         var inputMedia: InputMediaData? = null
 
         try {
             val command = arrayOf(
-                ConfigManager.getFFprobePath(),
+                ffprobePath,
                 LOG_LEVEL, FFLogLevel.ERROR,
                 SHOW_ENTRIES, formatEntries(),
                 SHOW_ENTRIES, streamEntries(),

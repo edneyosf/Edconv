@@ -2,7 +2,7 @@ package edneyosf.edconv.features.vmaf.ui
 
 import androidx.compose.runtime.Composable
 import edneyosf.edconv.features.mediainfo.MediaInfoDialog
-import edneyosf.edconv.features.vmaf.events.VmafEvent
+import edneyosf.edconv.features.vmaf.VmafEvent
 import edneyosf.edconv.features.vmaf.states.VmafDialogState.*
 import edneyosf.edconv.features.vmaf.states.VmafState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState.*

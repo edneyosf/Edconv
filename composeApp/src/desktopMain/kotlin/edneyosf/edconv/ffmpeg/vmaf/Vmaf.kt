@@ -49,10 +49,7 @@ class Vmaf(
 
                 BufferedReader(InputStreamReader(it.errorStream)).useLines { lines ->
                     lines.forEach { line ->
-                        val progress = line.getProgressData(
-                            pattern = VmafPattern.PROGRESS,
-                            onException = { e-> onStdout("Error = { " + e.message + " }") }
-                        )
+                        val progress = line.getProgressData{ e -> onStdout("Error = { " + e.message + " }") }
 
                         line.getScore()
 
@@ -83,7 +80,7 @@ class Vmaf(
 
     private fun String.getScore() {
         try {
-            val regex = Regex(pattern = VmafPattern.SCORE)
+            val regex = Regex(pattern = "VMAF score:\\s*(\\d+(?:\\.\\d+)?)")
             val match = regex.find(input = this)
 
             if(match != null) {

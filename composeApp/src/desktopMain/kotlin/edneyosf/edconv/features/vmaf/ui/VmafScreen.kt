@@ -26,18 +26,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.MEDIA_INFO
 import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.*
-import edneyosf.edconv.features.vmaf.VmafArgs
-import edneyosf.edconv.features.vmaf.events.VmafEvent
+import edneyosf.edconv.features.vmaf.VmafEvent
 import edneyosf.edconv.features.vmaf.states.VmafDialogState
 import edneyosf.edconv.features.vmaf.states.VmafState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState
 import edneyosf.edconv.features.vmaf.strings.vmafScreenStrings
-import edneyosf.edconv.features.vmaf.viewmodels.VmafViewModel
+import edneyosf.edconv.features.vmaf.VmafViewModel
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.TextTooltip
@@ -49,13 +46,12 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun VMAFScreen(args: VmafArgs) {
-    val viewModel = viewModel { VmafViewModel(input = args.input) }
+fun VMAFScreen() {
+    val viewModel = koinViewModel<VmafViewModel>()
     val state by viewModel.state
-
-    LaunchedEffected(key = args) { viewModel.refresh(newInput = it.input) }
 
     CompositionLocalProvider(value = stringsComp provides vmafScreenStrings) {
         state.Dialogs(event = viewModel)
@@ -79,17 +75,19 @@ private fun VmafState.Content(event: VmafEvent) {
             stopEnabled = canStop(),
             startDescription = strings[START_ANALYSIS],
             stopDescription = strings[STOP_ANALYSIS],
-            onStart = { event.start() },
-            onStop = { event.stop() },
+            onStart = event::start,
+            onStop = event::stop,
             righties = {
-                TextTooltip(text = strings[MEDIA_INFO]) {
-                    IconButton(
-                        onClick = { event.setDialog(VmafDialogState.MediaInfo(inputMedia = reference)) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = strings[MEDIA_INFO]
-                        )
+                reference?.let {
+                    TextTooltip(text = strings[MEDIA_INFO]) {
+                        IconButton(
+                            onClick = { event.setDialog(VmafDialogState.MediaInfo(inputMedia = it)) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Info,
+                                contentDescription = strings[MEDIA_INFO]
+                            )
+                        }
                     }
                 }
             }

@@ -10,8 +10,8 @@ enum class Error(val code: String) {
     NO_STREAM_FOUND_INPUT_MEDIA(code = "0006"),
     FFMPEG_OR_FFPROBE_VERIFICATION(code = "0007"),
     CONFIGURATION_SAVE(code = "0008"),
-    ON_STARTING_CONVERSION(code = "0009"),
-    ON_STARTING_CONVERSION_REQUIREMENTS(code = "000A"),
+    ON_ADD_TO_QUEUE(code = "0009"),
+    ON_ADD_TO_QUEUE_REQUIREMENTS(code = "000A"),
     ON_STOPPING_CONVERSION(code = "000B"),
     START_TIME_NULL(code = "000C"),
     INPUT_FILE_NOT_EXIST(code = "000D"),
@@ -25,5 +25,6 @@ enum class Error(val code: String) {
     ON_STOPPING_VMAF(code = "000L"),
     ON_STARTING_VMAF_REQUIREMENTS(code = "000M"),
     NO_VIDEO_INPUT_MEDIA(code = "000N"),
-    VMAF_MODEL_SAVE(code = "000O");
+    VMAF_MODEL_SAVE(code = "000O"),
+    FILE_ALREADY_EXISTS(code = "000P")
 }

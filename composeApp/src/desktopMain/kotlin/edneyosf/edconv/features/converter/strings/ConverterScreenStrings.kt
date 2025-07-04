@@ -16,8 +16,7 @@ inline val converterScreenStrings: ConverterScreenStrings
 class ConverterScreenStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
-        TITLE_PICK_FILE to "Escolha um arquivo",
-        SELECT_FILE to "Selecionar arquivo",
+        ADD_TO_QUEUE_CONVERSION to "Adicionar",
         START_CONVERSION to "Iniciar",
         STOP_CONVERSION to "Parar",
         OUTPUT_FILE to "Salvar como",
@@ -33,22 +32,15 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         VBR_INPUT to "Taxa de Bits Variável:",
         CRF_INPUT to "Fator de Taxa Constante:",
         PRESET_INPUT to "Predefinição:",
-        AUDIO_NAVIGATION_ITEM to "Áudio",
-        VIDEO_NAVIGATION_ITEM  to "Vídeo",
-        VMAF_NAVIGATION_ITEM to "VMAF",
         COMMAND_INPUT to "Comando",
         LOGS_VIEW to "Registros",
-        NO_FILE_SELECTED to "Selecione um arquivo de mídia",
-        VERSION to "Versão",
-        DEFAULT_ERROR to "Opa! Algo deu errado.",
-        SELECT_MEDIA_FILE to "Selecionar mídia",
-        SETTINGS to "Configurações",
-        MEDIA_INFO to "Informações da mídia"
+        MEDIA_INFO to "Informações da mídia",
+        QUEUE to "Fila",
+        PENDING_JOBS to "Trabalhos pendentes"
     )
 
     override val en = mapOf(
-        TITLE_PICK_FILE to "Choose a file",
-        SELECT_FILE to "Select file",
+        ADD_TO_QUEUE_CONVERSION to "Add",
         START_CONVERSION to "Start",
         STOP_CONVERSION to "Stop",
         OUTPUT_FILE to "Save as",
@@ -64,24 +56,17 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         VBR_INPUT to "Variable Bit Rate:",
         CRF_INPUT to "Constant Rate Factor:",
         PRESET_INPUT to "Preset:",
-        AUDIO_NAVIGATION_ITEM to "Audio",
-        VIDEO_NAVIGATION_ITEM  to "Video",
-        VMAF_NAVIGATION_ITEM to "VMAF",
         COMMAND_INPUT to "Command",
         LOGS_VIEW to "Logs",
-        NO_FILE_SELECTED to "Select a media file",
-        VERSION to "Version",
-        DEFAULT_ERROR to "Oops! Something went wrong.",
-        SELECT_MEDIA_FILE to "Select media",
-        SETTINGS to "Settings",
-        MEDIA_INFO to "Media information"
+        MEDIA_INFO to "Media information",
+        QUEUE to "Queue",
+        PENDING_JOBS to "Pending jobs"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
 
     enum class Keys {
-        TITLE_PICK_FILE,
-        SELECT_FILE,
+        ADD_TO_QUEUE_CONVERSION,
         START_CONVERSION,
         STOP_CONVERSION,
         OUTPUT_FILE,
@@ -97,16 +82,10 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         VBR_INPUT,
         CRF_INPUT,
         PRESET_INPUT,
-        AUDIO_NAVIGATION_ITEM,
-        VIDEO_NAVIGATION_ITEM,
-        VMAF_NAVIGATION_ITEM,
         COMMAND_INPUT,
         LOGS_VIEW,
-        NO_FILE_SELECTED,
-        VERSION,
-        DEFAULT_ERROR,
-        SELECT_MEDIA_FILE,
-        SETTINGS,
-        MEDIA_INFO
+        MEDIA_INFO,
+        QUEUE,
+        PENDING_JOBS
     }
 }

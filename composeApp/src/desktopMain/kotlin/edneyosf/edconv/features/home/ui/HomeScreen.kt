@@ -16,18 +16,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import edneyosf.edconv.core.utils.PropertyUtils
-import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.converter.ui.ConverterScreen
-import edneyosf.edconv.features.home.events.HomeEvent
-import edneyosf.edconv.features.home.viewmodels.HomeViewModel
+import edneyosf.edconv.features.home.HomeEvent
+import edneyosf.edconv.features.home.HomeViewModel
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.features.home.strings.homeScreenStrings
-import edneyosf.edconv.features.nomedia.ui.NoMediaScreen
+import edneyosf.edconv.features.nomedia.NoMediaScreen
 import edneyosf.edconv.features.vmaf.ui.VMAFScreen
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
@@ -38,12 +36,11 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
-import edneyosf.edconv.features.converter.ConverterArgs
-import edneyosf.edconv.features.vmaf.VmafArgs
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen() {
-    val viewModel = viewModel { HomeViewModel() }
+    val viewModel = koinViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsState()
 
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
@@ -60,34 +57,15 @@ private fun HomeState.Content(event: HomeEvent) {
     Scaffold { innerPadding ->
         Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
             HomeNavigation(
-                onSelected = { event.setNavigation(state = it) },
+                onSelected = event::setNavigation,
                 onSettings = { event.setDialog(state = HomeDialogState.Settings) },
                 onPickFile = { event.pickFile(title = stringPickFile) }
             )
             when {
                 loading -> Loading(appVersion = version)
                 input == null -> NoMediaScreen(appVersion = version)
-                navigation is HomeNavigationState.Audio -> {
-                    val args = ConverterArgs(
-                        input = input,
-                        type = MediaType.AUDIO
-                    )
-
-                    ConverterScreen(args)
-                }
-                navigation is HomeNavigationState.Video -> {
-                    val args = ConverterArgs(
-                        input = input,
-                        type = MediaType.VIDEO
-                    )
-
-                    ConverterScreen(args)
-                }
-                navigation is HomeNavigationState.Vmaf -> {
-                    val args = VmafArgs(input = input)
-
-                    VMAFScreen(args)
-                }
+                navigation is HomeNavigationState.Audio || navigation is HomeNavigationState.Video -> ConverterScreen()
+                navigation is HomeNavigationState.Vmaf -> VMAFScreen()
             }
         }
     }

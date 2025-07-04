@@ -10,13 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.viewmodel.compose.viewModel
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.commonStrings
-import edneyosf.edconv.features.settings.events.SettingsEvent
-import edneyosf.edconv.features.settings.viewmodels.SettingsViewModel
+import edneyosf.edconv.features.settings.SettingsEvent
+import edneyosf.edconv.features.settings.SettingsViewModel
 import edneyosf.edconv.features.settings.states.SettingsState
 import edneyosf.edconv.features.settings.states.SettingsStatusState
 import edneyosf.edconv.features.settings.strings.settingsDialogStrings
@@ -31,10 +30,11 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SettingsDialog(onComplete: () -> Unit) {
-    val viewModel = viewModel { SettingsViewModel() }
+    val viewModel = koinViewModel<SettingsViewModel>()
     val state by viewModel.state
 
     LaunchedEffected(key = state.status) {

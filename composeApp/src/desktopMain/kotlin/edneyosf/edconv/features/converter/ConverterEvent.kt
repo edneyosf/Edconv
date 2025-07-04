@@ -1,12 +1,16 @@
-package edneyosf.edconv.features.converter.events
+package edneyosf.edconv.features.converter
 
-import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
+import edneyosf.edconv.ffmpeg.common.Bitrate
+import edneyosf.edconv.ffmpeg.common.Channels
+import edneyosf.edconv.ffmpeg.common.Codec
+import edneyosf.edconv.ffmpeg.common.CompressionType
+import edneyosf.edconv.ffmpeg.common.PixelFormat
+import edneyosf.edconv.ffmpeg.common.Resolution
+import edneyosf.edconv.ffmpeg.common.SampleRate
 
 interface ConverterEvent {
-    fun refresh(newInput: InputMedia, newType: MediaType) = Unit
     fun setStatus(status: ConverterStatusState) = Unit
     fun setDialog(dialog: ConverterDialogState) = Unit
     fun setCommand(cmd: String) = Unit
@@ -24,6 +28,7 @@ interface ConverterEvent {
     fun setNoAudio(noAudio: Boolean) = Unit
     fun setNoSubtitle(noSubtitle: Boolean) = Unit
     fun setNoMetadata(noMetadata: Boolean) = Unit
+    fun addToQueue(fromStart: Boolean = false, overwrite: Boolean = false) = Unit
     fun start(overwrite: Boolean = false) = Unit
     fun stop() = Unit
 }

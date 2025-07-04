@@ -30,6 +30,9 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.serialization.json)
             implementation(libs.viewmodel)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
