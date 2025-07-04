@@ -24,7 +24,8 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
         INPUT_NOT_FILE to "A mídia de entrada não é um arquivo.",
         CONVERSION_PROCESS_COMPLETED to "A conversão não pôde ser realizada com sucesso.",
         PROCESS_NULL to "O processo de conversão é nulo.",
-        CONVERSION_PROCESS to "Falha na conversão."
+        CONVERSION_PROCESS to "Falha na conversão.",
+        FILE_ALREADY_EXISTS to "Outro trabalho em fila especificou o mesmo destino."
     )
 
     override val en = mapOf(
@@ -36,7 +37,8 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
         INPUT_NOT_FILE to "The input media is not a file.",
         CONVERSION_PROCESS_COMPLETED to "The conversion could not be completed successfully.",
         PROCESS_NULL to "The conversion process is null.",
-        CONVERSION_PROCESS to "Conversion failed."
+        CONVERSION_PROCESS to "Conversion failed.",
+        FILE_ALREADY_EXISTS to "Another queued job has specified the same destination."
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -50,6 +52,7 @@ class ConverterErrorDialogStrings(override val language: String): Strings(langua
         INPUT_NOT_FILE,
         CONVERSION_PROCESS_COMPLETED,
         PROCESS_NULL,
-        CONVERSION_PROCESS
+        CONVERSION_PROCESS,
+        FILE_ALREADY_EXISTS
     }
 }

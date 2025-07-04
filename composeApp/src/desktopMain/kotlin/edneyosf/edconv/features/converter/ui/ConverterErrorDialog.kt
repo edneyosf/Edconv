@@ -34,6 +34,7 @@ fun ConverterErrorDialog(error: Error, onFinish: () -> Unit) {
             Error.CONVERSION_PROCESS_COMPLETED -> strings[CONVERSION_PROCESS_COMPLETED]
             Error.PROCESS_NULL -> strings[PROCESS_NULL]
             Error.CONVERSION_PROCESS -> strings[CONVERSION_PROCESS]
+            Error.FILE_ALREADY_EXISTS -> strings[FILE_ALREADY_EXISTS]
             else -> commonStrings[ERROR_DEFAULT]
         }
 

@@ -250,15 +250,20 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     setDialog(ConverterDialogState.None)
                 }
 
-                process.addToQueue(
-                    item = MediaQueue(
-                        id = UUID.randomUUID().toString(),
-                        input = input,
-                        type = type,
-                        command = command.normalizeCommand(),
-                        outputFile = outputFile
+                if(process.queue.value.any { it.outputFile.path == outputFile.path }){
+                    onError(Error.FILE_ALREADY_EXISTS)
+                }
+                else {
+                    process.addToQueue(
+                        item = MediaQueue(
+                            id = UUID.randomUUID().toString(),
+                            input = input,
+                            type = type,
+                            command = command.normalizeCommand(),
+                            outputFile = outputFile
+                        )
                     )
-                )
+                }
             }
             catch (e: Exception) {
                 e.printStackTrace()

@@ -25,5 +25,6 @@ enum class Error(val code: String) {
     ON_STOPPING_VMAF(code = "000L"),
     ON_STARTING_VMAF_REQUIREMENTS(code = "000M"),
     NO_VIDEO_INPUT_MEDIA(code = "000N"),
-    VMAF_MODEL_SAVE(code = "000O");
+    VMAF_MODEL_SAVE(code = "000O"),
+    FILE_ALREADY_EXISTS(code = "000P")
 }
