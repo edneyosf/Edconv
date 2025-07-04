@@ -1,23 +1,25 @@
 package edneyosf.edconv.ffmpeg.extensions
 
 import edneyosf.edconv.core.utils.DateTimeUtils
-import edneyosf.edconv.ffmpeg.converter.ConverterPattern
 import edneyosf.edconv.ffmpeg.data.ProgressData
 
-fun String.getProgressData(pattern: String, onException: (e: Exception) -> Unit): ProgressData? {
+fun String.getProgressData(onException: (e: Exception) -> Unit): ProgressData? {
     var progress: ProgressData? = null
 
     try {
-        val regex = Regex(pattern = pattern)
-        val match = regex.find(input = this)
+        val timeRegex = Regex(pattern = "time=(\\d+:\\d+:\\d+\\.\\d+)")
+        val speedRegex = Regex(pattern = "speed=\\s*([\\d.]+x)")
+        val timeMatch = timeRegex.find(input = this)
+        val speedMatch = speedRegex.find(input = this)
 
-        if(match != null) {
-            val (_, rawTime, _, speed) = match.destructured
-            val time = DateTimeUtils.timeToLong(time = rawTime, pattern = ConverterPattern.TIME)
+        if(timeMatch != null && speedMatch != null) {
+            val (rawTime) = timeMatch.destructured
+            val (rawSpeed) = speedMatch.destructured
+            val time = DateTimeUtils.timeToLong(time = rawTime, pattern = "HH:mm:ss.SS")
 
             progress = ProgressData(
                 time = time,
-                speed = speed
+                speed = rawSpeed
             )
         }
     }

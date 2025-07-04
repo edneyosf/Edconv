@@ -7,8 +7,8 @@ data class ConverterState(
     val status: ConverterStatusState = ConverterStatusState.Initial,
     val dialog: ConverterDialogState = ConverterDialogState.None,
     val command: String = "",
-    val input: InputMedia,
-    val type: MediaType,
+    val input: InputMedia? = null,
+    val type: MediaType? = null,
     val output: String? = null,
     val codec: Codec? = null,
     val compression: CompressionType? = null,
@@ -22,5 +22,6 @@ data class ConverterState(
     val pixelFormat: PixelFormat? = null,
     val noAudio: Boolean = false,
     val noSubtitle: Boolean = false,
-    val noMetadata: Boolean = false
+    val noMetadata: Boolean = false,
+    val queueSize: Int = 0
 )

@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.settings.events
+package edneyosf.edconv.features.settings
 
 import edneyosf.edconv.features.settings.states.SettingsStatusState
 

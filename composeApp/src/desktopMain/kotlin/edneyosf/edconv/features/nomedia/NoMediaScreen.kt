@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.nomedia.ui
+package edneyosf.edconv.features.nomedia
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
-import edneyosf.edconv.features.nomedia.strings.NoMediaScreenStrings.Keys.*
-import edneyosf.edconv.features.nomedia.strings.noMediaScreenStrings
+import edneyosf.edconv.features.nomedia.NoMediaScreenStrings.Keys.*
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp

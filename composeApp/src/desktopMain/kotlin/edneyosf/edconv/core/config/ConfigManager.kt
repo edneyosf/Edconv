@@ -1,59 +1,33 @@
 package edneyosf.edconv.core.config
 
+import edneyosf.edconv.app.AppConfigs
 import edneyosf.edconv.core.utils.PropertyUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
 
-object ConfigManager {
+open class ConfigManager(private val fileName: String) {
 
-    private const val FILE_NAME = "config.json"
-    private lateinit var configFile: File
-    private lateinit var config: Config
+    protected lateinit var configFile: File
+    protected lateinit var config: Config
 
-    fun getFFmpegPath(): String = config.ffmpegPath
-    fun getFFprobePath(): String = config.ffprobePath
+    fun load() {
+        configFile = File(configDir(), fileName)
 
-    fun getVmafModelPath(): String = config.vmafModelPath
-
-    suspend fun setFFmpegPath(path: String) {
-        val newConfig = config.copy(ffmpegPath = path)
-        save(newConfig)
-        config = newConfig
+        config = if (configFile.exists()) Json.Default.decodeFromString(string = configFile.readText())
+        else Config()
     }
 
-    suspend fun setFFprobePath(path: String) {
-        val newConfig = config.copy(ffprobePath = path)
-        save(newConfig)
-        config = newConfig
+    protected inline fun save(crossinline block: Config.() -> Unit) {
+        config.block()
+        configFile.writeText(text = Json.Default.encodeToString(value = config))
     }
 
-    suspend fun setVmafModelPath(path: String) {
-        val newConfig = config.copy(vmafModelPath = path)
-        save(newConfig)
-        config = newConfig
-    }
-
-    private suspend fun save(config: Config) = withContext(context = Dispatchers.IO) {
-        configFile.writeText(Json.Default.encodeToString(config))
-    }
-
-    fun load(appName: String) {
-        configFile = File(configDir(appName), FILE_NAME)
-
-        return if (configFile.exists()) config = Json.Default.decodeFromString(configFile.readText())
-        else config = Config()
-    }
-
-    private fun configDir(appName: String): File {
+    private fun configDir(): File {
         val baseDir = when {
-            isWindows() -> PropertyUtils.userHomeDir
+            PropertyUtils.isWindows() -> PropertyUtils.userHomeDir
             else -> "${PropertyUtils.userHomeDir}/.config"
         }
 
-        return File(baseDir, appName).also { it.mkdirs() }
+        return File(baseDir, AppConfigs.NAME).also { it.mkdirs() }
     }
-
-    private fun isWindows(): Boolean = PropertyUtils.osName.contains("win")
 }

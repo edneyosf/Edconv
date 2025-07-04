@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.nomedia.strings
+package edneyosf.edconv.features.nomedia
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -6,7 +6,7 @@ import edneyosf.edconv.core.common.Languages.EN
 import edneyosf.edconv.core.common.Languages.PT
 import edneyosf.edconv.core.common.Strings
 import edneyosf.edconv.ui.compositions.language
-import edneyosf.edconv.features.nomedia.strings.NoMediaScreenStrings.Keys.*
+import edneyosf.edconv.features.nomedia.NoMediaScreenStrings.Keys.*
 
 inline val noMediaScreenStrings: NoMediaScreenStrings
     @ReadOnlyComposable
