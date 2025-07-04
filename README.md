@@ -24,11 +24,11 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 - Clean, intuitive interface
 - Media Information
 - VMAF perceptual video quality assessment algorithm
-- Conversion queue (soon)
+- Conversion queue
 
 ## Screenshots
 
-![Application Preview](assets/edconv.webp)
+![Application Preview](assets/edconv.png)
 
 ## Requirements
 
