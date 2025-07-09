@@ -2,6 +2,7 @@ package edneyosf.edconv.ffmpeg.vmaf
 
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.notifyMain
+import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.extensions.getProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.VmafFFmpeg
@@ -11,11 +12,11 @@ import java.io.File
 import java.io.InputStreamReader
 
 class Vmaf(
-    private val scope: CoroutineScope, private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
+    private val process: EdProcess, private val scope: CoroutineScope,
+    private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
     private val onError: (Error) -> Unit, private val onProgress: (ProgressData?) -> Unit,
     private val onStop: (Double?) -> Unit
 ) {
-    private var process: Process? = null
     private var score: Double? = null
 
     fun run(ffmpeg: String, data: VmafFFmpeg) = scope.launch(context = Dispatchers.IO) {
@@ -39,12 +40,12 @@ class Vmaf(
                 return@launch
             }
 
-            process = ProcessBuilder(
+            process.analysis = ProcessBuilder(
                 ffmpeg,
                 *cmd
             ).start()
 
-            process?.let {
+            process.analysis?.let {
                 notifyMain { onProgress(null) }
 
                 BufferedReader(InputStreamReader(it.errorStream)).useLines { lines ->
@@ -71,7 +72,7 @@ class Vmaf(
             notifyMain { onError(Error.VMAF_PROCESS) }
         }
         finally {
-            process = null
+            process.analysis = null
             notifyMain { onStop(score) }
         }
 
@@ -96,7 +97,7 @@ class Vmaf(
     }
 
     fun destroyProcess() {
-        process?.destroyForcibly()
-        process = null
+        process.analysis?.destroyForcibly()
+        process.analysis = null
     }
 }

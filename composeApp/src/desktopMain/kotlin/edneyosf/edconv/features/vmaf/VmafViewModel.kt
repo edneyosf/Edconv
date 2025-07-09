@@ -14,7 +14,6 @@ import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.home.mappers.toInputMedia
-import edneyosf.edconv.features.vmaf.states.VmafDialogState
 import edneyosf.edconv.features.vmaf.states.VmafState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState
 import edneyosf.edconv.ffmpeg.data.ProgressData
@@ -47,6 +46,7 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
         _state = mutableStateOf(value = stateValue)
         state = _state
         vmaf = Vmaf(
+            process = process,
             scope = viewModelScope,
             onStart = ::onStart,
             onStdout = {},
@@ -68,7 +68,7 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
 
     private fun onStart() {
         startTime = Instant.now()
-        process.setAnalysis(true)
+        process.setAnalyzing(true)
     }
 
     private fun onProgress(it: ProgressData?) {
@@ -85,7 +85,7 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
     }
 
     private fun onStop(score: Double?) {
-        process.setAnalysis(false)
+        process.setAnalyzing(false)
         startTime?.let {
             val finishTime = Instant.now()
             val startText = DateTimeUtils.instantToText(instant = it, pattern = DateTimePattern.TIME_HMS)
@@ -112,8 +112,6 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
     private fun onError(error: Error) = setStatus(status = VmafStatusState.Failure(error))
 
     override fun setStatus(status: VmafStatusState) = _state.update { copy(status = status) }
-
-    override fun setDialog(dialog: VmafDialogState) = _state.update { copy(dialog = dialog) }
 
     override fun start() {
         _state.value.run {
