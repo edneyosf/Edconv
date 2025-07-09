@@ -32,23 +32,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.window.Window
 import edconv.composeapp.generated.resources.Res
 import edconv.composeapp.generated.resources.icon
+import edneyosf.edconv.app.AppConfigs.MIN_SUB_WINDOW_HEIGHT
+import edneyosf.edconv.app.AppConfigs.MIN_SUB_WINDOW_WIDTH
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.toReadableCommand
 import edneyosf.edconv.core.process.MediaQueue
 import edneyosf.edconv.core.process.QueueStatus
-import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
-import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.CONVERSION_PROCESS
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.CONVERSION_PROCESS_COMPLETED
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.FILE_ALREADY_EXISTS
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.INPUT_FILE_NOT_EXIST
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.INPUT_NOT_FILE
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.ON_ADD_TO_QUEUE
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.ON_ADD_TO_QUEUE_REQUIREMENTS
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.ON_STOPPING_CONVERSION
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.PROCESS_NULL
-import edneyosf.edconv.features.converter.strings.ConverterErrorDialogStrings.Keys.START_TIME_NULL
+import edneyosf.edconv.features.converter.extensions.toConverterDescription
 import edneyosf.edconv.features.queue.QueueEvent
 import edneyosf.edconv.features.queue.QueueViewModel
 import edneyosf.edconv.features.queue.strings.QueueScreenStrings.Keys.*
@@ -66,6 +57,7 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import java.awt.Dimension
 import java.io.File
 
 @Composable
@@ -79,6 +71,7 @@ fun QueueScreen(onClose: () -> Unit) {
             title = strings[WINDOW_TITLE],
             icon = painterResource(resource = Res.drawable.icon)
         ) {
+            window.minimumSize = Dimension(MIN_SUB_WINDOW_WIDTH, MIN_SUB_WINDOW_HEIGHT)
             state.Content(event = viewModel)
         }
     }
@@ -154,23 +147,9 @@ private fun MediaQueue.Details(modifier: Modifier) {
             value = outputFile.path
         )
         error?.let {
-            val description = when(it) {
-                Error.ON_ADD_TO_QUEUE -> strings[ON_ADD_TO_QUEUE]
-                Error.ON_ADD_TO_QUEUE_REQUIREMENTS -> strings[ON_ADD_TO_QUEUE_REQUIREMENTS]
-                Error.ON_STOPPING_CONVERSION -> strings[ON_STOPPING_CONVERSION]
-                Error.START_TIME_NULL -> strings[START_TIME_NULL]
-                Error.INPUT_FILE_NOT_EXIST -> strings[INPUT_FILE_NOT_EXIST]
-                Error.INPUT_NOT_FILE -> strings[INPUT_NOT_FILE]
-                Error.CONVERSION_PROCESS_COMPLETED -> strings[CONVERSION_PROCESS_COMPLETED]
-                Error.PROCESS_NULL -> strings[PROCESS_NULL]
-                Error.CONVERSION_PROCESS -> strings[CONVERSION_PROCESS]
-                Error.FILE_ALREADY_EXISTS -> strings[FILE_ALREADY_EXISTS]
-                else -> commonStrings[ERROR_DEFAULT]
-            }
-
             DetailItem(
                 label = strings[ERROR],
-                value = description
+                value = it.toConverterDescription()
             )
         }
         startTime?.let {
