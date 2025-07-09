@@ -22,11 +22,11 @@ import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.ConverterEvent
 import edneyosf.edconv.features.converter.ConverterViewModel
-import edneyosf.edconv.features.converter.states.ConverterDialogState as DialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
+import edneyosf.edconv.features.mediainfo.MediaInfoScreen
 import edneyosf.edconv.features.queue.ui.QueueScreen
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.Selector
@@ -64,8 +64,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
         Actions(
             onAddToQueue = event::addToQueue,
             onStart = event::start,
-            onStop = event::stop,
-            onMediaInfo = { event.setDialog(DialogState.MediaInfo(inputMedia = it)) }
+            onStop = event::stop
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
@@ -174,14 +173,20 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
 private fun ConverterState.Actions(
     onAddToQueue: () -> Unit,
     onStart: () -> Unit,
-    onStop: () -> Unit,
-    onMediaInfo: (InputMedia) -> Unit
+    onStop: () -> Unit
 ) {
     var showQueue by remember { mutableStateOf(value = false) }
+    var showMediaInfo by remember { mutableStateOf(value = false) }
 
     if(showQueue) {
         QueueScreen(
             onClose = { showQueue = false }
+        )
+    }
+
+    if(showMediaInfo) {
+        input?.MediaInfoScreen(
+            onFinish = { showMediaInfo = false }
         )
     }
 
@@ -221,7 +226,7 @@ private fun ConverterState.Actions(
             input?.let {
                 TextTooltip(text = strings[MEDIA_INFO]) {
                     IconButton(
-                        onClick = { onMediaInfo(it) }
+                        onClick = { showMediaInfo = true }
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Info,

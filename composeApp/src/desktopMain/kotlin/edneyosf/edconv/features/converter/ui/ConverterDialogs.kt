@@ -6,7 +6,6 @@ import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.enums.ConverterFileExistsAction as FileExistsAction
-import edneyosf.edconv.features.mediainfo.MediaInfoDialog
 import edneyosf.edconv.features.settings.ui.SettingsDialog
 
 @Composable
@@ -47,12 +46,6 @@ fun ConverterState.Dialogs(event: ConverterEvent) {
                             FileExistsAction.ON_CONVERSION -> { /* TODO */ }
                         }
                     }
-                )
-            }
-
-            is ConverterDialogState.MediaInfo -> {
-                inputMedia.MediaInfoDialog(
-                    onFinish = { event.setDialog(ConverterDialogState.None) }
                 )
             }
 

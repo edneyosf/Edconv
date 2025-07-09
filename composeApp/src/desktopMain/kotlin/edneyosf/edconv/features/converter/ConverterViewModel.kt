@@ -63,7 +63,11 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     val state: StateFlow<ConverterState> = _state
 
     init {
-        converter = Converter(onStdout = ::onStdout, onProgress = ::onProgress)
+        converter = Converter(
+            process = process,
+            onStdout = ::onStdout,
+            onProgress = ::onProgress
+        )
         observeCodec()
         observeInput()
         observeQueue()

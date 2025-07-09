@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class EdProcess {
+
+    var conversion: Process? = null
+    var analysis: Process? = null
+
     private val _input = MutableStateFlow<InputMedia?>(value = null)
     val input = _input.asStateFlow()
 
@@ -15,8 +19,8 @@ class EdProcess {
     private val _converting = MutableStateFlow(value = false)
     val converting = _converting.asStateFlow()
 
-    private val _analysis = MutableStateFlow(value = false)
-    val analysis = _analysis.asStateFlow()
+    private val _analyzing = MutableStateFlow(value = false)
+    val analyzing = _analyzing.asStateFlow()
 
     private val _queue = MutableStateFlow(value = listOf<MediaQueue>())
     val queue = _queue.asStateFlow()
@@ -27,7 +31,7 @@ class EdProcess {
 
     fun setConverting(status: Boolean) { _converting.value = status }
 
-    fun setAnalysis(status: Boolean) { _analysis.value = status }
+    fun setAnalyzing(status: Boolean) { _analyzing.value = status }
 
     fun addToQueue(item: MediaQueue) { _queue.value = _queue.value + item }
 
@@ -52,4 +56,13 @@ class EdProcess {
     }
 
     fun pendingQueueSize() = _queue.value.filter { it.status == QueueStatus.NOT_STARTED }.size
+
+    fun isBusy() = converting.value || analyzing.value
+
+    fun killAll() {
+        conversion?.destroyForcibly()
+        analysis?.destroyForcibly()
+        conversion = null
+        analysis = null
+    }
 }
