@@ -23,14 +23,17 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.mediainfo.MediaInfoScreen
 import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.MEDIA_INFO
 import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.*
 import edneyosf.edconv.features.vmaf.VmafEvent
-import edneyosf.edconv.features.vmaf.states.VmafDialogState
 import edneyosf.edconv.features.vmaf.states.VmafState
 import edneyosf.edconv.features.vmaf.states.VmafStatusState
 import edneyosf.edconv.features.vmaf.strings.vmafScreenStrings
@@ -64,6 +67,13 @@ fun VMAFScreen() {
 @Composable
 private fun VmafState.Content(event: VmafEvent) {
     val stringPickFile = strings[TITLE_PICK_FILE]
+    var showMediaInfo by remember { mutableStateOf(value = false) }
+
+    if(showMediaInfo) {
+        reference?.MediaInfoScreen(
+            onFinish = { showMediaInfo = false }
+        )
+    }
 
     Column(
         modifier = Modifier.padding(all = dimens.md),
@@ -81,7 +91,7 @@ private fun VmafState.Content(event: VmafEvent) {
                 reference?.let {
                     TextTooltip(text = strings[MEDIA_INFO]) {
                         IconButton(
-                            onClick = { event.setDialog(VmafDialogState.MediaInfo(inputMedia = it)) }
+                            onClick = { showMediaInfo = true }
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Info,
