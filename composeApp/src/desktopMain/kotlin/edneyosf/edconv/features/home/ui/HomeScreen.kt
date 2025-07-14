@@ -1,6 +1,7 @@
 package edneyosf.edconv.features.home.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
 import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.features.converter.ui.ConverterScreen
 import edneyosf.edconv.features.home.HomeEvent
@@ -53,8 +56,13 @@ fun HomeScreen() {
 private fun HomeState.Content(event: HomeEvent) {
     val version = remember { PropertyUtils.version }
     val stringPickFile = strings[TITLE_PICK_FILE]
+    val modifier = Modifier
+        .dragAndDropTarget(
+            shouldStartDragAndDrop = { true },
+            target = buildDropTarget(homeEvent = event)
+        )
 
-    Scaffold { innerPadding ->
+    Scaffold(modifier = modifier) { innerPadding ->
         Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
             HomeNavigation(
                 onSelected = event::setNavigation,
@@ -83,6 +91,14 @@ private fun Loading(appVersion: String?) {
         if(appVersion != null) Text(text = "${commonStrings[VERSION]} $appVersion")
     }
 }
+
+private fun buildDropTarget(homeEvent: HomeEvent): DragAndDropTarget =
+    object : DragAndDropTarget {
+        override fun onDrop(event: DragAndDropEvent): Boolean {
+            return homeEvent.onDragAndDropInput(event)
+        }
+    }
+
 
 @Composable
 private fun DefaultPreview() {
