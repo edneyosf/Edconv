@@ -16,11 +16,11 @@ inline val noMediaScreenStrings: NoMediaScreenStrings
 class NoMediaScreenStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
-        NO_FILE_SELECTED to "Selecione um arquivo de mídia"
+        NO_FILE_SELECTED to "Arraste ou selecione um arquivo de mídia"
     )
 
     override val en = mapOf(
-        NO_FILE_SELECTED to "Select a media file"
+        NO_FILE_SELECTED to "Drag or select a media file"
     )
 
     override val texts = mapOf(PT to pt, EN to en)

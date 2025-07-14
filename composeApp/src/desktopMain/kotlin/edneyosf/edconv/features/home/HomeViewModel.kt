@@ -1,5 +1,8 @@
 package edneyosf.edconv.features.home
 
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.core.process.EdProcess
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.awt.datatransfer.DataFlavor
 import java.io.File
 
 class HomeViewModel(private val config: EdConfig, private val process: EdProcess): ViewModel(), HomeEvent {
@@ -144,5 +148,26 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         FileUtils.pickFile(title = title)?.let {
             setInput(path = it)
         }
+    }
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    override fun onDragAndDropInput(event: DragAndDropEvent): Boolean {
+        try {
+            val data = event.awtTransferable.getTransferData(DataFlavor.javaFileListFlavor)
+
+            if (data is List<*>) {
+                val files = data.filterIsInstance<File>()
+                val file = files.firstOrNull()
+
+                file?.let { setInput(file.absolutePath) }
+
+                return true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            setDialog(HomeDialogState.Failure(Error.DEFAULT))
+        }
+
+        return false
     }
 }

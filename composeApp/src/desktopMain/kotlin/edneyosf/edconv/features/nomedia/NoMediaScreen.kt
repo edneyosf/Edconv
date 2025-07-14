@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.VideoLibrary
+import androidx.compose.material.icons.rounded.UploadFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +42,7 @@ private fun Content(appVersion: String?) {
         Spacer(modifier = Modifier.weight(weight = 1f))
         Icon(
             modifier = Modifier.size(size = dimens.giga),
-            imageVector = Icons.Rounded.VideoLibrary,
+            imageVector = Icons.Rounded.UploadFile,
             contentDescription = null
         )
         Spacer(modifier = Modifier.height(height = dimens.xl))
