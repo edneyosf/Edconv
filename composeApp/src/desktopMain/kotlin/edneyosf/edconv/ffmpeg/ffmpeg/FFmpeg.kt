@@ -70,7 +70,7 @@ class FFmpeg private constructor(
 
         data.addCmd(FFmpegArgs.LOG_LEVEL, logLevel)
         if(isVideo()) data.addCmd(FFmpegArgs.MAP, "0:v:0")
-        if(!noAudio) data.addCmd(FFmpegArgs.MAP, if(isVideo()) "0:a" else "0:a:0")
+        if(!noAudio) data.addCmd(FFmpegArgs.MAP, if(isVideo()) "0:a?" else "0:a:0")
         if(isVideo() && !noSubtitle) data.addCmd(FFmpegArgs.MAP, "0:s?")
         data.addCmd(codecArg(), codec)
         data.addCmd(bitRateArg(), bitrate)
