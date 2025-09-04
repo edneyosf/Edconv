@@ -1,6 +1,6 @@
 ![Application Preview](assets/edconv-banner.png)
 
-<div align="center">
+<div style="text-align: center;">
   <h1>Edconv</h1>
 
 A user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
@@ -32,8 +32,9 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 
 ## Requirements
 
-- [FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system, **recommended to use version 7.1 or higher**
-- On first launch, Edconv will prompt you to select your local FFmpeg binary
+[FFmpeg](https://ffmpeg.org/download.html) must be installed and accessible in your system, we also provide GPL-licensed binaries in our releases, **recommended to use version 7.1 or higher**.
+
+On first launch, Edconv will prompt you to select your local FFmpeg binary.
 
 ## Installation
 
@@ -58,5 +59,5 @@ Run the installer as administrator and follow the installation steps.
 Special thanks to all supporter ❤️
 
 <a href="https://buymeacoffee.com/edneyosf">
-  <img src="assets/bmc-button.svg" width="200">
+  <img alt="" src="assets/bmc-button.svg" width="200">
 </a>
