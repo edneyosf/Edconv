@@ -142,22 +142,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
                 )
             }
         }
-        Row(
-            modifier = Modifier.weight(weight = 1f),
-            horizontalArrangement = Arrangement.spacedBy(space = dimens.md)
-        ) {
-            LogsView(data = logs)
-            if(command.isNotBlank()) {
-                TextField(
-                    value = command,
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(weight = 1f).fillMaxHeight(),
-                    colors = TextFieldDefaults.colors().custom(),
-                    onValueChange = event::setCommand,
-                    label = { Text(text = strings[COMMAND_INPUT]) }
-                )
-            }
-        }
+        Spacer(modifier = Modifier.weight(weight = 1f))
         Progress(status)
         TextField(
             value = output ?: "",
@@ -223,6 +208,16 @@ private fun ConverterState.Actions(
             }
         },
         righties = {
+            TextTooltip(text = strings[MEDIA_INFO]) {
+                IconButton(
+                    onClick = { showMediaInfo = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Terminal,
+                        contentDescription = strings[MEDIA_INFO]
+                    )
+                }
+            }
             input?.let {
                 TextTooltip(text = strings[MEDIA_INFO]) {
                     IconButton(
