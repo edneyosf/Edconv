@@ -27,4 +27,5 @@ object FFmpegArgs {
     const val COPY = "copy"
     const val MAP_METADATA = "-map_metadata"
     const val FILTER_AV = "-lavfi"
+    const val STATS = "-stats"
 }
