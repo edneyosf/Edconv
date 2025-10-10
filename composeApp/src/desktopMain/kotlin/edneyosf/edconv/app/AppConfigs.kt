@@ -10,6 +10,6 @@ object AppConfigs {
     const val MIN_SUB_WINDOW_WIDTH = 800
     const val MIN_SUB_WINDOW_HEIGHT = 600
     const val LANGUAGE = Languages.EN
-    const val FFMPEG_LOG_LEVEL = FFLogLevel.VERBOSE
+    const val FFMPEG_LOG_LEVEL = FFLogLevel.WARNING
     const val LOG_MONITOR_DELAY = 2000L
 }

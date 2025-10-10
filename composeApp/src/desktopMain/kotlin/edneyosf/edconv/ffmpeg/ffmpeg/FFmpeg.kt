@@ -68,29 +68,30 @@ class FFmpeg private constructor(
     fun build(): String {
         val data = mutableListOf<String>()
 
-        data.addCmd(FFmpegArgs.LOG_LEVEL, logLevel)
-        if(isVideo()) data.addCmd(FFmpegArgs.MAP, "0:v:0")
-        if(!noAudio) data.addCmd(FFmpegArgs.MAP, if(isVideo()) "0:a?" else "0:a:0")
-        if(isVideo() && !noSubtitle) data.addCmd(FFmpegArgs.MAP, "0:s?")
-        data.addCmd(codecArg(), codec)
-        data.addCmd(bitRateArg(), bitrate)
-        data.addCmd(FFmpegArgs.VBR, vbr)
-        data.addCmd(FFmpegArgs.SAMPLE_RATE, sampleRate)
-        data.addCmd(FFmpegArgs.CHANNELS, channels)
-        data.addCmd(FFmpegArgs.PRESET, preset)
-        data.addCmd(FFmpegArgs.CRF, crf?.toString())
-        data.addCmd(profileArg(), profile)
-        data.addCmd(FFmpegArgs.PIXEL_FORMAT, pixelFormat)
-        data.addCmd(filterArg(), filter)
+        data.addCmd(param = FFmpegArgs.LOG_LEVEL, value = logLevel)
+        data.add(FFmpegArgs.STATS)
+        if(isVideo()) data.addCmd(param = FFmpegArgs.MAP, value = "0:v:0")
+        if(!noAudio) data.addCmd(param = FFmpegArgs.MAP, value = if(isVideo()) "0:a?" else "0:a:0")
+        if(isVideo() && !noSubtitle) data.addCmd(param = FFmpegArgs.MAP, value = "0:s?")
+        data.addCmd(param = codecArg(), value = codec)
+        data.addCmd(param = bitRateArg(), value = bitrate)
+        data.addCmd(param = FFmpegArgs.VBR, value = vbr)
+        data.addCmd(param = FFmpegArgs.SAMPLE_RATE, value = sampleRate)
+        data.addCmd(param = FFmpegArgs.CHANNELS, value = channels)
+        data.addCmd(param = FFmpegArgs.PRESET, value = preset)
+        data.addCmd(param = FFmpegArgs.CRF, value = crf?.toString())
+        data.addCmd(param = profileArg(), value = profile)
+        data.addCmd(param = FFmpegArgs.PIXEL_FORMAT, value = pixelFormat)
+        data.addCmd(param = filterArg(), value = filter)
 
         if(noAudio) data.add(FFmpegArgs.NO_AUDIO)
         if(noSubtitle) data.add(FFmpegArgs.NO_SUBTITLE)
-        if(noMetadata) data.addCmd(FFmpegArgs.MAP_METADATA, "-1")
+        if(noMetadata) data.addCmd(param = FFmpegArgs.MAP_METADATA, value = "-1")
 
         custom?.let { data.addAll(custom) }
 
-        if(isVideo() && !noAudio) data.addCmd(FFmpegArgs.CODEC_AUDIO, FFmpegArgs.COPY)
-        if(isVideo() && !noSubtitle) data.addCmd(FFmpegArgs.CODEC_SUBTITLES, FFmpegArgs.COPY)
+        if(isVideo() && !noAudio) data.addCmd(param = FFmpegArgs.CODEC_AUDIO, value = FFmpegArgs.COPY)
+        if(isVideo() && !noSubtitle) data.addCmd(param = FFmpegArgs.CODEC_SUBTITLES, value = FFmpegArgs.COPY)
 
         return data.joinToString(separator = " ")
     }

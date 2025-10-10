@@ -10,12 +10,12 @@ enum class Resolution(val width: Int, val height: Int, val text: String) {
     P1080(width = 1920, height = 1080, text = "1080p"),
     P2160(width = 3840, height = 2160, text = "2160p");
 
-    private val scalingFilter = "lanczos"
+    private val scalingFilter = "spline36"
 
     fun preserveAspectRatioFilter(sourceWidth: Int, sourceHeight: Int) = when {
         sourceWidth == width || sourceHeight == height -> null
-        (sourceWidth - width).absoluteValue > (sourceHeight - height).absoluteValue -> "scale=-1:$height:flags=$scalingFilter"
-        else -> "scale=$width:-1:flags=$scalingFilter"
+        (sourceWidth - width).absoluteValue > (sourceHeight - height).absoluteValue -> "zscale=-1:$height:f=$scalingFilter"
+        else -> "zscale=$width:-1:f=$scalingFilter"
     }
 
     companion object {

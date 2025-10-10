@@ -14,8 +14,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edneyosf.edconv.features.common.models.InputMedia
@@ -39,6 +41,8 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
 import org.koin.compose.viewmodel.koinViewModel
+
+private const val SLIDER_DENSITY = 0.7f
 
 @Composable
 fun ConverterScreen() {
@@ -298,13 +302,15 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                     )
                 }
                 Box(modifier = Modifier.padding(start = 14.dp)) {
-                    Slider(
-                        value = vbr.toFloat(),
-                        modifier = Modifier.width(width = 220.dp),
-                        enabled = isVBR,
-                        onValueChange = { onValueChange(it.toInt()) },
-                        valueRange = minVBR.toFloat() .. maxVBR.toFloat()
-                    )
+                    CompositionLocalProvider(LocalDensity provides Density(density = SLIDER_DENSITY)) {
+                        Slider(
+                            value = vbr.toFloat(),
+                            modifier = Modifier.width(width = 280.dp),
+                            enabled = isVBR,
+                            onValueChange = { onValueChange(it.toInt()) },
+                            valueRange = minVBR.toFloat() .. maxVBR.toFloat()
+                        )
+                    }
                 }
             }
         }
@@ -375,13 +381,15 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                     )
                 }
                 Box(modifier = Modifier.padding(start = 14.dp)) {
-                    Slider(
-                        value = crf.toFloat(),
-                        modifier = Modifier.width(width = 320.dp),
-                        enabled = isCRF,
-                        onValueChange = { onValueChange(it.toInt()) },
-                        valueRange = minCRF.toFloat() .. maxCRF.toFloat()
-                    )
+                    CompositionLocalProvider(LocalDensity provides Density(density = SLIDER_DENSITY)) {
+                        Slider(
+                            value = crf.toFloat(),
+                            modifier = Modifier.width(width = 320.dp),
+                            enabled = isCRF,
+                            onValueChange = { onValueChange(it.toInt()) },
+                            valueRange = minCRF.toFloat() .. maxCRF.toFloat()
+                        )
+                    }
                 }
             }
         }
@@ -500,13 +508,15 @@ private fun ConverterState.PresetInput(onValueChange: (String?) -> Unit) {
                     )
                 }
                 Spacer(modifier = Modifier.height(height = dimens.xs))
-                Slider(
-                    value = codec.indexByPresetValue(value = preset)?.toFloat() ?: 0f,
-                    modifier = Modifier.width(width = 320.dp),
-                    enabled = codec.mediaType == MediaType.VIDEO,
-                    onValueChange = { onValueChange(codec.presetValueByIndex(index = it.toInt())) },
-                    valueRange = minPreset.toFloat() .. maxPreset.toFloat()
-                )
+                CompositionLocalProvider(LocalDensity provides Density(density = SLIDER_DENSITY)) {
+                    Slider(
+                        value = codec.indexByPresetValue(value = preset)?.toFloat() ?: 0f,
+                        modifier = Modifier.width(width = 320.dp),
+                        enabled = codec.mediaType == MediaType.VIDEO,
+                        onValueChange = { onValueChange(codec.presetValueByIndex(index = it.toInt())) },
+                        valueRange = minPreset.toFloat() .. maxPreset.toFloat()
+                    )
+                }
             }
         }
     }
