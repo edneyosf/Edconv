@@ -36,7 +36,8 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         LOGS_VIEW to "Registros",
         MEDIA_INFO to "Informações da mídia",
         QUEUE to "Fila",
-        PENDING_JOBS to "Trabalhos pendentes"
+        PENDING_JOBS to "Trabalhos pendentes",
+        OUTPUT_PICK_FILE to ""
     )
 
     override val en = mapOf(
@@ -60,7 +61,8 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         LOGS_VIEW to "Logs",
         MEDIA_INFO to "Media information",
         QUEUE to "Queue",
-        PENDING_JOBS to "Pending jobs"
+        PENDING_JOBS to "Pending jobs",
+        OUTPUT_PICK_FILE to ""
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -86,6 +88,7 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         LOGS_VIEW,
         MEDIA_INFO,
         QUEUE,
-        PENDING_JOBS
+        PENDING_JOBS,
+        OUTPUT_PICK_FILE
     }
 }

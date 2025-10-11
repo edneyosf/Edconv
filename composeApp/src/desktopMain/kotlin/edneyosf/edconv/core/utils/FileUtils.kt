@@ -10,4 +10,15 @@ object FileUtils {
 
         return file?.absolutePath
     }
+
+    fun pickDirectory(title: String, fileName: String = ""): Pair<String, String>? {
+        val dialog = FileDialog(Frame(), title, FileDialog.SAVE)
+            .apply {
+                file = fileName
+                isVisible = true
+            }
+        val directory = dialog.directory
+
+        return if(directory != null) Pair(first = directory, second = dialog.file ?: "") else null
+    }
 }

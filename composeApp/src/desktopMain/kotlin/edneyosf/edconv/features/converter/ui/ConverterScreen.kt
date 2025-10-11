@@ -28,11 +28,14 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
+import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.SELECT_MEDIA_FILE
 import edneyosf.edconv.features.mediainfo.MediaInfoScreen
 import edneyosf.edconv.features.queue.ui.QueueScreen
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.TextTooltip
+import edneyosf.edconv.ui.components.buttons.PrimaryButton
+import edneyosf.edconv.ui.components.buttons.SecondaryButton
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
@@ -41,6 +44,7 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
 import org.koin.compose.viewmodel.koinViewModel
+import java.io.File
 
 private const val SLIDER_DENSITY = 0.7f
 
@@ -163,13 +167,34 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
             }
         }
         Progress(status)
-        TextField(
-            value = output ?: "",
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors().custom(),
-            onValueChange = event::setOutput,
-            label = { Text(text = strings[OUTPUT_FILE]) }
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(space = dimens.xs),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = output?.second ?: "",
+                modifier = Modifier.weight(weight = 1f),
+                colors = TextFieldDefaults.colors().custom(),
+                onValueChange = event::setOutput,
+                label = { Text(text = strings[OUTPUT_FILE]) }
+            )
+            Text(text = "Para:", style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ))
+            ElevatedButton(onClick = { event.pickFolder(title = "Selecione arquivo", fileName = output?.second ?: "") }){
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        modifier = Modifier.height(dimens.ml),
+                        imageVector =  Icons.Rounded.FolderOpen,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Text(
+                        text = File(output?.first ?: "").name ?: "",
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -658,7 +683,8 @@ private fun Progress(status: ConverterStatusState) {
 
 private fun ConverterState.canAddToQueue(): Boolean {
     if (
-        output.isNullOrBlank() ||
+        output?.first.isNullOrBlank() ||
+        output.second.isBlank() ||
         command.isBlank() ||
         codec == null ||
         status is ConverterStatusState.Loading
@@ -673,7 +699,8 @@ private fun ConverterState.canAddToQueue(): Boolean {
 
 private fun ConverterState.canStart(): Boolean {
     if (
-        output.isNullOrBlank() ||
+        output?.first.isNullOrBlank() ||
+        output.second.isBlank() ||
         command.isBlank() ||
         codec == null ||
         status is ConverterStatusState.Loading ||

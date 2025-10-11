@@ -9,7 +9,7 @@ data class ConverterState(
     val command: String = "",
     val input: InputMedia? = null,
     val type: MediaType? = null,
-    val output: String? = null,
+    val output: Pair<String, String>? = null,
     val codec: Codec? = null,
     val compression: CompressionType? = null,
     val channels: Channels? = null,
