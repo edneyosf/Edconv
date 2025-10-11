@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,14 +29,11 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
-import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.SELECT_MEDIA_FILE
 import edneyosf.edconv.features.mediainfo.MediaInfoScreen
 import edneyosf.edconv.features.queue.ui.QueueScreen
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.Selector
 import edneyosf.edconv.ui.components.TextTooltip
-import edneyosf.edconv.ui.components.buttons.PrimaryButton
-import edneyosf.edconv.ui.components.buttons.SecondaryButton
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.compositions.*
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
@@ -64,6 +62,8 @@ fun ConverterScreen() {
 
 @Composable
 private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
+    val stringSaveFile = strings[OUTPUT_SAVE_FILE]
+
     Column(
         modifier = Modifier.padding(all = dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -178,19 +178,29 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
                 onValueChange = event::setOutput,
                 label = { Text(text = strings[OUTPUT_FILE]) }
             )
-            Text(text = "Para:", style = TextStyle(
+            Text(text = strings[OUTPUT_TO], style = TextStyle(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             ))
-            ElevatedButton(onClick = { event.pickFolder(title = "Selecione arquivo", fileName = output?.second ?: "") }){
+            ElevatedButton(
+                onClick = {
+                    event.pickFolder(
+                        title = stringSaveFile,
+                        fileName = output?.second ?: ""
+                    )
+                }
+            ){
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        modifier = Modifier.height(dimens.ml),
+                        modifier = Modifier.height(height = dimens.ml),
                         imageVector =  Icons.Rounded.FolderOpen,
                         contentDescription = null
                     )
-                    Spacer(modifier = Modifier.width(dimens.xs))
+                    Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
-                        text = File(output?.first ?: "").name ?: "",
+                        modifier = Modifier.widthIn(max = 150.dp),
+                        text = (File(output?.first ?: "").name ?: ""),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

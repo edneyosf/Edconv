@@ -438,9 +438,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun setNoMetadata(noMetadata: Boolean) = _state.updateAndSync { copy(noMetadata = noMetadata) }
 
     override fun pickFolder(title: String, fileName: String) {
-        FileUtils.pickDirectory(title, fileName)?.let {
-            _state.update { copy(output = it) }
-        }
+        val extension = _state.value.codec?.toFileExtension() ?: ""
+
+        FileUtils.saveFile(title, fileName, extension)
+            ?.let { _state.update { copy(output = it) } }
     }
 
     private fun Codec?.toOutput(inputMedia: InputMedia): Pair<String, String>? {
