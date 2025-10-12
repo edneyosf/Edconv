@@ -14,7 +14,7 @@ interface ConverterEvent {
     fun setStatus(status: ConverterStatusState) = Unit
     fun setDialog(dialog: ConverterDialogState) = Unit
     fun setCommand(cmd: String) = Unit
-    fun setOutput(path: String) = Unit
+    fun setOutput(fileName: String) = Unit
     fun setCodec(codec: Codec?) = Unit
     fun setCompression(type: CompressionType?) = Unit
     fun setChannels(channels: Channels?) = Unit
@@ -31,4 +31,5 @@ interface ConverterEvent {
     fun addToQueue(fromStart: Boolean = false, overwrite: Boolean = false) = Unit
     fun start(overwrite: Boolean = false) = Unit
     fun stop() = Unit
+    fun pickFolder(title: String, fileName: String) = Unit
 }

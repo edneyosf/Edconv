@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +42,7 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
 import org.koin.compose.viewmodel.koinViewModel
+import java.io.File
 
 private const val SLIDER_DENSITY = 0.7f
 
@@ -60,6 +62,8 @@ fun ConverterScreen() {
 
 @Composable
 private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
+    val stringSaveFile = strings[OUTPUT_SAVE_FILE]
+
     Column(
         modifier = Modifier.padding(all = dimens.md),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,13 +152,45 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
         }
         Spacer(modifier = Modifier.weight(weight = 1f))
         Progress(status)
-        TextField(
-            value = output ?: "",
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors().custom(),
-            onValueChange = event::setOutput,
-            label = { Text(text = strings[OUTPUT_FILE]) }
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(space = dimens.xs),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = output?.second ?: "",
+                modifier = Modifier.weight(weight = 1f),
+                colors = TextFieldDefaults.colors().custom(),
+                onValueChange = event::setOutput,
+                label = { Text(text = strings[OUTPUT_FILE]) }
+            )
+            Text(
+                text = strings[OUTPUT_TO],
+                style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+            )
+            ElevatedButton(
+                onClick = {
+                    event.pickFolder(
+                        title = stringSaveFile,
+                        fileName = output?.second ?: ""
+                    )
+                }
+            ){
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        modifier = Modifier.height(height = dimens.ml),
+                        imageVector =  Icons.Rounded.FolderOpen,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(width = dimens.xs))
+                    Text(
+                        modifier = Modifier.widthIn(max = 150.dp),
+                        text = output?.first?.let { File(it).name } ?: "",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -653,7 +689,8 @@ private fun Progress(status: ConverterStatusState) {
 
 private fun ConverterState.canAddToQueue(): Boolean {
     if (
-        output.isNullOrBlank() ||
+        output?.first.isNullOrBlank() ||
+        output.second.isBlank() ||
         command.isBlank() ||
         codec == null ||
         status is ConverterStatusState.Loading
@@ -668,7 +705,8 @@ private fun ConverterState.canAddToQueue(): Boolean {
 
 private fun ConverterState.canStart(): Boolean {
     if (
-        output.isNullOrBlank() ||
+        output?.first.isNullOrBlank() ||
+        output.second.isBlank() ||
         command.isBlank() ||
         codec == null ||
         status is ConverterStatusState.Loading ||

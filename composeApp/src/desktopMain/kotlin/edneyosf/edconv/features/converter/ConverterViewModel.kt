@@ -18,6 +18,7 @@ import edneyosf.edconv.core.process.MediaQueue
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.process.QueueStatus
 import edneyosf.edconv.core.utils.DirUtils
+import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
@@ -161,7 +162,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         val state = _state.value
         val codec = state.codec
 
-        if (codec == null || state.output.isNullOrBlank()) {
+        if (codec == null || state.output?.first.isNullOrBlank() || state.output.second.isBlank()) {
             setCommand("")
             return
         }
@@ -239,9 +240,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         val output = state.output
         val command = state.command
 
-        if(input != null && type != null && !output.isNullOrBlank() && command.isNotBlank()) {
+        if(input != null && type != null && !output?.first.isNullOrBlank() && !state.output.second.isBlank() && command.isNotBlank()) {
             try {
-                val outputFile = File(output)
+                val outputFile = File("${output.first}${output.second}")
                 val outputExists = outputFile.exists()
 
                 if(!overwrite && outputExists) {
@@ -408,7 +409,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setDialog(dialog: ConverterDialogState) = _state.update { copy(dialog = dialog) }
 
-    override fun setOutput(path: String) = _state.update { copy(output = path) }
+    override fun setOutput(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
 
     override fun setCodec(codec: Codec?) = _state.updateAndSync { copy(codec = codec) }
 
@@ -436,15 +437,22 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setNoMetadata(noMetadata: Boolean) = _state.updateAndSync { copy(noMetadata = noMetadata) }
 
-    private fun Codec?.toOutput(inputMedia: InputMedia): String? {
-        var output: String? = null
+    override fun pickFolder(title: String, fileName: String) {
+        val extension = _state.value.codec?.toFileExtension() ?: ""
+
+        FileUtils.saveFile(title, fileName, extension)
+            ?.let { _state.update { copy(output = it) } }
+    }
+
+    private fun Codec?.toOutput(inputMedia: InputMedia): Pair<String, String>? {
+        var output: Pair<String, String>? = null
 
         if(this != null) {
             val inputPath = inputMedia.path
             val outputName = File(inputPath).nameWithoutExtension
             val outputExtension = toFileExtension()
 
-            output = "${DirUtils.outputDir}$outputName.$outputExtension"
+            output = Pair(first = DirUtils.outputDir, second = "$outputName.$outputExtension")
         }
 
         return output
