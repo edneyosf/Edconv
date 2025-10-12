@@ -25,6 +25,12 @@ class EdProcess {
     private val _queue = MutableStateFlow(value = listOf<MediaQueue>())
     val queue = _queue.asStateFlow()
 
+    private val _logs = MutableStateFlow<List<String>>(value = emptyList())
+    val logs = _logs.asStateFlow()
+
+    private val _command = MutableStateFlow(value = "")
+    val command = _command.asStateFlow()
+
     fun setInput(inputMedia: InputMedia?) { _input.value = inputMedia }
 
     fun setInputType(mediaType: MediaType?) { _inputType.value = mediaType }
@@ -33,9 +39,9 @@ class EdProcess {
 
     fun setAnalyzing(status: Boolean) { _analyzing.value = status }
 
-    fun addToQueue(item: MediaQueue) { _queue.value = _queue.value + item }
+    fun addToQueue(item: MediaQueue) { _queue.value += item }
 
-    fun removeFromQueue(item: MediaQueue) { _queue.value = _queue.value - item }
+    fun removeFromQueue(item: MediaQueue) { _queue.value -= item }
 
     fun clearQueue() {
         _queue.value = _queue.value.filter {
@@ -65,4 +71,8 @@ class EdProcess {
         conversion = null
         analysis = null
     }
+
+    fun addLogs(data: List<String>) { _logs.value += data }
+
+    fun setCommand(it: String) { _command.value = it }
 }

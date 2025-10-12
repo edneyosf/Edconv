@@ -13,7 +13,6 @@ import edneyosf.edconv.ffmpeg.common.SampleRate
 interface ConverterEvent {
     fun setStatus(status: ConverterStatusState) = Unit
     fun setDialog(dialog: ConverterDialogState) = Unit
-    fun setCommand(cmd: String) = Unit
     fun setOutput(fileName: String) = Unit
     fun setCodec(codec: Codec?) = Unit
     fun setCompression(type: CompressionType?) = Unit

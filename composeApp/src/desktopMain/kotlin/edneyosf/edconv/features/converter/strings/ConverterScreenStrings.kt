@@ -32,13 +32,13 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         VBR_INPUT to "Taxa de Bits Variável:",
         CRF_INPUT to "Fator de Taxa Constante:",
         PRESET_INPUT to "Predefinição:",
-        COMMAND_INPUT to "Comando",
         LOGS_VIEW to "Registros",
         MEDIA_INFO to "Informações da mídia",
         QUEUE to "Fila",
         PENDING_JOBS to "Trabalhos pendentes",
         OUTPUT_SAVE_FILE to "Salvar arquivo",
-        OUTPUT_TO to "Para:"
+        OUTPUT_TO to "Para:",
+        CONSOLE to "Console"
     )
 
     override val en = mapOf(
@@ -58,13 +58,13 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         VBR_INPUT to "Variable Bit Rate:",
         CRF_INPUT to "Constant Rate Factor:",
         PRESET_INPUT to "Preset:",
-        COMMAND_INPUT to "Command",
         LOGS_VIEW to "Logs",
         MEDIA_INFO to "Media information",
         QUEUE to "Queue",
         PENDING_JOBS to "Pending jobs",
         OUTPUT_SAVE_FILE to "Save file",
-        OUTPUT_TO to "To:"
+        OUTPUT_TO to "To:",
+        CONSOLE to "Console"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -86,12 +86,12 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         VBR_INPUT,
         CRF_INPUT,
         PRESET_INPUT,
-        COMMAND_INPUT,
         LOGS_VIEW,
         MEDIA_INFO,
         QUEUE,
         PENDING_JOBS,
         OUTPUT_SAVE_FILE,
-        OUTPUT_TO
+        OUTPUT_TO,
+        CONSOLE
     }
 }

@@ -1,13 +1,7 @@
 package edneyosf.edconv.features.converter.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -20,8 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.console.ui.ConsoleScreen
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.ConverterEvent
 import edneyosf.edconv.features.converter.ConverterViewModel
@@ -40,7 +34,6 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
-import edneyosf.edconv.ui.theme.firaCodeFont
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 
@@ -50,18 +43,16 @@ private const val SLIDER_DENSITY = 0.7f
 fun ConverterScreen() {
     val viewModel = koinViewModel<ConverterViewModel>()
     val state by viewModel.state.collectAsState()
+    val commandState by viewModel.commandState.collectAsState()
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = viewModel)
-        state.Content(
-            logs = viewModel.logsState,
-            event = viewModel
-        )
+        state.Content(command = commandState, event = viewModel)
     }
 }
 
 @Composable
-private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
+private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val stringSaveFile = strings[OUTPUT_SAVE_FILE]
 
     Column(
@@ -70,6 +61,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
         verticalArrangement = Arrangement.spacedBy(space = dimens.xl)
     ) {
         Actions(
+            command,
             onAddToQueue = event::addToQueue,
             onStart = event::start,
             onStop = event::stop
@@ -196,12 +188,14 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
 
 @Composable
 private fun ConverterState.Actions(
+    command: String,
     onAddToQueue: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit
 ) {
     var showQueue by remember { mutableStateOf(value = false) }
     var showMediaInfo by remember { mutableStateOf(value = false) }
+    var showConsole by remember { mutableStateOf(value = false) }
 
     if(showQueue) {
         QueueScreen(
@@ -215,9 +209,15 @@ private fun ConverterState.Actions(
         )
     }
 
+    if(showConsole) {
+        ConsoleScreen(
+            onFinish = { showConsole = false }
+        )
+    }
+
     ActionsTool(
-        addToQueueEnabled = canAddToQueue(),
-        startEnabled = canStart(),
+        addToQueueEnabled = canAddToQueue(command),
+        startEnabled = canStart(command),
         stopEnabled = canStop(),
         addToQueueDescription = strings[ADD_TO_QUEUE_CONVERSION],
         startDescription = strings[START_CONVERSION],
@@ -248,13 +248,13 @@ private fun ConverterState.Actions(
             }
         },
         righties = {
-            TextTooltip(text = strings[MEDIA_INFO]) {
+            TextTooltip(text = strings[CONSOLE]) {
                 IconButton(
-                    onClick = { showMediaInfo = true }
+                    onClick = { showConsole = true }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Terminal,
-                        contentDescription = strings[MEDIA_INFO]
+                        contentDescription = strings[CONSOLE]
                     )
                 }
             }
@@ -576,84 +576,6 @@ private fun CheckboxInput(checked: Boolean, label: String, onCheckedChange: (Boo
 }
 
 @Composable
-private fun RowScope.LogsView(data: List<String>) {
-    val scrollState = rememberLazyListState()
-    val modifier = Modifier
-        .weight(weight = 2f)
-        .fillMaxHeight()
-
-    LaunchedEffect(data.size) {
-        if(data.isNotEmpty()) {
-            scrollState.animateScrollToItem(index = data.size - 1)
-        }
-    }
-
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(size = dimens.xs)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(
-                    vertical = dimens.xs,
-                    horizontal = dimens.md)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Terminal,
-                    modifier = Modifier.size(size = dimens.lg),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(width = dimens.xs))
-                Text(
-                    text = strings[LOGS_VIEW],
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.titleSmall,
-                )
-            }
-            HorizontalDivider()
-            Box(modifier = Modifier.fillMaxSize()) {
-                SelectionContainer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = dimens.md,
-                            end = dimens.sm, // Space for VerticalScrollbar
-                            top = dimens.sm,
-                            bottom = dimens.sm
-                        )
-                ) {
-                    LazyColumn(state = scrollState) {
-                        items(items = data) {
-                            Text(
-                                text = it,
-                                style = TextStyle(
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 12.sp,
-                                    fontFamily = firaCodeFont
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(bottom = dimens.md)
-                            )
-                        }
-                    }
-                }
-                VerticalScrollbar(
-                    adapter = rememberScrollbarAdapter(scrollState),
-                    style = LocalScrollbarStyle.current.copy(
-                        hoverColor = MaterialTheme.colorScheme.surfaceContainer
-                    ),
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .fillMaxHeight()
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun Progress(status: ConverterStatusState) {
     val modifier = Modifier
         .fillMaxWidth()
@@ -687,7 +609,7 @@ private fun Progress(status: ConverterStatusState) {
     }
 }
 
-private fun ConverterState.canAddToQueue(): Boolean {
+private fun ConverterState.canAddToQueue(command: String): Boolean {
     if (
         output?.first.isNullOrBlank() ||
         output.second.isBlank() ||
@@ -703,7 +625,7 @@ private fun ConverterState.canAddToQueue(): Boolean {
     }
 }
 
-private fun ConverterState.canStart(): Boolean {
+private fun ConverterState.canStart(command: String): Boolean {
     if (
         output?.first.isNullOrBlank() ||
         output.second.isBlank() ||
@@ -726,7 +648,6 @@ private fun ConverterState.canStop(): Boolean = status is ConverterStatusState.P
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         val type = MediaType.VIDEO
-        val logs = listOf<String>()
         val input = InputMedia(
             path = "/sdfsd",
             type = type,
@@ -737,7 +658,7 @@ private fun DefaultPreview() {
         )
 
         ConverterState(input = input, type = type)
-            .Content(logs, event = object : ConverterEvent {})
+            .Content(command = "Command", event = object : ConverterEvent {})
     }
 }
 

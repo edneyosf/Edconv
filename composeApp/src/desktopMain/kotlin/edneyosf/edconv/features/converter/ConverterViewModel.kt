@@ -1,6 +1,5 @@
 package edneyosf.edconv.features.converter
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.app.AppConfigs
@@ -56,12 +55,12 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     private val converter: Converter
     private var currentMediaId: String? = null
 
-    private val _logsState = mutableStateListOf<String>()
-    val logsState: List<String> get() = _logsState
     private val logsCache = mutableListOf<String>()
 
     private val _state = MutableStateFlow(value = ConverterState())
     val state: StateFlow<ConverterState> = _state
+
+    val commandState: StateFlow<String> = process.command
 
     init {
         converter = Converter(
@@ -163,7 +162,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         val codec = state.codec
 
         if (codec == null || state.output?.first.isNullOrBlank() || state.output.second.isBlank()) {
-            setCommand("")
+            process.setCommand("")
             return
         }
 
@@ -229,7 +228,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 else -> return@run
             }
 
-            setCommand(ffmpeg.build().toReadableCommand())
+            process.setCommand(ffmpeg.build().toReadableCommand())
         }
     }
 
@@ -238,7 +237,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         val input = state.input
         val type = state.type
         val output = state.output
-        val command = state.command
+        val command = process.command.value
 
         if(input != null && type != null && !output?.first.isNullOrBlank() && !state.output.second.isBlank() && command.isNotBlank()) {
             try {
@@ -298,7 +297,6 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     currentMediaId = item.id
                     notifyMain { updateCurrentStatus(status = QueueStatus.STARTED) }
                     logsCache.clear()
-                    _logsState.clear()
                     startLogMonitor()
 
                     val error = converter.run(
@@ -397,13 +395,11 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 val cache = logsCache.toList()
 
                 logsCache.clear()
-                notifyMain { _logsState.addAll(elements = cache) }
+                notifyMain { process.addLogs(data = cache) }
                 delay(timeMillis = AppConfigs.LOG_MONITOR_DELAY)
             }
         }
     }
-
-    override fun setCommand(cmd: String) = _state.update { copy(command = cmd) }
 
     override fun setStatus(status: ConverterStatusState) = _state.update { copy(status = status) }
 
