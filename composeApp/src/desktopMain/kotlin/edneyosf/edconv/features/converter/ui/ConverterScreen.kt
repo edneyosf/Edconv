@@ -178,9 +178,10 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
                 onValueChange = event::setOutput,
                 label = { Text(text = strings[OUTPUT_FILE]) }
             )
-            Text(text = strings[OUTPUT_TO], style = TextStyle(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ))
+            Text(
+                text = strings[OUTPUT_TO],
+                style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+            )
             ElevatedButton(
                 onClick = {
                     event.pickFolder(
@@ -198,7 +199,7 @@ private fun ConverterState.Content(logs: List<String>, event: ConverterEvent) {
                     Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
                         modifier = Modifier.widthIn(max = 150.dp),
-                        text = (File(output?.first ?: "").name ?: ""),
+                        text = output?.first?.let { File(it).name } ?: "",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
