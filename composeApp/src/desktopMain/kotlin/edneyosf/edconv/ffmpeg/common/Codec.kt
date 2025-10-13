@@ -42,7 +42,7 @@ enum class Codec(
     ),
     EAC3(
         value = "eac3",
-        text = "EAC3",
+        text = "E-AC3",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
         defaultBitrate = Bitrate.K384
