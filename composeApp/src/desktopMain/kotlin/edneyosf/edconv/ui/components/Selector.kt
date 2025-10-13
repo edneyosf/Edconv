@@ -15,10 +15,11 @@ import edneyosf.edconv.ui.previews.LightPreview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Selector(
-    text: String, label: String, expanded: Boolean, enabled: Boolean = true, onExpanded: (Boolean) -> Unit,
-    content: @Composable ColumnScope.() -> Unit) {
+    modifier: Modifier = Modifier, text: String, label: String, expanded: Boolean, enabled: Boolean = true,
+    onExpanded: (Boolean) -> Unit, content: @Composable ColumnScope.() -> Unit) {
 
     ExposedDropdownMenuBox(
+        modifier = modifier,
         expanded = expanded,
         onExpandedChange = { if(enabled) onExpanded(!expanded) },
     ) {
