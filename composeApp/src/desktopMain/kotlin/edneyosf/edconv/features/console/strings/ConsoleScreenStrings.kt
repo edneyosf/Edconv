@@ -18,17 +18,20 @@ class ConsoleScreenStrings(override val language: String): Strings(language) {
     override val pt = mapOf(
         TITLE to "Console",
         COMMAND_INPUT to "Comando",
+        EMPTY_LOGS to "Sem registros"
     )
 
     override val en = mapOf(
         TITLE to "Console",
         COMMAND_INPUT to "Command",
+        EMPTY_LOGS to "No logs"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
 
     enum class Keys {
         TITLE,
-        COMMAND_INPUT
+        COMMAND_INPUT,
+        EMPTY_LOGS
     }
 }

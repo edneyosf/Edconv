@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -82,7 +86,26 @@ private fun Content(logs: List<String>, command: String, event: ConsoleEvent) {
                 .padding(paddingValues = innerPadding)
                 .padding(all = dimens.md)
         ) {
-            LogsView(data = logs)
+            if(logs.isNotEmpty()) LogsView(data = logs)
+            else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(weight = 1f)
+                        .fillMaxWidth()
+                        .padding(all = dimens.md)
+                ) {
+                    Spacer(modifier = Modifier.weight(weight = 1f))
+                    Icon(
+                        modifier = Modifier.size(size = dimens.xxl),
+                        imageVector = Icons.Rounded.Description,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.height(height = dimens.xs))
+                    Text(text = strings[EMPTY_LOGS])
+                    Spacer(modifier = Modifier.weight(weight = 1f))
+                }
+            }
             Spacer(modifier = Modifier.height(height = dimens.sm))
             TextField(
                 value = command,
