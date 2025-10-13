@@ -648,6 +648,7 @@ private fun ConverterState.canStop(): Boolean = status is ConverterStatusState.P
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         val type = MediaType.VIDEO
+        val output = Pair(first = "Edconv", second = "video.mkv")
         val input = InputMedia(
             path = "/sdfsd",
             type = type,
@@ -657,8 +658,19 @@ private fun DefaultPreview() {
             durationText = "123456"
         )
 
-        ConverterState(input = input, type = type)
-            .Content(command = "Command", event = object : ConverterEvent {})
+        ConverterState(
+            status = ConverterStatusState.Initial,
+            input = input,
+            type = type,
+            output = output,
+            codec = Codec.AV1,
+            preset = "4",
+            crf = 22,
+            compression = CompressionType.CRF,
+            resolution = Resolution.P1080,
+            pixelFormat = PixelFormat.BIT_10,
+            noAudio = true
+        ).Content(command = "Command", event = object : ConverterEvent {})
     }
 }
 
