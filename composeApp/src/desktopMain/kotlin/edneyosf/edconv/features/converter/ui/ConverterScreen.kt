@@ -54,6 +54,9 @@ fun ConverterScreen() {
 @Composable
 private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val stringSaveFile = strings[OUTPUT_SAVE_FILE]
+    val outputDir = output?.first?.let { File(it) }
+    val outputFile = output?.second?.let { File(it) }
+    val invalidOutputFile = outputFile?.extension?.isBlank() == true
 
     Column(
         modifier = Modifier.padding(all = dimens.md),
@@ -62,6 +65,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     ) {
         Actions(
             command,
+            invalidOutputFile,
             onAddToQueue = event::addToQueue,
             onStart = event::start,
             onStop = event::stop
@@ -72,8 +76,16 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
         ) {
             EncoderInput(
                 value = codec,
+                compression = compression,
                 mediaType = type,
-                onValueChange = event::setCodec
+                onValueChange = event::setCodec,
+                onClick = { event.setCompression(null) }
+            )
+            CopyInput { event.setCompression(CompressionType.COPY) }
+            CBRInput(
+                mediaType = codec?.mediaType,
+                onClick = { event.setCompression(CompressionType.CBR) },
+                onValueChange = event::setBitrate
             )
             VBRInput(
                 onClick = { event.setCompression(CompressionType.VBR) },
@@ -83,13 +95,8 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                 onClick = { event.setCompression(CompressionType.CRF) },
                 onValueChange = event::setCrf
             )
-            CBRInput(
-                mediaType = codec?.mediaType,
-                onClick = { event.setCompression(CompressionType.CBR) },
-                onValueChange = event::setBitrate
-            )
         }
-        if(type == MediaType.AUDIO) {
+        if(type == MediaType.AUDIO && compression != CompressionType.COPY) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
@@ -104,7 +111,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                 )
             }
         }
-        else if(type == MediaType.VIDEO) {
+        else if(type == MediaType.VIDEO && compression != CompressionType.COPY) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
@@ -153,7 +160,17 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                 modifier = Modifier.weight(weight = 1f),
                 colors = TextFieldDefaults.colors().custom(),
                 onValueChange = event::setOutput,
-                label = { Text(text = strings[OUTPUT_FILE]) }
+                label = { Text(text = strings[OUTPUT_FILE]) },
+                maxLines = 1,
+                isError = invalidOutputFile,
+                trailingIcon = {
+                    if(invalidOutputFile) {
+                        Icon(
+                            imageVector = Icons.Rounded.Error,
+                            contentDescription = null
+                        )
+                    }
+                }
             )
             Text(
                 text = strings[OUTPUT_TO],
@@ -176,7 +193,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                     Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
                         modifier = Modifier.widthIn(max = 150.dp),
-                        text = output?.first?.let { File(it).name } ?: "",
+                        text = outputDir?.name ?: "",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -189,6 +206,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
 @Composable
 private fun ConverterState.Actions(
     command: String,
+    invalidOutputFile: Boolean,
     onAddToQueue: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit
@@ -216,8 +234,8 @@ private fun ConverterState.Actions(
     }
 
     ActionsTool(
-        addToQueueEnabled = canAddToQueue(command),
-        startEnabled = canStart(command),
+        addToQueueEnabled = canAddToQueue(command, invalidOutputFile),
+        startEnabled = canStart(command, invalidOutputFile),
         stopEnabled = canStop(),
         addToQueueDescription = strings[ADD_TO_QUEUE_CONVERSION],
         startDescription = strings[START_CONVERSION],
@@ -275,7 +293,10 @@ private fun ConverterState.Actions(
 }
 
 @Composable
-private fun EncoderInput(value: Codec?, mediaType: MediaType?, onValueChange: (Codec) -> Unit) {
+private fun EncoderInput(
+    value: Codec?, compression: CompressionType?, mediaType: MediaType?,
+    onValueChange: (Codec) -> Unit, onClick: () -> Unit
+) {
     var expanded by remember { mutableStateOf(value = false) }
     val medias = Codec.getAll().filter {
         it.mediaType == when(mediaType) {
@@ -285,21 +306,27 @@ private fun EncoderInput(value: Codec?, mediaType: MediaType?, onValueChange: (C
         }
     }
 
-    Selector(
-        text = value?.text ?: "",
-        label = strings[ENCODER_INPUT],
-        enabled = medias.isNotEmpty(),
-        expanded = expanded,
-        onExpanded = { expanded = it }
-    ) {
-        medias.forEach { item ->
-            DropdownMenuItem(
-                text = { Text(text = item.text) },
-                onClick = {
-                    expanded = false
-                    onValueChange(item)
-                }
-            )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if(value?.compressions?.isEmpty() == true) {
+            RadioButton(selected = compression == null, onClick = onClick)
+        }
+        Selector(
+            modifier = Modifier.width(width = 164.dp),
+            text = value?.text ?: "",
+            label = strings[ENCODER_INPUT],
+            enabled = medias.isNotEmpty(),
+            expanded = expanded,
+            onExpanded = { expanded = it }
+        ) {
+            medias.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = item.text) },
+                    onClick = {
+                        expanded = false
+                        onValueChange(item)
+                    }
+                )
+            }
         }
     }
 }
@@ -360,10 +387,9 @@ private fun ConverterState.CBRInput(mediaType: MediaType?, onClick: () -> Unit, 
         val isCBR = CompressionType.CBR == compression
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if(codec.compressions.size > 1) {
-                RadioButton(selected = isCBR, onClick = onClick)
-            }
+            RadioButton(selected = isCBR, onClick = onClick)
             Selector(
+                modifier = Modifier.width(width = 148.dp),
                 text = bitrate?.text ?: "",
                 label = strings[CBR_INPUT],
                 enabled = isCBR,
@@ -385,6 +411,25 @@ private fun ConverterState.CBRInput(mediaType: MediaType?, onClick: () -> Unit, 
 }
 
 @Composable
+private fun ConverterState.CopyInput(onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        RadioButton(
+            selected = CompressionType.COPY == compression,
+            onClick = onClick
+        )
+        Text(
+            text = strings[COPY_INPUT],
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
+    }
+}
+
+@Composable
 private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) -> Unit) {
     if(codec?.compressions?.contains(CompressionType.CRF) == true && crf != null) {
         val minCRF = codec.minCRF
@@ -392,6 +437,7 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
 
         if(minCRF != null && maxCRF != null) {
             val isCRF = CompressionType.CRF == compression
+            val valueColor = MaterialTheme.colorScheme.run { if(isCRF) onSurface else onSurface.copy(alpha = 0.38f) }
 
             Column {
                 Row(
@@ -411,7 +457,7 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                     Text(
                         text = crf.toString(),
                         style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = valueColor,
                             fontWeight = FontWeight.Medium
                         )
                     )
@@ -437,6 +483,7 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
+        modifier = Modifier.width(width = 196.dp),
         text = value?.text ?: "",
         label = strings[CHANNELS_INPUT],
         expanded = expanded,
@@ -459,6 +506,7 @@ private fun SampleRateInput(value: SampleRate?, onValueChange: (SampleRate) -> U
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
+        modifier = Modifier.width(width = 196.dp),
         text = value?.text ?: "",
         label = strings[SAMPLE_RATE_INPUT],
         expanded = expanded,
@@ -481,6 +529,7 @@ private fun PixelFormatInput(value: PixelFormat?, onValueChange: (PixelFormat) -
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
+        modifier = Modifier.width(width = 232.dp),
         text = value?.text ?: "",
         label = strings[PIXEL_FORMAT_INPUT],
         expanded = expanded,
@@ -503,6 +552,7 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
+        modifier = Modifier.width(width = 200.dp),
         text = value?.text ?: "",
         label = strings[RESOLUTION_INPUT],
         expanded = expanded,
@@ -609,12 +659,13 @@ private fun Progress(status: ConverterStatusState) {
     }
 }
 
-private fun ConverterState.canAddToQueue(command: String): Boolean {
+private fun ConverterState.canAddToQueue(command: String, invalidOutputFile: Boolean): Boolean {
     if (
         output?.first.isNullOrBlank() ||
         output.second.isBlank() ||
         command.isBlank() ||
         codec == null ||
+        invalidOutputFile ||
         status is ConverterStatusState.Loading
     ) return false
 
@@ -625,11 +676,12 @@ private fun ConverterState.canAddToQueue(command: String): Boolean {
     }
 }
 
-private fun ConverterState.canStart(command: String): Boolean {
+private fun ConverterState.canStart(command: String, invalidOutputFile: Boolean): Boolean {
     if (
         output?.first.isNullOrBlank() ||
         output.second.isBlank() ||
         command.isBlank() ||
+        invalidOutputFile ||
         codec == null ||
         status is ConverterStatusState.Loading ||
         status is ConverterStatusState.Progress

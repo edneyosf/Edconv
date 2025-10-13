@@ -20,7 +20,9 @@ class FFmpeg private constructor(
     val noAudio: Boolean = false,
     val noSubtitle: Boolean = false,
     val noMetadata: Boolean = false,
-    val custom: List<String>? = null
+    val custom: List<String>? = null,
+    val uncompressedVideo: Boolean = false,
+    val uncompressedAudio: Boolean = false
 ) {
 
     companion object {
@@ -35,6 +37,7 @@ class FFmpeg private constructor(
                 codec = codec,
                 vbr = if(compressionType == CompressionType.VBR) vbr else null,
                 bitrate = if(compressionType == CompressionType.CBR) bitrate else null,
+                uncompressedAudio = compressionType == CompressionType.COPY,
                 sampleRate = sampleRate,
                 channels = channels,
                 filter = filter,
@@ -55,6 +58,7 @@ class FFmpeg private constructor(
                 preset = preset,
                 crf = if(compressionType == CompressionType.CRF) crf else null,
                 bitrate = if(compressionType == CompressionType.CBR) bitrate else null,
+                uncompressedVideo = compressionType == CompressionType.COPY,
                 pixelFormat = pixelFormat,
                 profile = profile,
                 filter = filter,
@@ -73,16 +77,21 @@ class FFmpeg private constructor(
         if(isVideo()) data.addCmd(param = FFmpegArgs.MAP, value = "0:v:0")
         if(!noAudio) data.addCmd(param = FFmpegArgs.MAP, value = if(isVideo()) "0:a?" else "0:a:0")
         if(isVideo() && !noSubtitle) data.addCmd(param = FFmpegArgs.MAP, value = "0:s?")
-        data.addCmd(param = codecArg(), value = codec)
-        data.addCmd(param = bitRateArg(), value = bitrate)
-        data.addCmd(param = FFmpegArgs.VBR, value = vbr)
-        data.addCmd(param = FFmpegArgs.SAMPLE_RATE, value = sampleRate)
-        data.addCmd(param = FFmpegArgs.CHANNELS, value = channels)
-        data.addCmd(param = FFmpegArgs.PRESET, value = preset)
-        data.addCmd(param = FFmpegArgs.CRF, value = crf?.toString())
-        data.addCmd(param = profileArg(), value = profile)
-        data.addCmd(param = FFmpegArgs.PIXEL_FORMAT, value = pixelFormat)
-        data.addCmd(param = filterArg(), value = filter)
+
+        if(!uncompressedVideo && !uncompressedAudio) {
+            data.addCmd(param = codecArg(), value = codec)
+            data.addCmd(param = bitRateArg(), value = bitrate)
+            data.addCmd(param = FFmpegArgs.VBR, value = vbr)
+            data.addCmd(param = FFmpegArgs.SAMPLE_RATE, value = sampleRate)
+            data.addCmd(param = FFmpegArgs.CHANNELS, value = channels)
+            data.addCmd(param = FFmpegArgs.PRESET, value = preset)
+            data.addCmd(param = FFmpegArgs.CRF, value = crf?.toString())
+            data.addCmd(param = profileArg(), value = profile)
+            data.addCmd(param = FFmpegArgs.PIXEL_FORMAT, value = pixelFormat)
+            data.addCmd(param = filterArg(), value = filter)
+        } else {
+            data.addCmd(param = codecArg(), value = FFmpegArgs.COPY)
+        }
 
         if(noAudio) data.add(FFmpegArgs.NO_AUDIO)
         if(noSubtitle) data.add(FFmpegArgs.NO_SUBTITLE)
