@@ -19,7 +19,7 @@ enum class Codec(
     ),
     AAC_FDK(
         value = "libfdk_aac",
-        text = "AAC (FDK)",
+        text = "FDK AAC",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.VBR, CompressionType.CBR),
         defaultVBR = 5,
@@ -56,7 +56,7 @@ enum class Codec(
 
     H264(
         value = "libx264",
-        text = "H.264 (x264)",
+        text = "x264",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 20,
@@ -69,7 +69,7 @@ enum class Codec(
     ),
     H265(
         value = "libx265",
-        text = "H.265 (x265)",
+        text = "x265",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 21,
@@ -92,7 +92,7 @@ enum class Codec(
     ),*/
     AV1(
         value = "libsvtav1",
-        text = "AV1 (SVT)",
+        text = "SVT-AV1",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 25,
