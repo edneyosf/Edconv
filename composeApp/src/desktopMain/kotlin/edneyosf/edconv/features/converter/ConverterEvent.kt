@@ -31,4 +31,5 @@ interface ConverterEvent {
     fun start(overwrite: Boolean = false) = Unit
     fun stop() = Unit
     fun pickFolder(title: String, fileName: String) = Unit
+    fun setHdr10ToSdr(enabled: Boolean) = Unit
 }

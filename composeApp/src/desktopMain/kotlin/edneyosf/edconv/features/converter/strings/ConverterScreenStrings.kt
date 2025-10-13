@@ -39,7 +39,8 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         PENDING_JOBS to "Trabalhos pendentes",
         OUTPUT_SAVE_FILE to "Salvar arquivo",
         OUTPUT_TO to "Para:",
-        CONSOLE to "Console"
+        CONSOLE to "Console",
+        HDR10_TO_SDR to "HDR10 para SDR"
     )
 
     override val en = mapOf(
@@ -66,7 +67,8 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         PENDING_JOBS to "Pending jobs",
         OUTPUT_SAVE_FILE to "Save file",
         OUTPUT_TO to "To:",
-        CONSOLE to "Console"
+        CONSOLE to "Console",
+        HDR10_TO_SDR to "HDR10 to SDR"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -95,6 +97,7 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         PENDING_JOBS,
         OUTPUT_SAVE_FILE,
         OUTPUT_TO,
-        CONSOLE
+        CONSOLE,
+        HDR10_TO_SDR
     }
 }

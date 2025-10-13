@@ -147,6 +147,11 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                     label = strings[NO_SUBTITLE_INPUT],
                     onCheckedChange = event::setNoSubtitle
                 )
+                CheckboxInput(
+                    checked = hdr10ToSdr,
+                    label = strings[HDR10_TO_SDR],
+                    onCheckedChange = event::setHdr10ToSdr
+                )
             }
         }
         Spacer(modifier = Modifier.weight(weight = 1f))

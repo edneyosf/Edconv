@@ -205,7 +205,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                         val width = stream.width
                         val height = stream.height
                         val filter = resolution
-                            ?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height)
+                            ?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height, hdr10ToSdr)
 
                         FFmpeg.createVideo(
                             logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
@@ -439,6 +439,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         FileUtils.saveFile(title, fileName, extension)
             ?.let { _state.update { copy(output = it) } }
     }
+
+    override fun setHdr10ToSdr(enabled: Boolean) { _state.updateAndSync { copy(hdr10ToSdr = enabled) } }
 
     private fun Codec?.toOutput(inputMedia: InputMedia): Pair<String, String>? {
         var output: Pair<String, String>? = null
