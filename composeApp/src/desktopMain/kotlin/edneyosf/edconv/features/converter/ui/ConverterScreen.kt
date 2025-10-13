@@ -70,7 +70,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FormatInput(
+            EncoderInput(
                 value = codec,
                 mediaType = type,
                 onValueChange = event::setCodec
@@ -275,7 +275,7 @@ private fun ConverterState.Actions(
 }
 
 @Composable
-private fun FormatInput(value: Codec?, mediaType: MediaType?, onValueChange: (Codec) -> Unit) {
+private fun EncoderInput(value: Codec?, mediaType: MediaType?, onValueChange: (Codec) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
     val medias = Codec.getAll().filter {
         it.mediaType == when(mediaType) {
@@ -287,7 +287,7 @@ private fun FormatInput(value: Codec?, mediaType: MediaType?, onValueChange: (Co
 
     Selector(
         text = value?.text ?: "",
-        label = strings[FORMAT_INPUT],
+        label = strings[ENCODER_INPUT],
         enabled = medias.isNotEmpty(),
         expanded = expanded,
         onExpanded = { expanded = it }

@@ -59,7 +59,7 @@ enum class Codec(
         text = "x264",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 20,
+        defaultCRF = 23,
         minCRF = 0,
         maxCRF = 51,
         defaultPreset = H264Preset.SLOW.value,
@@ -72,7 +72,7 @@ enum class Codec(
         text = "x265",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 21,
+        defaultCRF = 28,
         minCRF = 0,
         maxCRF = 51,
         defaultPreset = H265Preset.SLOW.value,
@@ -85,7 +85,7 @@ enum class Codec(
         text = "VP9",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 19,
+        defaultCRF = 32,
         minCRF = 0,
         maxCRF = 63,
         defaultBitrate = Bitrate.M3_5
@@ -95,7 +95,7 @@ enum class Codec(
         text = "SVT-AV1",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 25,
+        defaultCRF = 35,
         minCRF = 0,
         maxCRF = 63,
         defaultPreset = AV1Preset.P4.value,
@@ -125,7 +125,8 @@ enum class Codec(
         FLAC -> "flac"
 
         //VP9 -> "webm"
-        H264, H265, AV1 -> "mkv"
+        H264, H265 -> "mp4"
+        AV1 -> "mkv"
     }
 
     fun presetValueByIndex(index: Int) = when(this) {
