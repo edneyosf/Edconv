@@ -3,12 +3,12 @@ package edneyosf.edconv.ffmpeg.common
 import kotlin.math.absoluteValue
 
 enum class Resolution(val width: Int, val height: Int, val text: String) {
-    P240(width = 426, height = 240, text = "240p"),
-    P360(width = 640, height = 360, text = "360p"),
-    P480(width = 854, height = 480, text = "480p"),
-    P720(width = 1280, height = 720, text = "720p"),
-    P1080(width = 1920, height = 1080, text = "1080p"),
-    P2160(width = 3840, height = 2160, text = "2160p");
+    P480(width = 854, height = 480, text = "SD (480p)"),
+    P720(width = 1280, height = 720, text = "HD (720p)"),
+    P1080(width = 1920, height = 1080, text = "Full HD (1080p)"),
+    P1440(width = 2560, height = 1440, text = "QHD (1440p)"),
+    P2160(width = 3840, height = 2160, text = "4K UHD (2160p)"),
+    P4320(width = 7680, height = 4320, text = "8K UHD (4320p)");
 
     private val scalingFilter = "spline36"
 
