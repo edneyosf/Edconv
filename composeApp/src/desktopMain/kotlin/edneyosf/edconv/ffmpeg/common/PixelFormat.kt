@@ -1,8 +1,8 @@
 package edneyosf.edconv.ffmpeg.common
 
 enum class PixelFormat(val value: String, val text: String) {
-    BIT_8(value = "yuv420p", text = "8-bit"),
-    BIT_10(value = "yuv420p10le", text = "10-bit");
+    BIT_8(value = "yuv420p", text = "8-bit (yuv420p)"),
+    BIT_10(value = "yuv420p10le", text = "10-bit (yuv420p10le)");
 
     companion object {
         fun getAll() = entries.toList()
