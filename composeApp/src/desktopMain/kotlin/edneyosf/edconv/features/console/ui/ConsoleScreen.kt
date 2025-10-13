@@ -123,7 +123,9 @@ private fun Content(logs: List<String>, command: String, event: ConsoleEvent) {
 private fun ColumnScope.LogsView(data: List<String>) {
     val scrollState = rememberLazyListState()
     val modifier = Modifier
+        .fillMaxWidth()
         .weight(weight = 1f)
+        .padding(end = dimens.sm)
 
     LaunchedEffect(data.size) {
         if(data.isNotEmpty()) {
@@ -134,7 +136,6 @@ private fun ColumnScope.LogsView(data: List<String>) {
     Box(modifier = modifier) {
         SelectionContainer(
             modifier = Modifier
-
         ) {
             LazyColumn(state = scrollState) {
                 items(items = data) {
