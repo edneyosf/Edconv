@@ -48,9 +48,9 @@ fun HomeState.HomeNavigation(
             third = strings[VIDEO_NAVIGATION_ITEM]
         ),
         Triple(
-            first = HomeNavigationState.Vmaf,
+            first = HomeNavigationState.Metrics,
             second =  Icons.Rounded.Visibility,
-            third =  strings[VMAF_NAVIGATION_ITEM]
+            third =  strings[METRICS_NAVIGATION_ITEM]
         )
     )
 
@@ -72,14 +72,14 @@ fun HomeState.HomeNavigation(
                 }
             }
             Spacer(modifier = Modifier.height(height = dimens.xl))
-            items.forEachIndexed { index, item ->
+            items.forEachIndexed { _, item ->
                 val state = item.first
                 val hasAudio = input?.audios?.isNotEmpty()
                 val hasVideo = input?.videos?.isNotEmpty()
                 val enabled = when(state) {
                     is HomeNavigationState.Audio -> hasAudio == true
                     is HomeNavigationState.Video -> hasVideo == true
-                    is HomeNavigationState.Vmaf -> hasVideo == true
+                    is HomeNavigationState.Metrics -> hasVideo == true
                     else -> false
                 }
 

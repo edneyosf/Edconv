@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.vmaf
+package edneyosf.edconv.features.metrics
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -14,12 +14,13 @@ import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.utils.DateTimeUtils
 import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.home.mappers.toInputMedia
-import edneyosf.edconv.features.vmaf.states.VmafState
-import edneyosf.edconv.features.vmaf.states.VmafStatusState
+import edneyosf.edconv.features.metrics.states.MetricsState
+import edneyosf.edconv.features.metrics.states.MetricsStatusState
 import edneyosf.edconv.ffmpeg.data.ProgressData
-import edneyosf.edconv.ffmpeg.ffmpeg.VmafFFmpeg
+import edneyosf.edconv.ffmpeg.ffmpeg.MetricsFFmpeg
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
-import edneyosf.edconv.ffmpeg.vmaf.Vmaf
+import edneyosf.edconv.ffmpeg.metrics.Metrics
+import edneyosf.edconv.ffmpeg.metrics.MetricsScore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -28,24 +29,22 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
 
-class VmafViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), VmafEvent {
+class MetricsViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), MetricsEvent {
 
     private var startTime: Instant? = null
-    private val vmaf: Vmaf
+    private val metrics: Metrics
 
     private var analysis: Job? = null
 
-    private val _state: MutableState<VmafState>
-    val state: State<VmafState>
+    private val _state: MutableState<MetricsState>
+    val state: State<MetricsState>
 
     init {
-        val modelPath = config.vmafModelPath
-        val model = modelPath.takeIf { it.isNotEmpty() }
-        val stateValue = VmafState(model = model, threads = getThreads())
+        val stateValue = MetricsState(threads = getThreads())
 
         _state = mutableStateOf(value = stateValue)
         state = _state
-        vmaf = Vmaf(
+        metrics = Metrics(
             process = process,
             scope = viewModelScope,
             onStart = ::onStart,
@@ -81,10 +80,10 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
             speed = it.speed
         }
 
-        setStatus(VmafStatusState.Progress(percentage, speed))
+        setStatus(MetricsStatusState.Progress(percentage, speed))
     }
 
-    private fun onStop(score: Double?) {
+    private fun onStop(score: MetricsScore) {
         process.setAnalyzing(false)
         startTime?.let {
             val finishTime = Instant.now()
@@ -93,33 +92,34 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
             val duration = DateTimeUtils.durationText(it, finishTime)
 
             startTime = null
-            if(_state.value.status !is VmafStatusState.Failure && score != null) {
-                setStatus(VmafStatusState.Complete(
-                    score = score.toString(),
+
+            if(score.vmaf == null && score.psnr == null && score.ssim == null) onError(Error.METRICS_SCORE_NULL)
+            else if(_state.value.status !is MetricsStatusState.Failure) {
+                setStatus(MetricsStatusState.Complete(
+                    vmafScore = score.vmaf?.toString(),
+                    psnrScore = score.psnr?.toString(),
+                    ssimScore = score.ssim?.toString(),
                     startTime = startText,
                     finishTime = finishText,
                     duration = duration
                 ))
-            }
-            else if(score == null) {
-                onError(Error.VMAF_SCORE_NULL)
             }
         } ?: run {
             onError(Error.START_TIME_NULL)
         }
     }
 
-    private fun onError(error: Error) = setStatus(status = VmafStatusState.Failure(error))
+    private fun onError(error: Error) = setStatus(status = MetricsStatusState.Failure(error))
 
-    override fun setStatus(status: VmafStatusState) = _state.update { copy(status = status) }
+    override fun setStatus(status: MetricsStatusState) = _state.update { copy(status = status) }
 
     override fun start() {
         _state.value.run {
             val referenceInfo = reference?.videos?.firstOrNull()
 
             when {
-                referenceInfo != null && distorted != null && model != null -> {
-                    setStatus(VmafStatusState.Loading)
+                referenceInfo != null && distorted != null -> {
+                    setStatus(MetricsStatusState.Loading)
                     viewModelScope.launch(context = Dispatchers.IO) {
                         val referenceDim = Pair(first = referenceInfo.width, second = referenceInfo.height)
                         val distortedFile = File(distorted)
@@ -131,17 +131,19 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
 
                         if(distortedInfo != null) {
                             val distortedDim = Pair(first = distortedInfo.width, second = distortedInfo.height)
-                            val data = VmafFFmpeg(
+                            val data = MetricsFFmpeg(
                                 reference = reference.path,
                                 distorted = distorted,
                                 referenceDim = referenceDim,
                                 distortedDim = distortedDim,
+                                vmaf = vmaf,
+                                psnr = psnr,
+                                ssim = ssim,
                                 fps = fps,
-                                threads = threads,
-                                model = model
+                                threads = threads
                             )
 
-                            analysis = vmaf.run(ffmpeg = config.ffmpegPath, data = data)
+                            analysis = metrics.run(ffmpeg = config.ffmpegPath, data = data)
                         }
                         else {
                             notifyMain { onError(Error.NO_VIDEO_INPUT_MEDIA) }
@@ -151,7 +153,7 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
 
                 referenceInfo == null -> onError(Error.NO_VIDEO_INPUT_MEDIA)
 
-                else -> onError(Error.ON_STARTING_VMAF_REQUIREMENTS)
+                else -> onError(Error.ON_STARTING_METRICS_REQUIREMENTS)
             }
         }
     }
@@ -159,14 +161,14 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
     override fun stop() {
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
-                vmaf.destroyProcess()
+                metrics.destroyProcess()
                 analysis?.cancelAndJoin()
                 analysis = null
-                notifyMain { setStatus(VmafStatusState.Initial) }
+                notifyMain { setStatus(MetricsStatusState.Initial) }
             }
             catch (e: Exception) {
                 e.printStackTrace()
-                notifyMain { onError(Error.ON_STOPPING_VMAF) }
+                notifyMain { onError(Error.ON_STOPPING_METRICS) }
             }
         }
     }
@@ -177,26 +179,15 @@ class VmafViewModel(private val config: EdConfig, private val process: EdProcess
         path?.let { _state.update { copy(distorted = it) } }
     }
 
-    override fun pickModelFile(title: String) {
-        val path = FileUtils.pickFile(title)
-
-        path?.let {
-            viewModelScope.launch(context = Dispatchers.IO) {
-                try {
-                    config.vmafModelPath = it
-                    notifyMain { _state.update { copy(model = it) } }
-                }
-                catch (e: Exception) {
-                    e.printStackTrace()
-                    onError(Error.VMAF_MODEL_SAVE)
-                }
-            }
-        }
-    }
-
     override fun setFps(value: String) = _state.update { copy(fps = value.toInt()) }
 
     override fun setThread(value: String) = _state.update { copy(threads = value.toInt()) }
+
+    override fun setVmaf(enabled: Boolean) { _state.update { copy(vmaf = enabled) } }
+
+    override fun setPsnr(enabled: Boolean) { _state.update { copy(psnr = enabled) } }
+
+    override fun setSsim(enabled: Boolean) { _state.update { copy(ssim = enabled) } }
 
     private fun getThreads() = Runtime.getRuntime().availableProcessors()
 }

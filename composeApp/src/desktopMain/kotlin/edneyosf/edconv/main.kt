@@ -8,7 +8,7 @@ import edneyosf.edconv.features.converter.converterModule
 import edneyosf.edconv.features.home.homeFeatureModule
 import edneyosf.edconv.features.queue.queueFeatureModule
 import edneyosf.edconv.features.settings.settingsFeatureModule
-import edneyosf.edconv.features.vmaf.vmafFeatureModule
+import edneyosf.edconv.features.metrics.metricsFeatureModule
 import org.koin.core.context.GlobalContext.startKoin
 
 fun main() {
@@ -18,7 +18,7 @@ fun main() {
         modules(modules = settingsFeatureModule)
         modules(modules = converterModule)
         modules(modules = queueFeatureModule)
-        modules(modules = vmafFeatureModule)
+        modules(modules = metricsFeatureModule)
         modules(modules = consoleModule)
     }
     application { App() }

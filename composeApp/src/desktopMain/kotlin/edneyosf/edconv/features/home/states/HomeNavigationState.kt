@@ -4,5 +4,5 @@ sealed interface HomeNavigationState {
     data object Initial: HomeNavigationState
     data object Audio: HomeNavigationState
     data object Video: HomeNavigationState
-    data object Vmaf: HomeNavigationState
+    data object Metrics: HomeNavigationState
 }

@@ -1,41 +1,40 @@
-package edneyosf.edconv.ffmpeg.vmaf
+package edneyosf.edconv.ffmpeg.metrics
 
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.extensions.getProgressData
-import edneyosf.edconv.ffmpeg.ffmpeg.VmafFFmpeg
+import edneyosf.edconv.ffmpeg.ffmpeg.MetricsFFmpeg
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class Vmaf(
+class Metrics(
     private val process: EdProcess, private val scope: CoroutineScope,
     private val onStart: () -> Unit, private val onStdout: (String) -> Unit,
     private val onError: (Error) -> Unit, private val onProgress: (ProgressData?) -> Unit,
-    private val onStop: (Double?) -> Unit
+    private val onStop: (MetricsScore) -> Unit
 ) {
-    private var score: Double? = null
+    private lateinit var score: MetricsScore
 
-    fun run(ffmpeg: String, data: VmafFFmpeg) = scope.launch(context = Dispatchers.IO) {
+    fun run(ffmpeg: String, data: MetricsFFmpeg) = scope.launch(context = Dispatchers.IO) {
         val cmd = data.command()
 
         notifyMain { onStart() }
         onStdout("Command = { ${cmd.joinToString(separator = " ")} }")
-        score = null
+        score = MetricsScore()
 
         try {
             val referenceFile = File(data.reference)
             val distortedFile = File(data.distorted)
-            val modelFile = File(data.model)
 
-            if(!referenceFile.exists() || !distortedFile.exists() || !modelFile.exists()) {
+            if(!referenceFile.exists() || !distortedFile.exists()) {
                 notifyMain { onError(Error.INPUT_FILE_NOT_EXIST) }
                 return@launch
             }
-            else if(!referenceFile.isFile || !distortedFile.isFile || !modelFile.isFile) {
+            else if(!referenceFile.isFile || !distortedFile.isFile) {
                 notifyMain { onError(Error.INPUT_NOT_FILE) }
                 return@launch
             }
@@ -60,7 +59,7 @@ class Vmaf(
                 }
 
                 val exitCode = it.waitFor()
-                if (exitCode != 0) notifyMain { onError(Error.VMAF_PROCESS_COMPLETED) }
+                if (exitCode != 0) notifyMain { onError(Error.METRICS_PROCESS_COMPLETED) }
 
             } ?: run {
                 notifyMain { onError(Error.PROCESS_NULL) }
@@ -69,7 +68,7 @@ class Vmaf(
         catch (e: Exception) {
             e.printStackTrace()
             destroyProcess()
-            notifyMain { onError(Error.VMAF_PROCESS) }
+            notifyMain { onError(Error.METRICS_PROCESS) }
         }
         finally {
             process.analysis = null
@@ -81,19 +80,31 @@ class Vmaf(
 
     private fun String.getScore() {
         try {
-            val regex = Regex(pattern = "VMAF score:\\s*(\\d+(?:\\.\\d+)?)")
-            val match = regex.find(input = this)
+            val vmafScore = findScore(pattern = "VMAF score:\\s*(\\d+(?:\\.\\d+)?)")
+            val psnrScore = findScore(pattern = "average:(\\d+(?:\\.\\d+)?)")
+            val ssimScore = findScore(pattern = "All:\\s*(\\d+(?:\\.\\d+)?)")
 
-            if(match != null) {
-                val (value) = match.destructured
-
-                score = value.toDouble()
-            }
+            vmafScore?.let { score = score.copy(vmaf = it) }
+            psnrScore?.let { score = score.copy(psnr = it) }
+            ssimScore?.let { score = score.copy(ssim = it) }
         }
         catch (e: Exception) {
             e.printStackTrace()
             onStdout("Error = { " + e.message + " }")
         }
+    }
+
+    private fun String.findScore(pattern: String): Double? {
+        val regex = Regex(pattern = pattern)
+        val match = regex.find(input = this)
+        var score: Double? = null
+
+        if(match != null) {
+            val (value) = match.destructured
+            score = value.toDouble()
+        }
+
+        return score
     }
 
     fun destroyProcess() {

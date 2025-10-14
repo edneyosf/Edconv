@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.vmaf.ui
+package edneyosf.edconv.features.metrics.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.features.common.commonStrings
-import edneyosf.edconv.features.vmaf.strings.VmafCompleteDialogStrings.Keys.*
-import edneyosf.edconv.features.vmaf.strings.vmafCompleteDialogStrings
+import edneyosf.edconv.features.metrics.strings.MetricsCompleteDialogStrings.Keys.*
+import edneyosf.edconv.features.metrics.strings.metricsCompleteDialogStrings
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
@@ -28,8 +28,11 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
-fun VmafCompleteDialog(score: String, startTime: String, finishTime: String, duration: String, onFinish: () -> Unit) {
-    CompositionLocalProvider(value = stringsComp provides vmafCompleteDialogStrings) {
+fun MetricsCompleteDialog(
+    vmafScore: String?, psnrScore: String?, ssimScore: String?, startTime: String, finishTime: String,
+    duration: String, onFinish: () -> Unit
+) {
+    CompositionLocalProvider(value = stringsComp provides metricsCompleteDialogStrings) {
         SimpleDialog(
             title = strings[TITLE],
             content = {
@@ -50,16 +53,9 @@ fun VmafCompleteDialog(score: String, startTime: String, finishTime: String, dur
                         Text(text = duration, style = MaterialTheme.typography.labelLarge)
                     }
                     Spacer(modifier = Modifier.height(height = dimens.xs))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        val color = MaterialTheme.colorScheme.tertiary
-
-                        Text(
-                            text = strings[SCORE],
-                            style = MaterialTheme.typography.bodyLarge.copy(color = color)
-                        )
-                        Spacer(modifier = Modifier.width(width = dimens.xxs))
-                        Text(text = score, style = MaterialTheme.typography.titleMedium.copy(color = color))
-                    }
+                    vmafScore?.let { Score(label = strings[VMAF_SCORE], value = it) }
+                    psnrScore?.let { Score(label = strings[PSNR_SCORE], value = it) }
+                    ssimScore?.let { Score(label = strings[SSIM_SCORE], value = it) }
                 }
             },
             icon = Icons.Rounded.CheckCircle,
@@ -70,8 +66,27 @@ fun VmafCompleteDialog(score: String, startTime: String, finishTime: String, dur
 }
 
 @Composable
-private fun DefaultPreview() = VmafCompleteDialog(
-    score = "12.345678",
+private fun Score(label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        val color = MaterialTheme.colorScheme.tertiary
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(color = color)
+        )
+        Spacer(modifier = Modifier.width(width = dimens.xxs))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium.copy(color = color)
+        )
+    }
+}
+
+@Composable
+private fun DefaultPreview() = MetricsCompleteDialog(
+    vmafScore = "12.345678",
+    psnrScore = "12.345678",
+    ssimScore = "12.345678",
     startTime = "123",
     finishTime = "123",
     duration = "123",

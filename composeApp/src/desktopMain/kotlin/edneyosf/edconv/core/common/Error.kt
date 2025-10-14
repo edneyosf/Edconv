@@ -19,12 +19,12 @@ enum class Error(val code: String) {
     CONVERSION_PROCESS_COMPLETED(code = "000F"),
     PROCESS_NULL(code = "000G"),
     CONVERSION_PROCESS(code = "000H"),
-    VMAF_PROCESS_COMPLETED(code = "000I"),
-    VMAF_PROCESS(code = "000J"),
-    VMAF_SCORE_NULL(code = "000K"),
-    ON_STOPPING_VMAF(code = "000L"),
-    ON_STARTING_VMAF_REQUIREMENTS(code = "000M"),
+    METRICS_PROCESS_COMPLETED(code = "000I"),
+    METRICS_PROCESS(code = "000J"),
+    METRICS_SCORE_NULL(code = "000K"),
+    ON_STOPPING_METRICS(code = "000L"),
+    ON_STARTING_METRICS_REQUIREMENTS(code = "000M"),
     NO_VIDEO_INPUT_MEDIA(code = "000N"),
-    VMAF_MODEL_SAVE(code = "000O"),
+    METRICS_MODEL_SAVE(code = "000O"),
     FILE_ALREADY_EXISTS(code = "000P")
 }

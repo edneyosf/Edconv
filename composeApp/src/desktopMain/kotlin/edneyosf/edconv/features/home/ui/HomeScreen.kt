@@ -29,7 +29,7 @@ import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.features.nomedia.NoMediaScreen
-import edneyosf.edconv.features.vmaf.ui.VMAFScreen
+import edneyosf.edconv.features.metrics.ui.MetricsScreen
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
@@ -73,7 +73,7 @@ private fun HomeState.Content(event: HomeEvent) {
                 loading -> Loading(appVersion = version)
                 input == null -> NoMediaScreen(appVersion = version)
                 navigation is HomeNavigationState.Audio || navigation is HomeNavigationState.Video -> ConverterScreen()
-                navigation is HomeNavigationState.Vmaf -> VMAFScreen()
+                navigation is HomeNavigationState.Metrics -> MetricsScreen()
             }
         }
     }

@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.vmaf.ui
+package edneyosf.edconv.features.metrics.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -29,15 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.mediainfo.MediaInfoScreen
-import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.MEDIA_INFO
-import edneyosf.edconv.features.vmaf.strings.VmafScreenStrings.Keys.*
-import edneyosf.edconv.features.vmaf.VmafEvent
-import edneyosf.edconv.features.vmaf.states.VmafState
-import edneyosf.edconv.features.vmaf.states.VmafStatusState
-import edneyosf.edconv.features.vmaf.strings.vmafScreenStrings
-import edneyosf.edconv.features.vmaf.VmafViewModel
+import edneyosf.edconv.features.metrics.strings.MetricsScreenStrings.Keys.MEDIA_INFO
+import edneyosf.edconv.features.metrics.strings.MetricsScreenStrings.Keys.*
+import edneyosf.edconv.features.metrics.MetricsEvent
+import edneyosf.edconv.features.metrics.states.MetricsState
+import edneyosf.edconv.features.metrics.states.MetricsStatusState
+import edneyosf.edconv.features.metrics.strings.metricsScreenStrings
+import edneyosf.edconv.features.metrics.MetricsViewModel
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.TextTooltip
@@ -50,13 +52,14 @@ import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import org.koin.compose.viewmodel.koinViewModel
+import java.io.File
 
 @Composable
-fun VMAFScreen() {
-    val viewModel = koinViewModel<VmafViewModel>()
+fun MetricsScreen() {
+    val viewModel = koinViewModel<MetricsViewModel>()
     val state by viewModel.state
 
-    CompositionLocalProvider(value = stringsComp provides vmafScreenStrings) {
+    CompositionLocalProvider(value = stringsComp provides metricsScreenStrings) {
         state.Dialogs(event = viewModel)
         state.Content(
             event = viewModel
@@ -65,7 +68,7 @@ fun VMAFScreen() {
 }
 
 @Composable
-private fun VmafState.Content(event: VmafEvent) {
+private fun MetricsState.Content(event: MetricsEvent) {
     val stringPickFile = strings[TITLE_PICK_FILE]
     var showMediaInfo by remember { mutableStateOf(value = false) }
 
@@ -102,54 +105,26 @@ private fun VmafState.Content(event: VmafEvent) {
                 }
             }
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextField(
-                modifier = Modifier.weight(weight = 1f),
-                value = distorted ?: "",
-                colors = TextFieldDefaults.colors().custom(),
-                placeholder = { Text(text = "video.mkv") },
-                readOnly = true,
-                singleLine = true,
-                onValueChange = {},
-                label = { Text(text = strings[DISTORTED_FILE_INPUT]) }
+        Row {
+            CheckboxInput(
+                checked = vmaf,
+                label = strings[VMAF],
+                onCheckedChange = event::setVmaf
             )
-            Spacer(modifier = Modifier.width(width = dimens.xs))
-            TextTooltip(text = strings[SELECT_FILE]) {
-                IconButton(
-                    onClick = { event.pickDistortedFile(title = stringPickFile) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.FileOpen,
-                        contentDescription = strings[SELECT_FILE]
-                    )
-                }
-            }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextField(
-                modifier = Modifier.weight(weight = 1f),
-                value = model ?: "",
-                colors = TextFieldDefaults.colors().custom(),
-                onValueChange = { },
-                singleLine = true,
-                readOnly = true,
-                placeholder = { Text(text = "model.json") },
-                label = { Text(text = strings[MODEL_FILE_INPUT]) }
+            CheckboxInput(
+                checked = psnr,
+                label = strings[PSNR],
+                onCheckedChange = event::setPsnr
             )
-            Spacer(modifier = Modifier.width(width = dimens.xs))
-            TextTooltip(text = strings[SELECT_FILE]) {
-                IconButton(
-                    onClick = { event.pickModelFile(title = stringPickFile) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.FileOpen,
-                        contentDescription = strings[SELECT_FILE]
-                    )
-                }
-            }
+            CheckboxInput(
+                checked = ssim,
+                label = strings[SSIM],
+                onCheckedChange = event::setSsim
+            )
         }
         Row {
             TextField(
+                modifier = Modifier.width(width = 164.dp),
                 value = fps.toString(),
                 colors = TextFieldDefaults.colors().custom(),
                 singleLine = true,
@@ -164,6 +139,7 @@ private fun VmafState.Content(event: VmafEvent) {
             )
             Spacer(modifier = Modifier.width(width = dimens.xl))
             TextField(
+                modifier = Modifier.width(width = 148.dp),
                 value = threads.toString(),
                 colors = TextFieldDefaults.colors().custom(),
                 singleLine = true,
@@ -179,11 +155,36 @@ private fun VmafState.Content(event: VmafEvent) {
         }
         Spacer(modifier = Modifier.weight(weight = 1f))
         Progress(status)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val distortedFile = distorted?.let { File(it) }
+
+            TextField(
+                modifier = Modifier.weight(weight = 1f),
+                value = distortedFile?.name ?: "",
+                colors = TextFieldDefaults.colors().custom(),
+                placeholder = { Text(text = "video.mkv") },
+                readOnly = true,
+                maxLines = 1,
+                onValueChange = {},
+                label = { Text(text = strings[DISTORTED_FILE_INPUT]) }
+            )
+            Spacer(modifier = Modifier.width(width = dimens.xs))
+            TextTooltip(text = strings[SELECT_FILE]) {
+                IconButton(
+                    onClick = { event.pickDistortedFile(title = stringPickFile) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.FileOpen,
+                        contentDescription = strings[SELECT_FILE]
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
-    private fun Progress(status: VmafStatusState) {
+    private fun Progress(status: MetricsStatusState) {
     val modifier = Modifier
         .fillMaxWidth()
         .height(height = dimens.xxl)
@@ -192,7 +193,7 @@ private fun VmafState.Content(event: VmafEvent) {
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
-        if(status is VmafStatusState.Progress && status.percentage > 0f) {
+        if(status is MetricsStatusState.Progress && status.percentage > 0f) {
             val text = "${String.format("%.2f", status.percentage)}% (${status.speed})"
 
             LinearProgressIndicator(
@@ -208,26 +209,43 @@ private fun VmafState.Content(event: VmafEvent) {
                 )
             )
         }
-        else if(status is VmafStatusState.Progress || status is VmafStatusState.Loading) {
+        else if(status is MetricsStatusState.Progress || status is MetricsStatusState.Loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
 }
 
-private fun VmafState.canStart(): Boolean {
-    return !(distorted.isNullOrBlank() ||
-            model.isNullOrBlank() ||
-            fps < 1 ||
-            threads < 1 ||
-            status is VmafStatusState.Loading ||
-            status is VmafStatusState.Progress)
+@Composable
+private fun CheckboxInput(checked: Boolean, label: String, onCheckedChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+        Spacer(modifier = Modifier.width(width = dimens.xxs))
+        Text(
+            text = label,
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
+    }
 }
 
-private fun VmafState.canStop(): Boolean = status is VmafStatusState.Progress
+private fun MetricsState.canStart(): Boolean {
+    return !(distorted.isNullOrBlank() ||
+            fps < 1 ||
+            threads < 1 ||
+            !vmaf && !psnr && !ssim ||
+            status is MetricsStatusState.Loading ||
+            status is MetricsStatusState.Progress)
+}
+
+private fun MetricsState.canStop(): Boolean = status is MetricsStatusState.Progress
 
 @Composable
 private fun DefaultPreview() {
-    CompositionLocalProvider(value = stringsComp provides vmafScreenStrings) {
+    CompositionLocalProvider(value = stringsComp provides metricsScreenStrings) {
         val type = MediaType.VIDEO
         val input = InputMedia(
             path = "/dir/video.mkv",
@@ -237,18 +255,17 @@ private fun DefaultPreview() {
             duration = 123456L,
             durationText = "123456"
         )
-        val progressStatus = VmafStatusState.Progress(
+        val progressStatus = MetricsStatusState.Progress(
             percentage = 50.0f,
             speed = "1.6x"
         )
-        val state = VmafState(
+        val state = MetricsState(
             status = progressStatus,
             reference = input,
-            distorted = "/dir/video.mkv",
-            model = "/dir/model.json"
+            distorted = "/dir/video.mkv"
         )
 
-        state.Content(event = object : VmafEvent {})
+        state.Content(event = object : MetricsEvent {})
     }
 }
 

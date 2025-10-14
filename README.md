@@ -23,7 +23,7 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 - Custom FFmpeg arguments
 - Clean, intuitive interface
 - Media Information
-- VMAF perceptual video quality assessment algorithm
+- VMAF, PSNR and SSIM perceptual video quality assessment algorithm
 - Conversion queue
 
 ## Screenshots

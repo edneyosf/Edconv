@@ -1,23 +1,25 @@
-package edneyosf.edconv.features.vmaf.ui
+package edneyosf.edconv.features.metrics.ui
 
 import androidx.compose.runtime.Composable
-import edneyosf.edconv.features.vmaf.VmafEvent
-import edneyosf.edconv.features.vmaf.states.VmafState
-import edneyosf.edconv.features.vmaf.states.VmafStatusState.*
+import edneyosf.edconv.features.metrics.MetricsEvent
+import edneyosf.edconv.features.metrics.states.MetricsState
+import edneyosf.edconv.features.metrics.states.MetricsStatusState.*
 
 @Composable
-fun VmafState.Dialogs(event: VmafEvent) {
+fun MetricsState.Dialogs(event: MetricsEvent) {
     status.run {
         when (this) {
             is Failure -> {
-                VmafErrorDialog(
+                MetricsErrorDialog(
                     error = error,
                     onFinish = { event.setStatus(Initial) }
                 )
             }
             is Complete -> {
-                VmafCompleteDialog(
-                    score = score,
+                MetricsCompleteDialog(
+                    vmafScore = vmafScore,
+                    psnrScore = psnrScore,
+                    ssimScore = ssimScore,
                     startTime = startTime,
                     finishTime = finishTime,
                     duration = duration,

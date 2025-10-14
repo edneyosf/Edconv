@@ -11,8 +11,4 @@ class EdConfig : ConfigManager(fileName = FILE_NAME) {
     var ffprobePath
         get() = config.ffprobePath
         set(value) = save { ffprobePath = value }
-
-    var vmafModelPath
-        get() = config.vmafModelPath
-        set(value) = save { vmafModelPath = value }
 }

@@ -1,4 +1,4 @@
-package edneyosf.edconv.features.vmaf.ui
+package edneyosf.edconv.features.metrics.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
@@ -11,9 +11,9 @@ import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_TITLE
 import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.features.common.CommonStrings.Keys.ERROR_DEFAULT
 import edneyosf.edconv.features.common.commonStrings
-import edneyosf.edconv.features.vmaf.strings.VmafErrorDialogStrings.Keys.*
-import edneyosf.edconv.features.vmaf.strings.VmafErrorDialogStrings.Keys.SCORE_NULL
-import edneyosf.edconv.features.vmaf.strings.vmafErrorDialogStrings
+import edneyosf.edconv.features.metrics.strings.MetricsErrorDialogStrings.Keys.*
+import edneyosf.edconv.features.metrics.strings.MetricsErrorDialogStrings.Keys.SCORE_NULL
+import edneyosf.edconv.features.metrics.strings.metricsErrorDialogStrings
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
@@ -23,20 +23,19 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
-fun VmafErrorDialog(error: Error, onFinish: () -> Unit) {
-    CompositionLocalProvider(value = stringsComp provides vmafErrorDialogStrings) {
+fun MetricsErrorDialog(error: Error, onFinish: () -> Unit) {
+    CompositionLocalProvider(value = stringsComp provides metricsErrorDialogStrings) {
         val description = when(error) {
-            Error.ON_STARTING_VMAF_REQUIREMENTS -> strings[ON_STARTING_VMAF_REQUIREMENTS]
-            Error.ON_STOPPING_VMAF -> strings[ON_STOPPING_VMAF]
-            Error.VMAF_SCORE_NULL -> strings[SCORE_NULL]
+            Error.ON_STARTING_METRICS_REQUIREMENTS -> strings[ON_STARTING_METRICS_REQUIREMENTS]
+            Error.ON_STOPPING_METRICS -> strings[ON_STOPPING_METRICS]
+            Error.METRICS_SCORE_NULL -> strings[SCORE_NULL]
             Error.START_TIME_NULL -> strings[START_TIME_NULL]
             Error.INPUT_FILE_NOT_EXIST -> strings[INPUT_FILE_NOT_EXIST]
             Error.INPUT_NOT_FILE -> strings[INPUT_NOT_FILE]
-            Error.VMAF_PROCESS_COMPLETED -> strings[VMAF_PROCESS_COMPLETED]
+            Error.METRICS_PROCESS_COMPLETED -> strings[METRICS_PROCESS_COMPLETED]
             Error.PROCESS_NULL -> strings[PROCESS_NULL]
-            Error.VMAF_PROCESS -> strings[VMAF_PROCESS]
+            Error.METRICS_PROCESS -> strings[METRICS_PROCESS]
             Error.NO_VIDEO_INPUT_MEDIA -> strings[NO_VIDEO_INPUT_MEDIA]
-            Error.VMAF_MODEL_SAVE -> strings[VMAF_MODEL_SAVE]
             else -> commonStrings[ERROR_DEFAULT]
         }
 
@@ -52,7 +51,7 @@ fun VmafErrorDialog(error: Error, onFinish: () -> Unit) {
 }
 
 @Composable
-private fun DefaultPreview() = VmafErrorDialog(Error.VMAF_PROCESS, onFinish = {})
+private fun DefaultPreview() = MetricsErrorDialog(Error.METRICS_PROCESS, onFinish = {})
 
 @Preview
 @Composable
