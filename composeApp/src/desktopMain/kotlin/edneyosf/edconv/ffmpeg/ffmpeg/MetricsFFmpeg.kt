@@ -1,6 +1,6 @@
 package edneyosf.edconv.ffmpeg.ffmpeg
 
-import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs.FILTER_COMPLEX
+import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs.FILTER_AV
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs.FORCE
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs.INPUT
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpegArgs.OVERRIDE_INPUT
@@ -24,7 +24,7 @@ class MetricsFFmpeg(
         data.addCmd(param = INPUT, value = distorted)
         data.addCmd(param = OVERRIDE_INPUT, value = fps.toString())
         data.addCmd(param = INPUT, value = reference)
-        data.addCmd(param = FILTER_COMPLEX, value = filter())
+        data.addCmd(param = FILTER_AV, value = filter())
 
         data.add(FORCE)
         data.add("null")
@@ -35,6 +35,7 @@ class MetricsFFmpeg(
 
     private fun filter(): String {
         val builder = StringBuilder()
+        val metrics = listOf(psnr, ssim, vmaf).count { it }
         val referenceWidth = referenceDim.first
         val referenceHeight = referenceDim.second
         val distortedWidth = distortedDim.first
@@ -56,17 +57,32 @@ class MetricsFFmpeg(
             }
         }
 
-        builder.append("[0:v]${distortedScale}setpts=PTS-STARTPTS;")
-        builder.append("[1:v]${referenceScale}setpts=PTS-STARTPTS")
-        if(psnr) builder.append(";[0:v][1:v]psnr")
-        if(ssim) builder.append(";[0:v][1:v]ssim")
-        if(vmaf) {
-            builder.append(";[0:v][1:v]libvmaf")
-            builder.append("=n_threads=$threads")
+        if (metrics > 0) {
+            builder.append("[0:v]${distortedScale}setpts=PTS-STARTPTS")
+            if (metrics > 1) builder.append(",split=$metrics")
+            builder.append((1..metrics).joinToString(separator = "") { "[dis$it]" })
+            builder.append(";")
+
+            builder.append("[1:v]${referenceScale}setpts=PTS-STARTPTS")
+            if (metrics > 1) builder.append(",split=$metrics")
+            builder.append((1..metrics).joinToString(separator = "") { "[ref$it]" })
+        }
+
+        var index = 1
+        if (psnr) {
+            builder.append(";[dis$index][ref$index]psnr")
+            index++
+        }
+        if (ssim) {
+            builder.append(";[dis$index][ref$index]ssim")
+            index++
+        }
+        if (vmaf) {
+            builder.append(";[dis$index][ref$index]libvmaf=n_threads=$threads")
         }
 
         return builder.toString()
     }
 
-    private fun scale(dimens: Pair<Int, Int>) = "scale=${dimens.first}:${dimens.second}:flags=bicubic,"
+    private fun scale(dimens: Pair<Int, Int>) = "zscale=${dimens.first}:${dimens.second}:f=spline36,"
 }
