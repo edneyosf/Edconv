@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.previews.DarkPreview
 import edneyosf.edconv.ui.previews.LightPreview
@@ -102,7 +101,6 @@ fun ActionsTool(
             Spacer(modifier = Modifier.weight(weight = 1f))
             if(righties != null) righties()
         }
-        HorizontalDivider(color = DividerDefaults.customColor())
     }
 }
 

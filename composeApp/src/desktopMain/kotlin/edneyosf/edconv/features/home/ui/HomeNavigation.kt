@@ -1,14 +1,12 @@
 package edneyosf.edconv.features.home.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileOpen
-import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Videocam
+import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,7 +21,6 @@ import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.ui.components.TextTooltip
-import edneyosf.edconv.ui.components.extensions.customColor
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
@@ -38,14 +35,9 @@ fun HomeState.HomeNavigation(
 ) {
     val items = listOf(
         Triple(
-            first = HomeNavigationState.Audio,
-            second = Icons.Rounded.MusicNote,
-            third = strings[AUDIO_NAVIGATION_ITEM]
-        ),
-        Triple(
-            first =  HomeNavigationState.Video,
-            second = Icons.Rounded.Videocam,
-            third = strings[VIDEO_NAVIGATION_ITEM]
+            first = HomeNavigationState.Media,
+            second = Icons.Rounded.VideoLibrary,
+            third = strings[MEDIA_NAVIGATION_ITEM]
         ),
         Triple(
             first = HomeNavigationState.Metrics,
@@ -54,59 +46,56 @@ fun HomeState.HomeNavigation(
         )
     )
 
-    Row {
-        NavigationRail {
-            TextTooltip(text = strings[SELECT_MEDIA_FILE]) {
-                FilledTonalIconButton(
-                    enabled = !loading,
-                    onClick = onPickFile
+    NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest) {
+        TextTooltip(text = strings[SELECT_MEDIA_FILE]) {
+            FilledTonalIconButton(
+                enabled = !loading,
+                onClick = onPickFile
+            ) {
+                BadgedBox(
+                    badge = { input?.let { Badge() } }
                 ) {
-                    BadgedBox(
-                        badge = { input?.let { Badge() } }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.FileOpen,
-                            contentDescription = strings[SELECT_MEDIA_FILE]
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(height = dimens.xl))
-            items.forEachIndexed { _, item ->
-                val state = item.first
-                val hasAudio = input?.audios?.isNotEmpty()
-                val hasVideo = input?.videos?.isNotEmpty()
-                val enabled = when(state) {
-                    is HomeNavigationState.Audio -> hasAudio == true
-                    is HomeNavigationState.Video -> hasVideo == true
-                    is HomeNavigationState.Metrics -> hasVideo == true
-                    else -> false
-                }
-
-                NavigationRailItem(
-                    label = { Text(text = item.third) },
-                    enabled = enabled && !loading,
-                    selected = navigation == state,
-                    onClick = { onSelected(state) },
-                    icon = {
-                        Icon(
-                            imageVector = item.second,
-                            contentDescription = null
-                        )
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.weight(weight = 1f))
-            TextTooltip(text = strings[SETTINGS]) {
-                IconButton(enabled = !loading, onClick = { onSettings() }) {
                     Icon(
-                        imageVector = Icons.Rounded.Settings,
-                        contentDescription = strings[SETTINGS]
+                        imageVector = Icons.Rounded.FileOpen,
+                        contentDescription = strings[SELECT_MEDIA_FILE]
                     )
                 }
             }
         }
-        VerticalDivider(color = DividerDefaults.customColor())
+        Spacer(modifier = Modifier.height(height = dimens.xl))
+        items.forEachIndexed { _, item ->
+            val state = item.first
+            val hasAudio = input?.audios?.isNotEmpty()
+            val hasVideo = input?.videos?.isNotEmpty()
+            val enabled = when(state) {
+                is HomeNavigationState.Media -> hasAudio == true || hasVideo == true
+                is HomeNavigationState.Metrics -> hasVideo == true
+                else -> false
+            }
+
+            NavigationRailItem(
+                label = { Text(text = item.third) },
+                enabled = enabled && !loading,
+                selected = navigation == state,
+                onClick = { onSelected(state) },
+                icon = {
+                    Icon(
+                        imageVector = item.second,
+                        contentDescription = null
+                    )
+                }
+            )
+        }
+        Spacer(modifier = Modifier.weight(weight = 1f))
+        TextTooltip(text = strings[SETTINGS]) {
+            IconButton(enabled = !loading, onClick = { onSettings() }) {
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    contentDescription = strings[SETTINGS]
+                )
+            }
+        }
     }
 }
 
@@ -124,7 +113,7 @@ private fun DefaultPreview() {
             videos = listOf(Video(height = 123, width = 123))
         )
 
-        HomeState(navigation = HomeNavigationState.Audio, input = inputData)
+        HomeState(navigation = HomeNavigationState.Media, input = inputData)
             .HomeNavigation(
                 onSelected = {},
                 onSettings = {},

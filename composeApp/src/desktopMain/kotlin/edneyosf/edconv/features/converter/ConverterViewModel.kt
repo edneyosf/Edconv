@@ -23,7 +23,7 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.ffmpeg.common.Bitrate
 import edneyosf.edconv.ffmpeg.common.Channels
-import edneyosf.edconv.ffmpeg.common.Codec
+import edneyosf.edconv.ffmpeg.common.Encoder
 import edneyosf.edconv.ffmpeg.common.CompressionType
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ffmpeg.common.PixelFormat
@@ -68,7 +68,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
             onStdout = ::onStdout,
             onProgress = ::onProgress
         )
-        observeCodec()
+        observeEncoders()
         observeInput()
         observeQueue()
     }
@@ -86,24 +86,27 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         }
     }
 
-    private fun observeCodec() {
+    private fun observeEncoders() {
         viewModelScope.launch {
-            _state.map { it.codec }
-            .distinctUntilChanged()
-            .collectLatest {
-                _state.updateAndSync {
-                    val newState = copy(
-                        bitrate = it?.defaultBitrate,
-                        vbr = it?.defaultVBR,
-                        crf = it?.defaultCRF,
-                        preset = it?.defaultPreset,
-                        compression = it?.compressions?.firstOrNull()
-                    )
+            _state.map { it.encoderAudio to it.encoderVideo }
+                .distinctUntilChanged()
+                .collectLatest { (audio, video) ->
+                    _state.updateAndSync {
+                        val newState = copy(
+                            bitrateAudio = audio?.defaultBitrate,
+                            bitrateControlAudio = audio?.defaultVBR,
+                            compressionTypeAudio = audio?.compressions?.firstOrNull(),
+                            bitrateVideo = video?.defaultBitrate,
+                            bitrateControlVideo = video?.defaultCRF,
+                            presetVideo = video?.defaultPreset,
+                            compressionTypeVideo = video?.compressions?.firstOrNull()
+                        )
+                        val encoder = if(type == MediaType.AUDIO) audio else video
 
-                    if(input != null) newState.copy(output = it?.toOutput(inputMedia = input))
-                    else newState
+                        if(input != null) newState.copy(output = encoder?.toOutput(inputMedia = input))
+                        else newState
+                    }
                 }
-            }
         }
     }
 
@@ -126,19 +129,18 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 val newSampleRate = sampleRate
                     ?: SampleRate.fromValue(value = audio?.sampleRate)
 
-                val defaultCodec = when (newType) {
-                    MediaType.AUDIO -> Codec.OPUS
-                    MediaType.VIDEO -> Codec.AV1
-                    MediaType.SUBTITLE -> null
-                }
-
-                val newCodec = codec.takeIf { type == newType } ?: defaultCodec
-                val newOutput = newCodec.toOutput(inputMedia = newInput)
+                val newEncoderAudio = encoderAudio ?: Encoder.OPUS
+                val newEncoderVideo = encoderVideo ?: Encoder.AV1
+                val newOutput = if(newType == MediaType.AUDIO)
+                    newEncoderAudio.toOutput(inputMedia = newInput)
+                else
+                    newEncoderVideo.toOutput(inputMedia = newInput)
 
                 copy(
                     input = newInput,
                     type = newType,
-                    codec = newCodec,
+                    encoderAudio = newEncoderAudio,
+                    encoderVideo = newEncoderVideo,
                     resolution = newResolution,
                     pixelFormat = newPixelFormat,
                     channels = newChannels,
@@ -159,9 +161,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     private fun buildCommand() {
         val state = _state.value
-        val codec = state.codec
+        val encoderAudio = state.encoderAudio
+        val encoderVideo = state.encoderVideo
 
-        if (codec == null || state.output?.first.isNullOrBlank() || state.output.second.isBlank()) {
+        if ((encoderAudio == null && encoderVideo == null) || state.output?.first.isNullOrBlank() || state.output.second.isBlank()) {
             process.setCommand("")
             return
         }
@@ -171,25 +174,25 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 MediaType.AUDIO -> {
                     val stream = input?.audios?.firstOrNull()
 
-                    if(stream != null) {
+                    if(stream != null && encoderAudio != null) {
                         val inputChannels = stream.channels
-                        val filter = channels?.downmixingFilter(sourceChannels = inputChannels)
                         val customChannelsArgs = Channels.customArguments(
                             channels = channels?.value?.toInt(),
                             inputChannels = inputChannels,
-                            codec = codec
+                            encoder = encoderAudio
                         )
 
                         FFmpeg.createAudio(
                             logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
-                            codec = codec.value,
-                            compressionType = compression,
+                            indexAudio = indexAudio,
+                            encoder = encoderAudio.value,
+                            compressionType = compressionTypeAudio,
                             sampleRate = sampleRate?.value,
                             channels = channels?.value,
-                            vbr = vbr?.toString(),
-                            bitrate = bitrate?.value,
-                            filter = filter,
+                            bitrateControl = bitrateControlAudio,
+                            bitrate = bitrateAudio?.value,
                             noMetadata = noMetadata,
+                            noChapters = noChapters,
                             custom = customChannelsArgs
                         )
                     }
@@ -197,28 +200,49 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 }
 
                 MediaType.VIDEO -> {
-                    if(preset.isNullOrBlank() || (crf == null && bitrate == null)) return@run
+                    if(presetVideo.isNullOrBlank() || (bitrateControlVideo == null && bitrateVideo == null)) return@run
 
-                    val stream = input?.videos?.firstOrNull()
+                    val streamVideo = input?.videos?.firstOrNull()
+                    val streamAudio = input?.audios?.firstOrNull()
+                    var inputChannels: Int? = null
+                    var customChannelsArgs: List<String>? = null
 
-                    if(stream != null) {
-                        val width = stream.width
-                        val height = stream.height
-                        val filter = resolution
+                    if(streamAudio != null && encoderAudio != null) {
+                        inputChannels = streamAudio.channels
+                        customChannelsArgs = Channels.customArguments(
+                            channels = channels?.value?.toInt(),
+                            inputChannels = inputChannels,
+                            encoder = encoderAudio
+                        )
+                    }
+
+                    if(streamVideo != null && encoderVideo != null) {
+                        val width = streamVideo.width
+                        val height = streamVideo.height
+                        val filterVideo = resolution
                             ?.preserveAspectRatioFilter(sourceWidth = width, sourceHeight = height, hdr10ToSdr)
 
                         FFmpeg.createVideo(
                             logLevel = AppConfigs.FFMPEG_LOG_LEVEL,
-                            codec = codec.value,
-                            compressionType = compression,
-                            preset = preset,
-                            crf = crf,
-                            bitrate = bitrate?.value,
-                            profile = codec.getVideoProfile(pixelFormat),
+                            indexVideo = indexVideo,
+                            indexAudio = indexAudio,
+                            encoderVideo = encoderVideo.value,
+                            encoderAudio = encoderAudio?.value,
+                            compressionTypeVideo = compressionTypeVideo,
+                            compressionTypeAudio = compressionTypeAudio,
+                            presetVideo = presetVideo,
+                            bitrateControlVideo = bitrateControlVideo,
+                            bitrateControlAudio = bitrateControlAudio,
+                            bitrateVideo = bitrateVideo?.value,
+                            bitrateAudio = bitrateAudio?.value,
+                            profileVideo = encoderVideo.getVideoProfile(pixelFormat),
                             pixelFormat = pixelFormat?.value,
-                            filter = filter,
-                            noAudio = noAudio,
+                            sampleRate = sampleRate?.value,
+                            channels = channels?.value,
+                            filterVideo = filterVideo,
+                            custom = customChannelsArgs,
                             noSubtitle = noSubtitle,
+                            noChapters = noChapters,
                             noMetadata = noMetadata
                         )
                     }
@@ -407,34 +431,49 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setOutput(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
 
-    override fun setCodec(codec: Codec?) = _state.updateAndSync { copy(codec = codec) }
+    override fun setIndexAudio(value: Int?) { _state.updateAndSync { copy(indexAudio = value) } }
 
-    override fun setCompression(type: CompressionType?) = _state.updateAndSync { copy(compression = type) }
+    override fun setIndexVideo(value: Int?) { _state.updateAndSync { copy(indexVideo = value) } }
+
+    override fun setEncoderAudio(encoder: Encoder?) = _state.updateAndSync { copy(encoderAudio = encoder) }
+
+    override fun setEncoderVideo(encoder: Encoder?) = _state.updateAndSync { copy(encoderVideo = encoder) }
+
+    override fun setCompressionTypeAudio(type: CompressionType?) = _state.updateAndSync { copy(compressionTypeAudio = type) }
+
+    override fun setCompressionTypeVideo(type: CompressionType?) = _state.updateAndSync { copy(compressionTypeVideo = type) }
 
     override fun setChannels(channels: Channels?) = _state.updateAndSync { copy(channels = channels) }
 
-    override fun setVbr(vbr: Int?) = _state.updateAndSync { copy(vbr = vbr) }
+    override fun setBitrateControlAudio(value: Int?) { _state.updateAndSync { copy(bitrateControlAudio = value) } }
 
-    override fun setBitrate(bitrate: Bitrate?) = _state.updateAndSync { copy(bitrate = bitrate) }
+    override fun setBitrateControlVideo(value: Int?) { _state.updateAndSync { copy(bitrateControlVideo = value) } }
+
+    override fun setBitrateAudio(bitrate: Bitrate?) { _state.updateAndSync { copy(bitrateAudio = bitrate) } }
+
+    override fun setBitrateVideo(bitrate: Bitrate?) { _state.updateAndSync { copy(bitrateVideo = bitrate) } }
 
     override fun setSampleRate(sampleRate: SampleRate?) = _state.updateAndSync { copy(sampleRate = sampleRate) }
 
-    override fun setPreset(preset: String?) = _state.updateAndSync { copy(preset = preset) }
-
-    override fun setCrf(crf: Int?) = _state.updateAndSync { copy(crf = crf) }
+    override fun setPresetVideo(preset: String?) = _state.updateAndSync { copy(presetVideo = preset) }
 
     override fun setResolution(resolution: Resolution?) = _state.updateAndSync { copy(resolution = resolution) }
 
     override fun setPixelFormat(pixelFormat: PixelFormat?) = _state.updateAndSync { copy(pixelFormat = pixelFormat) }
 
-    override fun setNoAudio(noAudio: Boolean) = _state.updateAndSync { copy(noAudio = noAudio) }
-
     override fun setNoSubtitle(noSubtitle: Boolean) = _state.updateAndSync { copy(noSubtitle = noSubtitle) }
 
     override fun setNoMetadata(noMetadata: Boolean) = _state.updateAndSync { copy(noMetadata = noMetadata) }
 
+    override fun setNoChapters(noChapters: Boolean) { _state.updateAndSync { copy(noChapters = noChapters) } }
+
     override fun pickFolder(title: String, fileName: String) {
-        val extension = _state.value.codec?.toFileExtension() ?: ""
+        val type = _state.value.type
+        val extension = when(type) {
+            MediaType.AUDIO -> _state.value.encoderAudio?.toFileExtension() ?: ""
+            MediaType.VIDEO -> _state.value.encoderVideo?.toFileExtension() ?: ""
+            else -> ""
+        }
 
         FileUtils.saveFile(title, fileName, extension)
             ?.let { _state.update { copy(output = it) } }
@@ -442,7 +481,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setHdr10ToSdr(enabled: Boolean) { _state.updateAndSync { copy(hdr10ToSdr = enabled) } }
 
-    private fun Codec?.toOutput(inputMedia: InputMedia): Pair<String, String>? {
+    private fun Encoder?.toOutput(inputMedia: InputMedia): Pair<String, String>? {
         var output: Pair<String, String>? = null
 
         if(this != null) {

@@ -9,6 +9,6 @@ import androidx.compose.ui.graphics.Color
 @Suppress("UnusedReceiverParameter")
 @Composable
 fun DividerDefaults.customColor(darkTheme: Boolean = isSystemInDarkTheme()): Color {
-    return if(darkTheme) MaterialTheme.colorScheme.surfaceContainer
-    else MaterialTheme.colorScheme.surfaceDim
+    return if(darkTheme) MaterialTheme.colorScheme.surfaceContainerHighest
+    else MaterialTheme.colorScheme.surfaceContainerHighest
 }

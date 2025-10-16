@@ -1,20 +1,29 @@
 package edneyosf.edconv.features.converter.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.features.common.models.Video
 import edneyosf.edconv.features.console.ui.ConsoleScreen
 import edneyosf.edconv.ffmpeg.common.*
 import edneyosf.edconv.features.converter.ConverterEvent
@@ -37,7 +46,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 
-private const val SLIDER_DENSITY = 0.7f
+private const val SLIDER_DENSITY = 0.6f
 
 @Composable
 fun ConverterScreen() {
@@ -57,6 +66,8 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val outputDir = output?.first?.let { File(it) }
     val outputFile = output?.second?.let { File(it) }
     val invalidOutputFile = outputFile?.extension?.isBlank() == true
+    val hasVideo = input?.videos?.isNotEmpty() == true
+    val hasAudio = input?.audios?.isNotEmpty() == true
 
     Column(
         modifier = Modifier.padding(all = dimens.md),
@@ -70,91 +81,186 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
             onStart = event::start,
             onStop = event::stop
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.weight(weight = 1f).verticalScroll(state = rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(space = dimens.xl)
         ) {
-            EncoderInput(
-                value = codec,
-                compression = compression,
-                mediaType = type,
-                onValueChange = event::setCodec,
-                onClick = { event.setCompression(null) }
-            )
-            CopyInput { event.setCompression(CompressionType.COPY) }
-            CBRInput(
-                mediaType = codec?.mediaType,
-                onClick = { event.setCompression(CompressionType.CBR) },
-                onValueChange = event::setBitrate
-            )
-            VBRInput(
-                onClick = { event.setCompression(CompressionType.VBR) },
-                onValueChange = event::setVbr
-            )
-            CRFInput(
-                onClick = { event.setCompression(CompressionType.CRF) },
-                onValueChange = event::setCrf
-            )
-        }
-        if(type == MediaType.AUDIO && compression != CompressionType.COPY) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                verticalArrangement = Arrangement.spacedBy(space = dimens.xl),
+            ) {
+                if(hasVideo) {
+                    MediaSection(
+                        imageVector = Icons.Rounded.Movie,
+                        title = strings[VIDEO]
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IndexInput(
+                                value = indexVideo?.takeIf { it >= 0 },
+                                max = input.videos.size,
+                                enabled = indexVideo != null && indexVideo >= 0,
+                                onValueChange = event::setIndexVideo,
+                                onClick = { event.setIndexVideo(0) }
+                            )
+                            AllIndexesInput(
+                                enabled = indexVideo == null,
+                                onClick = { event.setIndexVideo(null) }
+                            )
+                            DisableIndexInput(
+                                enabled = indexVideo == -1,
+                                onClick = { event.setIndexVideo(-1) }
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            EncoderInput(
+                                value = encoderVideo,
+                                compression = compressionTypeVideo,
+                                mediaType = MediaType.VIDEO,
+                                onValueChange = event::setEncoderVideo,
+                                onClick = { event.setCompressionTypeVideo(null) }
+                            )
+                            CopyInput(compressionType = compressionTypeVideo) {
+                                event.setCompressionTypeVideo(CompressionType.COPY)
+                            }
+                            CBRInput(
+                                encoder = encoderVideo,
+                                bitrate = bitrateVideo,
+                                compressionType = compressionTypeVideo,
+                                mediaType = encoderVideo?.mediaType,
+                                onClick = { event.setCompressionTypeVideo(CompressionType.CBR) },
+                                onValueChange = event::setBitrateVideo
+                            )
+                            CRFInput(
+                                onClick = { event.setCompressionTypeVideo(CompressionType.CRF) },
+                                onValueChange = event::setBitrateControlVideo
+                            )
+                        }
+                        if(compressionTypeVideo != CompressionType.COPY) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
+                            ) {
+                                ResolutionInput(
+                                    value = resolution,
+                                    onValueChange = event::setResolution
+                                )
+                                PixelFormatInput(
+                                    value = pixelFormat,
+                                    onValueChange = event::setPixelFormat
+                                )
+                                PresetInput(onValueChange = event::setPresetVideo)
+                            }
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
+                        ){
+                            CheckboxInput(
+                                checked = noSubtitle,
+                                label = strings[NO_SUBTITLE_INPUT],
+                                onCheckedChange = event::setNoSubtitle
+                            )
+                            CheckboxInput(
+                                checked = hdr10ToSdr,
+                                label = strings[HDR10_TO_SDR],
+                                onCheckedChange = event::setHdr10ToSdr
+                            )
+                        }
+                    }
+                }
+                if(hasAudio) {
+                    MediaSection(
+                        imageVector = Icons.Rounded.MusicNote,
+                        title = strings[AUDIO]
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IndexInput(
+                                value = indexAudio?.takeIf { it >= 0 },
+                                max = input.audios.size,
+                                enabled = indexAudio != null && indexAudio >= 0,
+                                onValueChange = event::setIndexAudio,
+                                onClick = { event.setIndexAudio(0) }
+                            )
+                            AllIndexesInput(
+                                enabled = indexAudio == null,
+                                onClick = { event.setIndexAudio(null) }
+                            )
+                            DisableIndexInput(
+                                enabled = indexAudio == -1,
+                                onClick = { event.setIndexAudio(-1) }
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            EncoderInput(
+                                value = encoderAudio,
+                                compression = compressionTypeAudio,
+                                mediaType = MediaType.AUDIO,
+                                onValueChange = event::setEncoderAudio,
+                                onClick = { event.setCompressionTypeAudio(null) }
+                            )
+                            CopyInput(compressionType = compressionTypeAudio) {
+                                event.setCompressionTypeAudio(CompressionType.COPY)
+                            }
+                            CBRInput(
+                                encoder = encoderAudio,
+                                bitrate = bitrateAudio,
+                                compressionType = compressionTypeAudio,
+                                mediaType = encoderAudio?.mediaType,
+                                onClick = { event.setCompressionTypeAudio(CompressionType.CBR) },
+                                onValueChange = event::setBitrateAudio
+                            )
+                            VBRInput(
+                                onClick = { event.setCompressionTypeAudio(CompressionType.VBR) },
+                                onValueChange = event::setBitrateControlAudio
+                            )
+                        }
+                        if(compressionTypeAudio != CompressionType.COPY) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
+                            ) {
+                                ChannelsInput(
+                                    value = channels,
+                                    onValueChange = event::setChannels
+                                )
+                                SampleRateInput(
+                                    value = sampleRate,
+                                    onValueChange = event::setSampleRate
+                                )
+                            }
+                        }
+                    }
+                }
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
             ) {
-                ChannelsInput(
-                    value = channels,
-                    onValueChange = event::setChannels
+                CheckboxInput(
+                    checked = noMetadata,
+                    label = strings[NO_METADATA_INPUT],
+                    onCheckedChange = event::setNoMetadata
                 )
-                SampleRateInput(
-                    value = sampleRate,
-                    onValueChange = event::setSampleRate
+                CheckboxInput(
+                    checked = noChapters,
+                    label = strings[NO_CHAPTERS],
+                    onCheckedChange = event::setNoChapters
                 )
             }
         }
-        else if(type == MediaType.VIDEO && compression != CompressionType.COPY) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
-            ) {
-                ResolutionInput(
-                    value = resolution,
-                    onValueChange = event::setResolution
-                )
-                PixelFormatInput(
-                    value = pixelFormat,
-                    onValueChange = event::setPixelFormat
-                )
-                PresetInput(onValueChange = event::setPreset)
-            }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
-        ) {
-            CheckboxInput(
-                checked = noMetadata,
-                label = strings[NO_METADATA_INPUT],
-                onCheckedChange = event::setNoMetadata
-            )
-            if(type == MediaType.VIDEO) {
-                CheckboxInput(
-                    checked = noAudio,
-                    label = strings[NO_AUDIO_INPUT],
-                    onCheckedChange = event::setNoAudio
-                )
-                CheckboxInput(
-                    checked = noSubtitle,
-                    label = strings[NO_SUBTITLE_INPUT],
-                    onCheckedChange = event::setNoSubtitle
-                )
-                CheckboxInput(
-                    checked = hdr10ToSdr,
-                    label = strings[HDR10_TO_SDR],
-                    onCheckedChange = event::setHdr10ToSdr
-                )
-            }
-        }
-        Spacer(modifier = Modifier.weight(weight = 1f))
         Progress(status)
         Row(
             horizontalArrangement = Arrangement.spacedBy(space = dimens.xs),
@@ -205,6 +311,36 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MediaSection(imageVector: ImageVector, title: String, content: (@Composable ColumnScope.() -> Unit)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .border(
+                border = BorderStroke(width = 1.5.dp, color = MaterialTheme.colorScheme.surfaceContainerHighest),
+                shape = RoundedCornerShape(size = dimens.sm)
+            ).padding(all = dimens.md)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = imageVector,
+                tint = MaterialTheme.colorScheme.tertiary,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(width = dimens.xs))
+            Text(
+                text = title,
+                style = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.tertiary)
+            )
+        }
+        Spacer(modifier = Modifier.height(height = dimens.sm))
+        Column(
+            verticalArrangement = Arrangement.spacedBy(space = dimens.sm),
+            content = content
+        )
     }
 }
 
@@ -298,18 +434,48 @@ private fun ConverterState.Actions(
 }
 
 @Composable
-private fun EncoderInput(
-    value: Codec?, compression: CompressionType?, mediaType: MediaType?,
-    onValueChange: (Codec) -> Unit, onClick: () -> Unit
-) {
+private fun IndexInput(value: Int?, max: Int, enabled: Boolean, onValueChange: (Int) -> Unit, onClick: () -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
-    val medias = Codec.getAll().filter {
-        it.mediaType == when(mediaType) {
-            MediaType.AUDIO -> MediaType.AUDIO
-            MediaType.VIDEO -> MediaType.VIDEO
-            else -> null
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        RadioButton(
+            selected = enabled,
+            onClick = onClick
+        )
+        Selector(
+            modifier = Modifier.width(width = 128.dp),
+            text = value?.toString() ?: "",
+            label = strings[INDEX],
+            enabled = value != null && value >= 0 && max > 0,
+            expanded = expanded,
+            onExpanded = { expanded = it }
+        ) {
+            for (index in 0..< max) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = index.toString(),
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onValueChange(index)
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun EncoderInput(
+    value: Encoder?, compression: CompressionType?, mediaType: MediaType?, onValueChange: (Encoder) -> Unit,
+    onClick: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(value = false) }
+    val encoders = Encoder.getAll().filter { it.mediaType == mediaType }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         if(value?.compressions?.isEmpty() == true) {
@@ -319,11 +485,11 @@ private fun EncoderInput(
             modifier = Modifier.width(width = 164.dp),
             text = value?.text ?: "",
             label = strings[ENCODER_INPUT],
-            enabled = medias.isNotEmpty(),
+            enabled = encoders.isNotEmpty(),
             expanded = expanded,
             onExpanded = { expanded = it }
         ) {
-            medias.forEach { item ->
+            encoders.forEach { item ->
                 DropdownMenuItem(
                     text = { Text(text = item.text) },
                     onClick = {
@@ -338,12 +504,12 @@ private fun EncoderInput(
 
 @Composable
 private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) -> Unit) {
-    if(codec?.compressions?.contains(CompressionType.VBR) == true && vbr != null) {
-        val minVBR = codec.minVBR
-        val maxVBR = codec.maxVBR
+    if(encoderAudio?.compressions?.contains(CompressionType.VBR) == true && bitrateControlAudio != null) {
+        val minVBR = encoderAudio.minVBR
+        val maxVBR = encoderAudio.maxVBR
 
         if(minVBR != null && maxVBR != null) {
-            val isVBR = CompressionType.VBR == compression
+            val isVBR = CompressionType.VBR == compressionTypeAudio
             val valueColor = MaterialTheme.colorScheme.run { if(isVBR) onSurface else onSurface.copy(alpha = 0.38f) }
 
             Column {
@@ -351,7 +517,7 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    if(codec.compressions.size > 1) {
+                    if(encoderAudio.compressions.size > 1) {
                         RadioButton(selected = isVBR, onClick = onClick)
                     }
                     Text(
@@ -362,7 +528,7 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                     )
                     Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
-                        text = vbr.toString(),
+                        text = bitrateControlAudio.toString(),
                         style = TextStyle(
                             color = valueColor,
                             fontWeight = FontWeight.Medium
@@ -372,7 +538,7 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
                 Box(modifier = Modifier.padding(start = 14.dp)) {
                     CompositionLocalProvider(LocalDensity provides Density(density = SLIDER_DENSITY)) {
                         Slider(
-                            value = vbr.toFloat(),
+                            value = bitrateControlAudio.toFloat(),
                             modifier = Modifier.width(width = 280.dp),
                             enabled = isVBR,
                             onValueChange = { onValueChange(it.toInt()) },
@@ -386,10 +552,13 @@ private fun ConverterState.VBRInput(onClick: () -> Unit, onValueChange: (Int) ->
 }
 
 @Composable
-private fun ConverterState.CBRInput(mediaType: MediaType?, onClick: () -> Unit, onValueChange: (Bitrate) -> Unit) {
-    if(codec?.compressions?.contains(CompressionType.CBR) == true) {
+private fun CBRInput(
+    encoder: Encoder?, compressionType: CompressionType?, bitrate: Bitrate?, mediaType: MediaType?, onClick: () -> Unit,
+    onValueChange: (Bitrate) -> Unit
+) {
+    if(encoder?.compressions?.contains(CompressionType.CBR) == true) {
         var expanded by remember { mutableStateOf(value = false) }
-        val isCBR = CompressionType.CBR == compression
+        val isCBR = CompressionType.CBR == compressionType
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(selected = isCBR, onClick = onClick)
@@ -416,32 +585,64 @@ private fun ConverterState.CBRInput(mediaType: MediaType?, onClick: () -> Unit, 
 }
 
 @Composable
-private fun ConverterState.CopyInput(onClick: () -> Unit) {
+private fun AllIndexesInput(enabled: Boolean, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         RadioButton(
-            selected = CompressionType.COPY == compression,
+            selected = enabled,
+            onClick = onClick
+        )
+        Text(
+            text = strings[INDEX_ALL],
+            style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+        )
+    }
+}
+
+@Composable
+private fun DisableIndexInput(enabled: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        RadioButton(
+            selected = enabled,
+            onClick = onClick
+        )
+        Text(
+            text = strings[INDEX_DISABLED],
+            style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+        )
+    }
+}
+
+@Composable
+private fun CopyInput(compressionType: CompressionType?, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        RadioButton(
+            selected = CompressionType.COPY == compressionType,
             onClick = onClick
         )
         Text(
             text = strings[COPY_INPUT],
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
         )
     }
 }
 
 @Composable
 private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) -> Unit) {
-    if(codec?.compressions?.contains(CompressionType.CRF) == true && crf != null) {
-        val minCRF = codec.minCRF
-        val maxCRF = codec.maxCRF
+    if(encoderVideo?.compressions?.contains(CompressionType.CRF) == true && bitrateControlVideo != null) {
+        val minCRF = encoderVideo.minCRF
+        val maxCRF = encoderVideo.maxCRF
 
         if(minCRF != null && maxCRF != null) {
-            val isCRF = CompressionType.CRF == compression
+            val isCRF = CompressionType.CRF == compressionTypeVideo
             val valueColor = MaterialTheme.colorScheme.run { if(isCRF) onSurface else onSurface.copy(alpha = 0.38f) }
 
             Column {
@@ -449,18 +650,14 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    if(codec.compressions.size > 1) {
-                        RadioButton(selected = isCRF, onClick = onClick)
-                    }
+                    if(encoderVideo.compressions.size > 1) RadioButton(selected = isCRF, onClick = onClick)
                     Text(
                         text = strings[CRF_INPUT],
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
                     )
                     Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
-                        text = crf.toString(),
+                        text = bitrateControlVideo.toString(),
                         style = TextStyle(
                             color = valueColor,
                             fontWeight = FontWeight.Medium
@@ -470,7 +667,7 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
                 Box(modifier = Modifier.padding(start = 14.dp)) {
                     CompositionLocalProvider(LocalDensity provides Density(density = SLIDER_DENSITY)) {
                         Slider(
-                            value = crf.toFloat(),
+                            value = bitrateControlVideo.toFloat(),
                             modifier = Modifier.width(width = 320.dp),
                             enabled = isCRF,
                             onValueChange = { onValueChange(it.toInt()) },
@@ -577,9 +774,9 @@ private fun ResolutionInput(value: Resolution?, onValueChange: (Resolution) -> U
 
 @Composable
 private fun ConverterState.PresetInput(onValueChange: (String?) -> Unit) {
-    if(codec != null && preset != null) {
-        val minPreset = codec.minPreset
-        val maxPreset = codec.maxPreset
+    if(encoderVideo != null && presetVideo != null) {
+        val minPreset = encoderVideo.minPreset
+        val maxPreset = encoderVideo.maxPreset
 
         if(minPreset != null && maxPreset != null) {
             Column {
@@ -592,7 +789,7 @@ private fun ConverterState.PresetInput(onValueChange: (String?) -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(width = dimens.xs))
                     Text(
-                        text = preset,
+                        text = presetVideo,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -601,10 +798,10 @@ private fun ConverterState.PresetInput(onValueChange: (String?) -> Unit) {
                 Spacer(modifier = Modifier.height(height = dimens.xs))
                 CompositionLocalProvider(LocalDensity provides Density(density = SLIDER_DENSITY)) {
                     Slider(
-                        value = codec.indexByPresetValue(value = preset)?.toFloat() ?: 0f,
+                        value = encoderVideo.indexByPresetValue(value = presetVideo)?.toFloat() ?: 0f,
                         modifier = Modifier.width(width = 320.dp),
-                        enabled = codec.mediaType == MediaType.VIDEO,
-                        onValueChange = { onValueChange(codec.presetValueByIndex(index = it.toInt())) },
+                        enabled = encoderVideo.mediaType == MediaType.VIDEO,
+                        onValueChange = { onValueChange(encoderVideo.presetValueByIndex(index = it.toInt())) },
                         valueRange = minPreset.toFloat() .. maxPreset.toFloat()
                     )
                 }
@@ -669,14 +866,15 @@ private fun ConverterState.canAddToQueue(command: String, invalidOutputFile: Boo
         output?.first.isNullOrBlank() ||
         output.second.isBlank() ||
         command.isBlank() ||
-        codec == null ||
+        (encoderAudio == null && encoderVideo == null) ||
         invalidOutputFile ||
         status is ConverterStatusState.Loading
     ) return false
 
     return when (type) {
-        MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
-        MediaType.VIDEO -> preset != null && crf != null
+        MediaType.AUDIO -> encoderAudio == null || encoderAudio.compressions.isEmpty()
+                || (bitrateAudio != null || bitrateControlAudio != null)
+        MediaType.VIDEO -> encoderVideo == null || presetVideo != null && bitrateControlVideo != null
         else -> false
     }
 }
@@ -687,14 +885,15 @@ private fun ConverterState.canStart(command: String, invalidOutputFile: Boolean)
         output.second.isBlank() ||
         command.isBlank() ||
         invalidOutputFile ||
-        codec == null ||
+        (encoderAudio == null && encoderVideo == null) ||
         status is ConverterStatusState.Loading ||
         status is ConverterStatusState.Progress
     ) return false
 
     return when (type) {
-        MediaType.AUDIO -> codec.compressions.isEmpty() || (bitrate != null || vbr != null)
-        MediaType.VIDEO -> preset != null && crf != null
+        MediaType.AUDIO -> encoderAudio == null || encoderAudio.compressions.isEmpty()
+                || (bitrateAudio != null || bitrateControlAudio != null)
+        MediaType.VIDEO -> encoderVideo == null || presetVideo != null && bitrateControlVideo != null
         else -> false
     }
 }
@@ -712,7 +911,9 @@ private fun DefaultPreview() {
             size = 123456L,
             sizeText = "123456",
             duration = 123456L,
-            durationText = "123456"
+            durationText = "123456",
+            videos = listOf(Video(width = 100, height = 100)),
+            audios = listOf(Audio(channels = 2))
         )
 
         ConverterState(
@@ -720,13 +921,15 @@ private fun DefaultPreview() {
             input = input,
             type = type,
             output = output,
-            codec = Codec.AV1,
-            preset = "4",
-            crf = 22,
-            compression = CompressionType.CRF,
+            encoderAudio = Encoder.OPUS,
+            encoderVideo = Encoder.AV1,
+            presetVideo = "4",
+            bitrateControlVideo = 22,
+            bitrateAudio = Bitrate.K384,
+            compressionTypeAudio = CompressionType.CBR,
+            compressionTypeVideo = CompressionType.CRF,
             resolution = Resolution.P1080,
             pixelFormat = PixelFormat.BIT_10,
-            noAudio = true
         ).Content(command = "Command", event = object : ConverterEvent {})
     }
 }

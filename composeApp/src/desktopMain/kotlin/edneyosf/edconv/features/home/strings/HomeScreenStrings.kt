@@ -17,8 +17,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
 
     override val pt = mapOf(
         TITLE_PICK_FILE to "Escolha um arquivo",
-        AUDIO_NAVIGATION_ITEM to "Áudio",
-        VIDEO_NAVIGATION_ITEM to "Vídeo",
+        MEDIA_NAVIGATION_ITEM to "Mídia",
         METRICS_NAVIGATION_ITEM to "Métricas",
         SELECT_MEDIA_FILE to "Selecionar mídia",
         SETTINGS to "Configurações"
@@ -26,8 +25,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
 
     override val en = mapOf(
         TITLE_PICK_FILE to "Choose a file",
-        AUDIO_NAVIGATION_ITEM to "Audio",
-        VIDEO_NAVIGATION_ITEM to "Video",
+        MEDIA_NAVIGATION_ITEM to "Media",
         METRICS_NAVIGATION_ITEM to "Metrics",
         SELECT_MEDIA_FILE to "Select media",
         SETTINGS to "Settings"
@@ -37,8 +35,7 @@ class HomeScreenStrings(override val language: String): Strings(language) {
 
     enum class Keys {
         TITLE_PICK_FILE,
-        AUDIO_NAVIGATION_ITEM,
-        VIDEO_NAVIGATION_ITEM,
+        MEDIA_NAVIGATION_ITEM,
         METRICS_NAVIGATION_ITEM,
         SELECT_MEDIA_FILE,
         SETTINGS

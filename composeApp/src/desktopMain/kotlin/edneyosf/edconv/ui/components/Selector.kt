@@ -27,11 +27,12 @@ fun Selector(
             value = text,
             readOnly = true,
             enabled = enabled,
+            maxLines = 1,
             onValueChange = {},
-            label = { Text(label) },
+            label = { Text(text = label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = TextFieldDefaults.colors().custom(),
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
         )
         ExposedDropdownMenu(
             expanded = expanded,

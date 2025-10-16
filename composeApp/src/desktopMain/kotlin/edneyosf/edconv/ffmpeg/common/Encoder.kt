@@ -4,7 +4,7 @@ import edneyosf.edconv.ffmpeg.av1.AV1Preset
 import edneyosf.edconv.ffmpeg.h264.H264Preset
 import edneyosf.edconv.ffmpeg.h265.H265Preset
 
-enum class Codec(
+enum class Encoder(
     val value: String, val text: String, val mediaType: MediaType, val compressions: List<CompressionType>,
     val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, val defaultVBR: Int? = null,
     val minVBR: Int? = null, val maxVBR: Int? = null, val defaultPreset: String? = null, val minPreset: Int? = null,

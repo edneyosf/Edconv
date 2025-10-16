@@ -40,7 +40,13 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         OUTPUT_SAVE_FILE to "Salvar arquivo",
         OUTPUT_TO to "Para:",
         CONSOLE to "Console",
-        HDR10_TO_SDR to "HDR10 para SDR"
+        HDR10_TO_SDR to "HDR10 para SDR",
+        VIDEO to "Vídeo",
+        AUDIO to "Áudio",
+        NO_CHAPTERS to "Sem capítulos",
+        INDEX to "Índice",
+        INDEX_ALL to "Todos",
+        INDEX_DISABLED to "Desabilitado"
     )
 
     override val en = mapOf(
@@ -68,7 +74,13 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         OUTPUT_SAVE_FILE to "Save file",
         OUTPUT_TO to "To:",
         CONSOLE to "Console",
-        HDR10_TO_SDR to "HDR10 to SDR"
+        HDR10_TO_SDR to "HDR10 to SDR",
+        VIDEO to "Video",
+        AUDIO to "Audio",
+        NO_CHAPTERS to "No chapters",
+        INDEX to "Index",
+        INDEX_ALL to "All",
+        INDEX_DISABLED to "Disabled"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -98,6 +110,12 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         OUTPUT_SAVE_FILE,
         OUTPUT_TO,
         CONSOLE,
-        HDR10_TO_SDR
+        HDR10_TO_SDR,
+        VIDEO,
+        AUDIO,
+        NO_CHAPTERS,
+        INDEX,
+        INDEX_ALL,
+        INDEX_DISABLED
     }
 }

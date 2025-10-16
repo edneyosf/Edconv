@@ -72,7 +72,7 @@ private fun HomeState.Content(event: HomeEvent) {
             when {
                 loading -> Loading(appVersion = version)
                 input == null -> NoMediaScreen(appVersion = version)
-                navigation is HomeNavigationState.Audio || navigation is HomeNavigationState.Video -> ConverterScreen()
+                navigation is HomeNavigationState.Media -> ConverterScreen()
                 navigation is HomeNavigationState.Metrics -> MetricsScreen()
             }
         }

@@ -51,11 +51,11 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         viewModelScope.launch {
             process.input.collectLatest {
                 val navigation = when(it?.type) {
-                    MediaType.AUDIO -> HomeNavigationState.Audio
-                    MediaType.VIDEO -> HomeNavigationState.Video
+                    MediaType.AUDIO, MediaType.VIDEO -> HomeNavigationState.Media
                     else -> HomeNavigationState.Initial
                 }
 
+                process.setInputType(it?.type)
                 setNavigation(navigation)
             }
         }
@@ -131,16 +131,7 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         }
     }
 
-    override fun setNavigation(state: HomeNavigationState) {
-        val mediaType = when(state) {
-            HomeNavigationState.Audio -> MediaType.AUDIO
-            HomeNavigationState.Video -> MediaType.VIDEO
-            else -> null
-        }
-
-        process.setInputType(mediaType)
-        _state.update { copy(navigation = state) }
-    }
+    override fun setNavigation(state: HomeNavigationState) { _state.update { copy(navigation = state) } }
 
     override fun setDialog(state: HomeDialogState) = _state.update { copy(dialog = state) }
 
