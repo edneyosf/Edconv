@@ -3,6 +3,7 @@ package edneyosf.edconv.ui.components
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -15,7 +16,7 @@ fun TextTooltip(text: String, content: @Composable (() -> Unit)) {
     val tooltipState = rememberTooltipState()
 
     TooltipBox(
-        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
         tooltip = { PlainTooltip { Text(text) } },
         state = tooltipState,
         content = content

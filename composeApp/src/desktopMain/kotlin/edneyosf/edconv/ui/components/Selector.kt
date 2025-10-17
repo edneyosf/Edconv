@@ -32,7 +32,7 @@ fun Selector(
             label = { Text(text = label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = TextFieldDefaults.colors().custom(),
-            modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+            modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable)
         )
         ExposedDropdownMenu(
             expanded = expanded,
