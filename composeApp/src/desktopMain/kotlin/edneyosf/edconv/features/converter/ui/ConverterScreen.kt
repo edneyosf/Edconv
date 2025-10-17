@@ -117,7 +117,10 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                             if(indexAudio != -1){
                                 DisableIndexInput(
                                     enabled = !videoEnabled,
-                                    onClick = { event.setIndexVideo(-1) }
+                                    onClick = {
+                                        event.setIndexAudio(0)
+                                        event.setIndexVideo(-1)
+                                    }
                                 )
                             }
                         }
@@ -199,7 +202,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                 onValueChange = event::setIndexAudio,
                                 onClick = { event.setIndexAudio(0) }
                             )
-                            if(input.audios.size > 1) {
+                            if(input.audios.size > 1 && indexVideo != -1) {
                                 AllIndexesInput(
                                     enabled = indexAudio == null,
                                     onClick = { event.setIndexAudio(null) }
