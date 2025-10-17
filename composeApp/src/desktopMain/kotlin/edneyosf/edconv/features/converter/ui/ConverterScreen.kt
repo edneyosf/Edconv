@@ -68,6 +68,8 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val invalidOutputFile = outputFile?.extension?.isBlank() == true
     val hasVideo = input?.videos?.isNotEmpty() == true
     val hasAudio = input?.audios?.isNotEmpty() == true
+    val videoEnabled = indexVideo != -1
+    val audioEnabled = indexAudio != -1
 
     Column(
         modifier = Modifier.padding(all = dimens.md),
@@ -106,72 +108,78 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                 onValueChange = event::setIndexVideo,
                                 onClick = { event.setIndexVideo(0) }
                             )
-                            AllIndexesInput(
-                                enabled = indexVideo == null,
-                                onClick = { event.setIndexVideo(null) }
-                            )
-                            DisableIndexInput(
-                                enabled = indexVideo == -1,
-                                onClick = { event.setIndexVideo(-1) }
-                            )
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            EncoderInput(
-                                value = encoderVideo,
-                                compression = compressionTypeVideo,
-                                mediaType = MediaType.VIDEO,
-                                onValueChange = event::setEncoderVideo,
-                                onClick = { event.setCompressionTypeVideo(null) }
-                            )
-                            CopyInput(compressionType = compressionTypeVideo) {
-                                event.setCompressionTypeVideo(CompressionType.COPY)
+                            if(input.videos.size > 1) {
+                                AllIndexesInput(
+                                    enabled = indexVideo == null,
+                                    onClick = { event.setIndexVideo(null) }
+                                )
                             }
-                            CBRInput(
-                                encoder = encoderVideo,
-                                bitrate = bitrateVideo,
-                                compressionType = compressionTypeVideo,
-                                mediaType = encoderVideo?.mediaType,
-                                onClick = { event.setCompressionTypeVideo(CompressionType.CBR) },
-                                onValueChange = event::setBitrateVideo
-                            )
-                            CRFInput(
-                                onClick = { event.setCompressionTypeVideo(CompressionType.CRF) },
-                                onValueChange = event::setBitrateControlVideo
-                            )
+                            if(indexAudio != -1){
+                                DisableIndexInput(
+                                    enabled = !videoEnabled,
+                                    onClick = { event.setIndexVideo(-1) }
+                                )
+                            }
                         }
-                        if(compressionTypeVideo != CompressionType.COPY) {
+                        if(videoEnabled) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                EncoderInput(
+                                    value = encoderVideo,
+                                    compression = compressionTypeVideo,
+                                    mediaType = MediaType.VIDEO,
+                                    onValueChange = event::setEncoderVideo,
+                                    onClick = { event.setCompressionTypeVideo(null) }
+                                )
+                                CopyInput(compressionType = compressionTypeVideo) {
+                                    event.setCompressionTypeVideo(CompressionType.COPY)
+                                }
+                                CBRInput(
+                                    encoder = encoderVideo,
+                                    bitrate = bitrateVideo,
+                                    compressionType = compressionTypeVideo,
+                                    mediaType = encoderVideo?.mediaType,
+                                    onClick = { event.setCompressionTypeVideo(CompressionType.CBR) },
+                                    onValueChange = event::setBitrateVideo
+                                )
+                                CRFInput(
+                                    onClick = { event.setCompressionTypeVideo(CompressionType.CRF) },
+                                    onValueChange = event::setBitrateControlVideo
+                                )
+                            }
+                            if(compressionTypeVideo != CompressionType.COPY) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
+                                ) {
+                                    ResolutionInput(
+                                        value = resolution,
+                                        onValueChange = event::setResolution
+                                    )
+                                    PixelFormatInput(
+                                        value = pixelFormat,
+                                        onValueChange = event::setPixelFormat
+                                    )
+                                    PresetInput(onValueChange = event::setPresetVideo)
+                                }
+                            }
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
-                            ) {
-                                ResolutionInput(
-                                    value = resolution,
-                                    onValueChange = event::setResolution
+                            ){
+                                CheckboxInput(
+                                    checked = noSubtitle,
+                                    label = strings[NO_SUBTITLE_INPUT],
+                                    onCheckedChange = event::setNoSubtitle
                                 )
-                                PixelFormatInput(
-                                    value = pixelFormat,
-                                    onValueChange = event::setPixelFormat
+                                CheckboxInput(
+                                    checked = hdr10ToSdr,
+                                    label = strings[HDR10_TO_SDR],
+                                    onCheckedChange = event::setHdr10ToSdr
                                 )
-                                PresetInput(onValueChange = event::setPresetVideo)
                             }
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
-                        ){
-                            CheckboxInput(
-                                checked = noSubtitle,
-                                label = strings[NO_SUBTITLE_INPUT],
-                                onCheckedChange = event::setNoSubtitle
-                            )
-                            CheckboxInput(
-                                checked = hdr10ToSdr,
-                                label = strings[HDR10_TO_SDR],
-                                onCheckedChange = event::setHdr10ToSdr
-                            )
                         }
                     }
                 }
@@ -191,55 +199,61 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                 onValueChange = event::setIndexAudio,
                                 onClick = { event.setIndexAudio(0) }
                             )
-                            AllIndexesInput(
-                                enabled = indexAudio == null,
-                                onClick = { event.setIndexAudio(null) }
-                            )
-                            DisableIndexInput(
-                                enabled = indexAudio == -1,
-                                onClick = { event.setIndexAudio(-1) }
-                            )
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            EncoderInput(
-                                value = encoderAudio,
-                                compression = compressionTypeAudio,
-                                mediaType = MediaType.AUDIO,
-                                onValueChange = event::setEncoderAudio,
-                                onClick = { event.setCompressionTypeAudio(null) }
-                            )
-                            CopyInput(compressionType = compressionTypeAudio) {
-                                event.setCompressionTypeAudio(CompressionType.COPY)
+                            if(input.audios.size > 1) {
+                                AllIndexesInput(
+                                    enabled = indexAudio == null,
+                                    onClick = { event.setIndexAudio(null) }
+                                )
                             }
-                            CBRInput(
-                                encoder = encoderAudio,
-                                bitrate = bitrateAudio,
-                                compressionType = compressionTypeAudio,
-                                mediaType = encoderAudio?.mediaType,
-                                onClick = { event.setCompressionTypeAudio(CompressionType.CBR) },
-                                onValueChange = event::setBitrateAudio
-                            )
-                            VBRInput(
-                                onClick = { event.setCompressionTypeAudio(CompressionType.VBR) },
-                                onValueChange = event::setBitrateControlAudio
-                            )
+                            if(indexVideo != -1){
+                                DisableIndexInput(
+                                    enabled = !audioEnabled,
+                                    onClick = { event.setIndexAudio(-1) }
+                                )
+                            }
                         }
-                        if(compressionTypeAudio != CompressionType.COPY) {
+                        if(audioEnabled) {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
-                            ) {
-                                ChannelsInput(
-                                    value = channels,
-                                    onValueChange = event::setChannels
+                                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                EncoderInput(
+                                    value = encoderAudio,
+                                    compression = compressionTypeAudio,
+                                    mediaType = MediaType.AUDIO,
+                                    onValueChange = event::setEncoderAudio,
+                                    onClick = { event.setCompressionTypeAudio(null) }
                                 )
-                                SampleRateInput(
-                                    value = sampleRate,
-                                    onValueChange = event::setSampleRate
+                                CopyInput(compressionType = compressionTypeAudio) {
+                                    event.setCompressionTypeAudio(CompressionType.COPY)
+                                }
+                                CBRInput(
+                                    encoder = encoderAudio,
+                                    bitrate = bitrateAudio,
+                                    compressionType = compressionTypeAudio,
+                                    mediaType = encoderAudio?.mediaType,
+                                    onClick = { event.setCompressionTypeAudio(CompressionType.CBR) },
+                                    onValueChange = event::setBitrateAudio
                                 )
+                                VBRInput(
+                                    onClick = { event.setCompressionTypeAudio(CompressionType.VBR) },
+                                    onValueChange = event::setBitrateControlAudio
+                                )
+                            }
+                            if(compressionTypeAudio != CompressionType.COPY) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
+                                ) {
+                                    ChannelsInput(
+                                        value = channels,
+                                        onValueChange = event::setChannels
+                                    )
+                                    SampleRateInput(
+                                        value = sampleRate,
+                                        onValueChange = event::setSampleRate
+                                    )
+                                }
                             }
                         }
                     }
@@ -471,8 +485,8 @@ private fun IndexInput(value: Int?, max: Int, enabled: Boolean, onValueChange: (
 
 @Composable
 private fun EncoderInput(
-    value: Encoder?, compression: CompressionType?, mediaType: MediaType?, onValueChange: (Encoder) -> Unit,
-    onClick: () -> Unit
+    value: Encoder?, compression: CompressionType?, mediaType: MediaType?,
+    onValueChange: (Encoder) -> Unit, onClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(value = false) }
     val encoders = Encoder.getAll().filter { it.mediaType == mediaType }

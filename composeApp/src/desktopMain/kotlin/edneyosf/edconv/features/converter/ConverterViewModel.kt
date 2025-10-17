@@ -69,6 +69,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
             onProgress = ::onProgress
         )
         observeEncoders()
+        observeIndexes()
         observeInput()
         observeQueue()
     }
@@ -101,11 +102,33 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             presetVideo = video?.defaultPreset,
                             compressionTypeVideo = video?.compressions?.firstOrNull()
                         )
-                        val encoder = if(type == MediaType.AUDIO) audio else video
+                        val encoder = type?.currentEncoder(
+                            indexVideo = indexVideo,
+                            encoderVideo = video,
+                            encoderAudio = audio
+                        )
 
                         if(input != null) newState.copy(output = encoder?.toOutput(inputMedia = input))
                         else newState
                     }
+                }
+        }
+    }
+
+    private fun observeIndexes() {
+        viewModelScope.launch {
+            _state.map { it.indexAudio to it.indexVideo }
+                .distinctUntilChanged()
+                .collectLatest { (audio, video) ->
+                    val state = _state.value
+                    val input = state.input
+                    val encoder = state.type?.currentEncoder(
+                        indexVideo = video,
+                        encoderVideo = state.encoderVideo,
+                        encoderAudio = state.encoderAudio
+                    )
+
+                    if(input != null) _state.update { copy(output = encoder?.toOutput(inputMedia = input)) }
                 }
         }
     }
@@ -131,21 +154,24 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
                 val newEncoderAudio = encoderAudio ?: Encoder.OPUS
                 val newEncoderVideo = encoderVideo ?: Encoder.AV1
-                val newOutput = if(newType == MediaType.AUDIO)
-                    newEncoderAudio.toOutput(inputMedia = newInput)
-                else
-                    newEncoderVideo.toOutput(inputMedia = newInput)
+                val newEncoder = type?.currentEncoder(
+                    indexVideo = indexVideo,
+                    encoderVideo = newEncoderVideo,
+                    encoderAudio = newEncoderAudio
+                )
 
                 copy(
                     input = newInput,
                     type = newType,
+                    indexVideo = if(newInput.videos.isEmpty()) -1 else 0,
+                    indexAudio = if(newInput.audios.isEmpty()) -1 else 0,
                     encoderAudio = newEncoderAudio,
                     encoderVideo = newEncoderVideo,
                     resolution = newResolution,
                     pixelFormat = newPixelFormat,
                     channels = newChannels,
                     sampleRate = newSampleRate,
-                    output = newOutput
+                    output = newEncoder.toOutput(inputMedia = newInput)
                 )
             }
         }
@@ -204,7 +230,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
                     val streamVideo = input?.videos?.firstOrNull()
                     val streamAudio = input?.audios?.firstOrNull()
-                    var inputChannels: Int? = null
+                    var inputChannels: Int?
                     var customChannelsArgs: List<String>? = null
 
                     if(streamAudio != null && encoderAudio != null) {
@@ -480,6 +506,14 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     }
 
     override fun setHdr10ToSdr(enabled: Boolean) { _state.updateAndSync { copy(hdr10ToSdr = enabled) } }
+
+    private fun MediaType.currentEncoder(indexVideo: Int?, encoderVideo: Encoder?, encoderAudio: Encoder?) =
+        when {
+            this == MediaType.VIDEO && indexVideo == -1 -> encoderAudio
+            this == MediaType.AUDIO -> encoderAudio
+            this == MediaType.VIDEO -> encoderVideo
+            else -> encoderVideo
+        }
 
     private fun Encoder?.toOutput(inputMedia: InputMedia): Pair<String, String>? {
         var output: Pair<String, String>? = null
