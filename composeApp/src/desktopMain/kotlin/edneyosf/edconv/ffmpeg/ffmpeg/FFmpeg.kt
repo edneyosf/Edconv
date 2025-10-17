@@ -7,8 +7,8 @@ import edneyosf.edconv.ffmpeg.ffmpeg.extensions.addCmd
 class FFmpeg private constructor(
     val logLevel: String,
     val mediaType: MediaType,
-    val indexVideo: Int? = null,
-    val indexAudio: Int? = null,
+    val indexVideo: Int? = -1,
+    val indexAudio: Int? = -1,
     val encoderAudio: String? = null,
     val encoderVideo: String? = null,
     var bitrateAudio: String? = null,
@@ -25,7 +25,8 @@ class FFmpeg private constructor(
     val noSubtitle: Boolean = false,
     val noMetadata: Boolean = false,
     val noChapters: Boolean = false,
-    val custom: List<String>? = null,
+    val customAudio: List<String>? = null,
+    val customVideo: List<String>? = null,
     val uncompressedVideo: Boolean = false,
     val uncompressedAudio: Boolean = false
 ) {
@@ -51,7 +52,7 @@ class FFmpeg private constructor(
                 filterAudio = filter,
                 noMetadata = noMetadata,
                 noChapters = noChapters,
-                custom = custom
+                customAudio = custom
             )
         }
 
@@ -61,8 +62,8 @@ class FFmpeg private constructor(
             bitrateControlVideo: Int?, bitrateControlAudio: Int?, bitrateVideo: String?, bitrateAudio: String?,
             profileVideo: String? = null, pixelFormat: String? = null, filterVideo: String? = null,
             filterAudio: String? = null, sampleRate: String? = null, channels: String? = null,
-            noSubtitle: Boolean = false, noMetadata: Boolean = false, custom: List<String>? = null,
-            noChapters: Boolean = false
+            noSubtitle: Boolean = false, noMetadata: Boolean = false, customVideo: List<String>? = null,
+            customAudio: List<String>? = null, noChapters: Boolean = false
         ): FFmpeg {
 
             return FFmpeg(
@@ -88,67 +89,65 @@ class FFmpeg private constructor(
                 noSubtitle = noSubtitle,
                 noMetadata = noMetadata,
                 noChapters = noChapters,
-                custom = custom
+                customAudio = customAudio,
+                customVideo = customVideo
             )
         }
     }
 
     fun build(): String {
         val data = mutableListOf<String>()
+        val noAudio = indexAudio == -1
 
         data.addCmd(param = FFmpegArgs.LOG_LEVEL, value = logLevel)
         data.add(FFmpegArgs.STATS)
+
         if(isVideo() && !noSubtitle) data.addCmd(param = FFmpegArgs.MAP, value = "0:s?")
 
         if(indexVideo != -1) {
             data.addCmd(param = FFmpegArgs.MAP, value = if(indexVideo == null) "0:v" else "0:v:$indexVideo")
 
             if(!uncompressedVideo) {
+                data.addCmd(param = FFmpegArgs.FILTER_VIDEO, value = filterVideo)
                 data.addCmd(param = FFmpegArgs.ENCODER_VIDEO, value = encoderVideo)
                 data.addCmd(param = FFmpegArgs.BITRATE_VIDEO, value = bitrateVideo)
                 data.addCmd(param = FFmpegArgs.PRESET, value = presetVideo)
                 data.addCmd(param = FFmpegArgs.CRF, value = bitrateControlVideo?.toString())
                 data.addCmd(param = FFmpegArgs.PROFILE_VIDEO, value = profileVideo)
                 data.addCmd(param = FFmpegArgs.PIXEL_FORMAT, value = pixelFormat)
-                data.addCmd(param = FFmpegArgs.FILTER_VIDEO, value = filterVideo)
+                customVideo?.let { data.addAll(customVideo) }
             }
             else {
                 data.addCmd(param = FFmpegArgs.ENCODER_VIDEO, value = FFmpegArgs.COPY)
             }
-        }
-        else {
-            data.addCmd(param = FFmpegArgs.MAP, value = "-0:v")
         }
 
         if(indexAudio != -1) {
             data.addCmd(param = FFmpegArgs.MAP, value = if(indexAudio == null) "0:a" else "0:a:$indexAudio")
 
             if(!uncompressedAudio) {
+                data.addCmd(param = FFmpegArgs.FILTER_AUDIO, value = filterAudio)
                 data.addCmd(param = FFmpegArgs.ENCODER_AUDIO, value = encoderAudio)
                 data.addCmd(param = FFmpegArgs.BITRATE_AUDIO, value = bitrateAudio)
                 data.addCmd(param = FFmpegArgs.VBR, value = bitrateControlAudio?.toString())
                 data.addCmd(param = FFmpegArgs.SAMPLE_RATE, value = sampleRate)
                 data.addCmd(param = FFmpegArgs.CHANNELS, value = channels)
-                data.addCmd(param = FFmpegArgs.FILTER_AUDIO, value = filterAudio)
+                customAudio?.let { data.addAll(customAudio) }
             }
             else {
                 data.addCmd(param = FFmpegArgs.ENCODER_AUDIO, value = FFmpegArgs.COPY)
             }
         }
-        else {
-            data.addCmd(param = FFmpegArgs.MAP, value = "-0:a")
-        }
-
-        if(noSubtitle) data.add(FFmpegArgs.NO_SUBTITLE)
-        if(noMetadata) data.addCmd(param = FFmpegArgs.MAP_METADATA, value = "-1")
-        if(noChapters) data.addCmd(param = FFmpegArgs.MAP_CHAPTERS, value = "-1")
-
-        custom?.let { data.addAll(custom) }
 
         if(isVideo() && !noSubtitle) data.addCmd(param = FFmpegArgs.ENCODER_SUBTITLES, value = FFmpegArgs.COPY)
+
+        if(isVideo() && noAudio) data.add(FFmpegArgs.NO_AUDIO)
+        if(isVideo() && noSubtitle) data.add(FFmpegArgs.NO_SUBTITLE)
+        if(noMetadata) data.addCmd(param = FFmpegArgs.MAP_METADATA, value = "-1")
+        if(noChapters) data.addCmd(param = FFmpegArgs.MAP_CHAPTERS, value = "-1")
 
         return data.joinToString(separator = " ")
     }
 
-    private fun isVideo() = mediaType == MediaType.VIDEO
+    private fun isVideo() = mediaType == MediaType.VIDEO && indexVideo != -1
 }

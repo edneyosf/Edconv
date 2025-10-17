@@ -266,7 +266,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             sampleRate = sampleRate?.value,
                             channels = channels?.value,
                             filterVideo = filterVideo,
-                            custom = customChannelsArgs,
+                            customVideo = null,
+                            customAudio = customChannelsArgs,
                             noSubtitle = noSubtitle,
                             noChapters = noChapters,
                             noMetadata = noMetadata

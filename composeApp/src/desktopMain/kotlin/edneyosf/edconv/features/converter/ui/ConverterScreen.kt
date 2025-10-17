@@ -101,14 +101,14 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IndexInput(
-                                value = indexVideo?.takeIf { it >= 0 },
-                                max = input.videos.size,
-                                enabled = indexVideo != null && indexVideo >= 0,
-                                onValueChange = event::setIndexVideo,
-                                onClick = { event.setIndexVideo(0) }
-                            )
                             if(input.videos.size > 1) {
+                                IndexInput(
+                                    value = indexVideo?.takeIf { it >= 0 },
+                                    max = input.videos.size,
+                                    enabled = indexVideo != null && indexVideo >= 0,
+                                    onValueChange = event::setIndexVideo,
+                                    onClick = { event.setIndexVideo(0) }
+                                )
                                 AllIndexesInput(
                                     enabled = indexVideo == null,
                                     onClick = { event.setIndexVideo(null) }
@@ -195,13 +195,15 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IndexInput(
-                                value = indexAudio?.takeIf { it >= 0 },
-                                max = input.audios.size,
-                                enabled = indexAudio != null && indexAudio >= 0,
-                                onValueChange = event::setIndexAudio,
-                                onClick = { event.setIndexAudio(0) }
-                            )
+                            if(input.audios.size > 1) {
+                                IndexInput(
+                                    value = indexAudio?.takeIf { it >= 0 },
+                                    max = input.audios.size,
+                                    enabled = indexAudio != null && indexAudio >= 0,
+                                    onValueChange = event::setIndexAudio,
+                                    onClick = { event.setIndexAudio(0) }
+                                )
+                            }
                             if(input.audios.size > 1 && indexVideo != -1) {
                                 AllIndexesInput(
                                     enabled = indexAudio == null,
