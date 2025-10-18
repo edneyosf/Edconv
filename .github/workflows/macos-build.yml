@@ -28,13 +28,9 @@ jobs:
       - name: Build .dmg with Gradle
         run: ./gradlew packageReleaseDmg --no-build-cache
 
-      - name: Build .pkg with Gradle
-        run: ./gradlew packageReleasePkg --no-build-cache
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-release
           path: |
             composeApp/build/compose/binaries/main-release/dmg/*.dmg
-            composeApp/build/compose/binaries/main-release/pkg/*.pkg
