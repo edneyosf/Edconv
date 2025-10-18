@@ -53,8 +53,7 @@ compose.desktop {
                 TargetFormat.Msi,
                 TargetFormat.Deb,
                 TargetFormat.Rpm,
-                TargetFormat.Dmg,
-                TargetFormat.Pkg
+                TargetFormat.Dmg
             )
             packageName = appName
             packageVersion = appVersion
