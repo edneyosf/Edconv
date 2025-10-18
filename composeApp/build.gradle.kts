@@ -48,7 +48,14 @@ compose.desktop {
         nativeDistributions {
             val resourceDir = File("resources")
 
-            targetFormats(TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
+            targetFormats(
+                TargetFormat.Exe,
+                TargetFormat.Msi,
+                TargetFormat.Deb,
+                TargetFormat.Rpm,
+                TargetFormat.Dmg,
+                TargetFormat.Pkg
+            )
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
@@ -59,6 +66,7 @@ compose.desktop {
 
             linux { iconFile.set(resourceDir.resolve("icon.png")) }
             windows { iconFile.set(resourceDir.resolve("icon.ico")) }
+            macOS { iconFile.set(resourceDir.resolve("icon.icns")) }
         }
     }
 }
