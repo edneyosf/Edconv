@@ -1,0 +1,37 @@
+app-id: com.edneyosf.edconv
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: edconv
+finish-args:
+  - --socket=x11
+  - --socket=wayland
+  - --share=network
+  - --share=ipc
+  - --device=dri
+  - --filesystem=home
+  - --filesystem=xdg-download
+  - --filesystem=xdg-videos
+
+modules:
+  - name: edconv-app
+    buildsystem: simple
+    sources:
+      - type: dir
+        path: composeApp/build/compose/binaries/main/
+      - type: file
+        path: com.edneyosf.edconv.desktop
+      - type: dir
+        path: assets/
+    build-commands:
+      - install -Dm755 app/edconv/bin/edconv /app/bin/edconv.real
+      - cp -r app/edconv/lib/ /app
+      - sh -c "echo '#!/bin/bash' > /app/bin/edconv"
+      - sh -c "echo 'export JAVA_HOME=/app/lib/runtime/lib' >> /app/bin/edconv"
+      - sh -c "echo 'exec /app/bin/edconv.real \"\$@\"' >> /app/bin/edconv"
+      - install -Dm644 app/edconv/lib/app/edconv.cfg /app/lib/app/edconv.real.cfg
+      - chmod +x /app/bin/edconv
+      - install -Dm644 com.edneyosf.edconv.desktop /app/share/applications/com.edneyosf.edconv.desktop
+      - install -Dm644 icons/hicolor/512x512/apps/edconv.png /app/share/icons/hicolor/512x512/apps/com.edneyosf.edconv.png
+      - sed -i 's|Exec=.*|Exec=edconv|' /app/share/applications/com.edneyosf.edconv.desktop
+      - sed -i 's|Icon=.*|Icon=com.edneyosf.edconv|' /app/share/applications/com.edneyosf.edconv.desktop

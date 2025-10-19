@@ -49,6 +49,12 @@ sudo dpkg -i edconv_x.x.x.deb
 ```bash
 sudo dnf install edconv_x.x.x.rpm
 ```
+#### Flatpak:
+```bash
+git clone https://github.com/edneyosf/Edconv
+cd Edconv
+flatpak-builder --user --install build com.edneyosf.edconv.yml --force-clean
+```
 
 #### Windows:  
 

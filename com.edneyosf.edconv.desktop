@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Edconv
+Comment=A user-friendly interface that simplifies the power of FFmpeg. It's designed for fast and efficient conversion of video and audio files.
+Exec=edconv
+Icon=com.edneyosf.edconv
+Terminal=false
+Type=Application
+Categories=Utility;Multimedia;
+StartupWMClass=edconv
