@@ -147,7 +147,7 @@ tasks.register("createDeb") {
 }
 
 tasks.named<io.github.jwharm.flatpakgradlegenerator.FlatpakGradleGeneratorTask>(name = "flatpakGradleGenerator") {
-    outputFile.set(file(path = "flatpak-sources.json"))
+    outputFile.set(file(path = "../assets/flatpak-sources.json"))
     downloadDirectory.set("./offline-repository")
     excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }
