@@ -40,11 +40,11 @@ On first launch, Edconv will prompt you to select your local FFmpeg binary.
 
 Download the latest release for your system from the [Releases page](https://github.com/edneyosf/edconv/releases):
 
-#### Windows:
+### Windows:
 
 Run the installer as administrator and follow the installation steps.
 
-#### AppImage
+### AppImage
 
 Before running the AppImage, ensure it has execution permissions. Open a terminal and run:
 
@@ -58,12 +58,12 @@ Run the AppImage from the terminal:
 ./edconv-x.x.x-x86_64.AppImage
 ```
 
-#### Debian-based systems:  
+### Debian-based systems:  
 ```bash
 sudo dpkg -i edconv_x.x.x.deb
 ```
 
-#### RPM-based systems:
+### RPM-based systems:
 ```bash
 sudo dnf install edconv_x.x.x.rpm
 ```
