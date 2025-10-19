@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.flatpakGenerator)
 }
 
 kotlin {
@@ -143,4 +144,10 @@ tasks.register("createDeb") {
 
         println(".deb generated at: ${outputDeb.absolutePath}")
     }
+}
+
+tasks.named<io.github.jwharm.flatpakgradlegenerator.FlatpakGradleGeneratorTask>(name = "flatpakGradleGenerator") {
+    outputFile.set(file(path = "flatpak-sources.json"))
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }

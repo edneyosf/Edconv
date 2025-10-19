@@ -5,6 +5,7 @@ kotlinx-coroutines = "1.10.2"
 serialization-json = "1.9.0"
 viewmodel = "2.9.4"
 koin = "4.1.1"
+flatpak-generator = "1.5.0"
 
 [libraries]
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
@@ -19,3 +20,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-mu
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+flatpakGenerator = { id = "io.github.jwharm.flatpak-gradle-generator", version.ref = "flatpak-generator" }
