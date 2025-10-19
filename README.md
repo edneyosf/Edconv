@@ -42,7 +42,7 @@ Download the latest release for your system from the [Releases page](https://git
 
 #### Debian-based systems:  
 ```bash
-sudo dpkg -i edconv_x.x.x.deb
+sudo apt install edconv_x.x.x.deb
 ```
 
 #### RPM-based systems:
