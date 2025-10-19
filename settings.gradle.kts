@@ -3,6 +3,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
+        maven(url = "./offline-repository")
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -12,12 +13,12 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        maven(url = "./offline-repository")
     }
 }
 
 dependencyResolutionManagement {
     repositories {
+        maven(url = "./offline-repository")
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -26,7 +27,6 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
-        maven(url = "./offline-repository")
     }
 }
 
