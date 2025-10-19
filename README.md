@@ -21,10 +21,10 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 
 - Convert video and audio using FFmpeg
 - Custom FFmpeg arguments
-- Clean, intuitive interface
+- Console mode (viewing logs at runtime)
+- Queue
 - Media Information
 - VMAF, PSNR and SSIM perceptual video quality assessment algorithm
-- Conversion queue
 
 ## Screenshots
 
