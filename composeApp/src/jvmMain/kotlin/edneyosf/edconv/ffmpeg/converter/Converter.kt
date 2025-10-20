@@ -72,10 +72,39 @@ class Converter(
     }
 
     private fun String.normalize(): Array<String> {
-        val regex = Regex(pattern = "\\s+")
-        val data = this.split(regex)
-        val filtered = data.filter { it.isNotBlank() }
+        val parts = mutableListOf<String>()
+        val cur = StringBuilder()
+        var inSingle = false
+        var inDouble = false
+        var escape = false
 
-        return filtered.toTypedArray()
+        for (ch in this) {
+            if (escape) {
+                cur.append(ch)
+                escape = false
+                continue
+            }
+
+            when (ch) {
+                '\\' -> escape = true
+                '"' -> if (!inSingle) inDouble = !inDouble else cur.append(ch)
+                '\'' -> if (!inDouble) inSingle = !inSingle else cur.append(ch)
+                else -> {
+                    if (ch.isWhitespace() && !inSingle && !inDouble) {
+                        if (cur.isNotEmpty()) {
+                            parts.add(cur.toString())
+                            cur.setLength(0)
+                        }
+                    } else {
+                        cur.append(ch)
+                    }
+                }
+            }
+        }
+
+        if (escape) cur.append('\\')
+        if (cur.isNotEmpty()) parts.add(cur.toString())
+
+        return parts.toTypedArray()
     }
 }
