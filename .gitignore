@@ -16,4 +16,4 @@ captures
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
-./gradle/wrapper/gradle-8.9-bin.zip
+gradle/wrapper/gradle-8.9-bin.zip
