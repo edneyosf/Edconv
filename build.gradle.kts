@@ -1,7 +1,6 @@
-/*plugins {
-    alias(libs.plugins.composeMultiplatform) apply false
-    alias(libs.plugins.composeCompiler) apply false
-    alias(libs.plugins.kotlinMultiplatform) apply false
-    alias(libs.plugins.serialization) apply false
-    alias(libs.plugins.flatpakGenerator) apply false
-}*/
+plugins {
+    alias(libs.plugins.compose) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+}

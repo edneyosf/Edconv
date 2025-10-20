@@ -7,11 +7,10 @@ val appDescriptionEn: String by project
 val appDescriptionPt: String by project
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.serialization)
-    alias(libs.plugins.flatpakGenerator)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -26,9 +25,9 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(compose.materialIconsExtended)
-            implementation(libs.serialization.json)
-            implementation(libs.viewmodelCompose)
-            implementation(libs.runtimeCompose)
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.lifecycle.runtime.compose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
@@ -142,10 +141,4 @@ tasks.register("createDeb") {
 
         println(".deb generated at: ${outputDeb.absolutePath}")
     }
-}
-
-tasks.named<io.github.jwharm.flatpakgradlegenerator.FlatpakGradleGeneratorTask>(name = "flatpakGradleGenerator") {
-    outputFile.set(file(path = "../assets/flatpak-sources.json"))
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }
