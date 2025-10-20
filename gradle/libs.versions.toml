@@ -1,7 +1,6 @@
 [versions]
 compose-multiplatform = "1.9.1"
 androidx-lifecycle = "2.9.4"
-composeHotReload = "1.0.0-beta07"
 kotlin = "2.2.20"
 kotlinx-coroutines = "1.10.2"
 serialization-json = "1.9.0"
@@ -18,7 +17,6 @@ koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = 
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
 
 [plugins]
-composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
