@@ -21,10 +21,10 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 
 - Convert video and audio using FFmpeg
 - Custom FFmpeg arguments
-- Clean, intuitive interface
+- Console mode (viewing logs at runtime)
+- Queue
 - Media Information
 - VMAF, PSNR and SSIM perceptual video quality assessment algorithm
-- Conversion queue
 
 ## Screenshots
 
@@ -40,19 +40,33 @@ On first launch, Edconv will prompt you to select your local FFmpeg binary.
 
 Download the latest release for your system from the [Releases page](https://github.com/edneyosf/edconv/releases):
 
-#### Debian-based systems:  
+### Windows:
+
+Run the installer as administrator and follow the installation steps.
+
+### AppImage
+
+Before running the AppImage, ensure it has execution permissions. Open a terminal and run:
+
+```bash
+chmod +x edconv-x.x.x-x86_64.AppImage
+```
+
+Run the AppImage from the terminal:
+
+```bash
+./edconv-x.x.x-x86_64.AppImage
+```
+
+### Debian-based systems:  
 ```bash
 sudo apt install edconv_x.x.x.deb
 ```
 
-#### RPM-based systems:
+### RPM-based systems:
 ```bash
 sudo dnf install edconv_x.x.x.rpm
 ```
-
-#### Windows:  
-
-Run the installer as administrator and follow the installation steps.
 
 ## Support & Donations
 
