@@ -25,5 +25,8 @@ jobs:
       with:
         cache-disabled: true
 
+    - name: Download Gradle Wrapper
+      run: wget -nc -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -P ./gradle/wrapper/
+
     - name: Check with Gradle Wrapper
       run: ./gradlew check
