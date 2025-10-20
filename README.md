@@ -60,7 +60,7 @@ Run the AppImage from the terminal:
 
 ### Debian-based systems:  
 ```bash
-sudo dpkg -i edconv_x.x.x.deb
+sudo apt install ./edconv_x.x.x.deb
 ```
 
 ### RPM-based systems:
