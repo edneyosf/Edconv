@@ -17,3 +17,5 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 gradle/wrapper/gradle-8.9-bin.zip
+.AppImage
+.flatpak
