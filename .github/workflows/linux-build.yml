@@ -4,36 +4,31 @@ on:
   push:
     tags:
       - '*.*.*'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-    - name: Checkout source
-      uses: actions/checkout@v4
-    
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-      with:
-        cache-disabled: true
+      - name: Build .deb with Gradle
+        run: ./gradlew createDeb --no-build-cache
 
-    - name: Build .deb with Gradle
-      run: ./gradlew createDeb --no-build-cache
+      - name: Build .rpm with Gradle
+        run: ./gradlew packageReleaseRpm --no-build-cache
 
-    - name: Build .rpm with Gradle
-      run: ./gradlew packageReleaseRpm --no-build-cache
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-release
-        path: |
-          composeApp/build/compose/binaries/main-release/deb/*.deb
-          composeApp/build/compose/binaries/main-release/rpm/*.rpm
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: |
+            composeApp/build/compose/binaries/main-release/deb/*.deb
+            composeApp/build/compose/binaries/main-release/rpm/*.rpm

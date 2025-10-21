@@ -5,28 +5,23 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-    - name: Checkout source
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-      with:
-        cache-disabled: true
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Download Gradle Wrapper
-      run: wget -nc -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -P ./gradle/wrapper/
+      - name: Download Gradle Wrapper
+        run: wget -nc -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -P ./gradle/wrapper/
 
-    - name: Check with Gradle Wrapper
-      run: ./gradlew check
+      - name: Check with Gradle Wrapper
+        run: ./gradlew check
