@@ -28,7 +28,9 @@ class FFmpeg private constructor(
     val customAudio: List<String>? = null,
     val customVideo: List<String>? = null,
     val uncompressedVideo: Boolean = false,
-    val uncompressedAudio: Boolean = false
+    val uncompressedAudio: Boolean = false,
+    val titleVideo: String? = null,
+    val titleAudio: String? = null
 ) {
 
     companion object {
@@ -36,7 +38,7 @@ class FFmpeg private constructor(
             logLevel: String, indexAudio: Int?, encoder: String, compressionType: CompressionType?,
             sampleRate: String? = null, bitrateControl: Int?, bitrate: String?, channels: String? = null,
             filter: String? = null, noMetadata: Boolean = false, custom: List<String>? = null,
-            noChapters: Boolean = false
+            noChapters: Boolean = false, title: String? = null
         ): FFmpeg {
 
             return FFmpeg(
@@ -52,7 +54,8 @@ class FFmpeg private constructor(
                 filterAudio = filter,
                 noMetadata = noMetadata,
                 noChapters = noChapters,
-                customAudio = custom
+                customAudio = custom,
+                titleAudio = title
             )
         }
 
@@ -63,7 +66,8 @@ class FFmpeg private constructor(
             profileVideo: String? = null, pixelFormat: String? = null, filterVideo: String? = null,
             filterAudio: String? = null, sampleRate: String? = null, channels: String? = null,
             noSubtitle: Boolean = false, noMetadata: Boolean = false, customVideo: List<String>? = null,
-            customAudio: List<String>? = null, noChapters: Boolean = false
+            customAudio: List<String>? = null, noChapters: Boolean = false, titleVideo: String? = null,
+            titleAudio: String? = null
         ): FFmpeg {
 
             return FFmpeg(
@@ -90,7 +94,9 @@ class FFmpeg private constructor(
                 noMetadata = noMetadata,
                 noChapters = noChapters,
                 customAudio = customAudio,
-                customVideo = customVideo
+                customVideo = customVideo,
+                titleVideo = titleVideo,
+                titleAudio = titleAudio
             )
         }
     }
@@ -120,6 +126,10 @@ class FFmpeg private constructor(
             else {
                 data.addCmd(param = FFmpegArgs.ENCODER_VIDEO, value = FFmpegArgs.COPY)
             }
+
+            if(!titleVideo.isNullOrBlank()) {
+                data.addCmd(param = "${FFmpegArgs.METADATA}:s:v",  value = "title=\"$titleVideo\"")
+            }
         }
 
         if(indexAudio != -1) {
@@ -136,6 +146,10 @@ class FFmpeg private constructor(
             }
             else {
                 data.addCmd(param = FFmpegArgs.ENCODER_AUDIO, value = FFmpegArgs.COPY)
+            }
+
+            if(!titleAudio.isNullOrBlank()) {
+                data.addCmd(param = "${FFmpegArgs.METADATA}:s:a", value = "title=\"$titleAudio\"")
             }
         }
 

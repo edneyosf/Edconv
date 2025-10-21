@@ -29,4 +29,5 @@ object FFmpegArgs {
     const val MAP_CHAPTERS = "-map_chapters"
     const val FILTER_AV = "-lavfi"
     const val STATS = "-stats"
+    const val METADATA = "-metadata"
 }

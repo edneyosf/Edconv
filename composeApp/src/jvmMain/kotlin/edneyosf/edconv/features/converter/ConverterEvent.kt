@@ -37,4 +37,6 @@ interface ConverterEvent {
     fun pickFolder(title: String, fileName: String) = Unit
     fun setHdr10ToSdr(enabled: Boolean) = Unit
     fun setNoChapters(noChapters: Boolean) = Unit
+    fun setTitleVideo(title: String) = Unit
+    fun setTitleAudio(title: String) = Unit
 }

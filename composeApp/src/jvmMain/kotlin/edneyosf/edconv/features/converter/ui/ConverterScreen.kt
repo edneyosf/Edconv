@@ -126,6 +126,18 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                         }
                         if(videoEnabled) {
                             Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextField(
+                                    modifier = Modifier.widthIn(max = 520.dp),
+                                    value = titleVideo ?: "",
+                                    colors = TextFieldDefaults.colors().custom(),
+                                    onValueChange = event::setTitleVideo,
+                                    label = { Text(text = strings[TITLE]) },
+                                    maxLines = 1,
+                                )
+                            }
+                            Row(
                                 horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -218,6 +230,18 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                             }
                         }
                         if(audioEnabled) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextField(
+                                    modifier = Modifier.widthIn(max = 520.dp),
+                                    value = titleAudio ?: "",
+                                    colors = TextFieldDefaults.colors().custom(),
+                                    onValueChange = event::setTitleAudio,
+                                    label = { Text(text = strings[TITLE]) },
+                                    maxLines = 1
+                                )
+                            }
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                                 verticalAlignment = Alignment.CenterVertically

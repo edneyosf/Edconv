@@ -119,7 +119,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         viewModelScope.launch {
             _state.map { it.indexAudio to it.indexVideo }
                 .distinctUntilChanged()
-                .collectLatest { (audio, video) ->
+                .collectLatest { (_, video) ->
                     val state = _state.value
                     val input = state.input
                     val encoder = state.type?.currentEncoder(
@@ -219,7 +219,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             bitrate = bitrateAudio?.value,
                             noMetadata = noMetadata,
                             noChapters = noChapters,
-                            custom = customChannelsArgs
+                            custom = customChannelsArgs,
+                            title = titleAudio
                         )
                     }
                     else return@run
@@ -270,7 +271,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             customAudio = customChannelsArgs,
                             noSubtitle = noSubtitle,
                             noChapters = noChapters,
-                            noMetadata = noMetadata
+                            noMetadata = noMetadata,
+                            titleVideo = titleVideo,
+                            titleAudio = titleAudio
                         )
                     }
                     else return@run
@@ -493,6 +496,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun setNoMetadata(noMetadata: Boolean) = _state.updateAndSync { copy(noMetadata = noMetadata) }
 
     override fun setNoChapters(noChapters: Boolean) { _state.updateAndSync { copy(noChapters = noChapters) } }
+
+    override fun setTitleVideo(title: String) { _state.updateAndSync { copy(titleVideo = title) } }
+
+    override fun setTitleAudio(title: String) { _state.updateAndSync { copy(titleAudio = title) } }
 
     override fun pickFolder(title: String, fileName: String) {
         val type = _state.value.type

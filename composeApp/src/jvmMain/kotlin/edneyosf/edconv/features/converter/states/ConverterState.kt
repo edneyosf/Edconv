@@ -28,5 +28,7 @@ data class ConverterState(
     val noSubtitle: Boolean = false,
     val noMetadata: Boolean = false,
     val hdr10ToSdr: Boolean = false,
-    val noChapters: Boolean = false
+    val noChapters: Boolean = false,
+    val titleVideo: String? = null,
+    val titleAudio: String? = null
 )

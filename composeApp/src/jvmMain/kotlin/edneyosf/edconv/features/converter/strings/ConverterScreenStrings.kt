@@ -46,7 +46,8 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         NO_CHAPTERS to "Sem capítulos",
         INDEX to "Índice",
         INDEX_ALL to "Todos",
-        INDEX_DISABLED to "Desabilitado"
+        INDEX_DISABLED to "Desabilitado",
+        TITLE to "Título"
     )
 
     override val en = mapOf(
@@ -80,7 +81,8 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         NO_CHAPTERS to "No chapters",
         INDEX to "Index",
         INDEX_ALL to "All",
-        INDEX_DISABLED to "Disabled"
+        INDEX_DISABLED to "Disabled",
+        TITLE to "Title"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -116,6 +118,7 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         NO_CHAPTERS,
         INDEX,
         INDEX_ALL,
-        INDEX_DISABLED
+        INDEX_DISABLED,
+        TITLE
     }
 }
