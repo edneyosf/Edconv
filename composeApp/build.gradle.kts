@@ -20,23 +20,23 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(compose.materialIconsExtended)
-            implementation(libs.kotlinx.serialization)
-            implementation(libs.lifecycle.viewmodel.compose)
-            implementation(libs.lifecycle.runtime.compose)
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
+            implementation(dependencyNotation = compose.runtime)
+            implementation(dependencyNotation = compose.foundation)
+            implementation(dependencyNotation = compose.material3)
+            implementation(dependencyNotation = compose.ui)
+            implementation(dependencyNotation = compose.components.resources)
+            implementation(dependencyNotation = compose.components.uiToolingPreview)
+            implementation(dependencyNotation = compose.materialIconsExtended)
+            implementation(dependencyNotation = libs.kotlinx.serialization)
+            implementation(dependencyNotation = libs.lifecycle.viewmodel.compose)
+            implementation(dependencyNotation = libs.lifecycle.runtime.compose)
+            implementation(dependencyNotation = libs.koin.core)
+            implementation(dependencyNotation = libs.koin.compose)
+            implementation(dependencyNotation = libs.koin.compose.viewmodel)
         }
         jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
+            implementation(dependencyNotation = compose.desktop.currentOs)
+            implementation(dependencyNotation = libs.kotlinx.coroutines.swing)
         }
     }
 }
@@ -48,13 +48,7 @@ compose.desktop {
         nativeDistributions {
             val resourceDir = File("resources")
 
-            targetFormats(
-                TargetFormat.Exe,
-                TargetFormat.Msi,
-                TargetFormat.Deb,
-                TargetFormat.Rpm,
-                TargetFormat.Dmg
-            )
+            targetFormats(TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.Dmg)
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
@@ -63,9 +57,9 @@ compose.desktop {
 
             licenseFile.set(File("../LICENSE"))
 
-            linux { iconFile.set(resourceDir.resolve("icon.png")) }
-            windows { iconFile.set(resourceDir.resolve("icon.ico")) }
-            macOS { iconFile.set(resourceDir.resolve("icon.icns")) }
+            linux { iconFile.set(resourceDir.resolve(relative = "icon.png")) }
+            windows { iconFile.set(resourceDir.resolve(relative = "icon.ico")) }
+            macOS { iconFile.set(resourceDir.resolve(relative = "icon.icns")) }
         }
     }
 }
