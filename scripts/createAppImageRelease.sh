@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-source ./scripts/config.sh
+source .env
 
 BUILD_DIR="Edconv.AppDir"
 APPDATA_FILE_NAME="${ID}.appdata.xml"

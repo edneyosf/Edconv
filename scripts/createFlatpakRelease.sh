@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-source ./scripts/config.sh
+source .env
 
 YAML_PATH="${PACKAGING_DIR}/${ID}.json"
 REPO_DIR="repo"
