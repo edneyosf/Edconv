@@ -1,12 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
-ID="io.github.edneyosf.edconv"
+source ./scripts/config.sh
+
 YAML_PATH="./scripts/packaging/${ID}.json"
 REPO_DIR="repo"
 BUILD_DIR="build-dir"
 BUILDER_DIR=".flatpak-builder"
-OUTPUT="${ID##*.}.flatpak"
+OUTPUT="${APP_NAME}-${APP_VERSION}-x86_64.flatpak"
 
 echo "🔨 Building Flatpak for ${ID}..."
 mkdir -p "$REPO_DIR" "$BUILD_DIR"
