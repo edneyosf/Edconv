@@ -1,6 +1,6 @@
 ![Application Preview](assets/edconv-banner.png)
 
-<div style="text-align: center;">
+<div align="center">
   <h1>Edconv</h1>
 
 A user-friendly interface that simplifies the power of **FFmpeg**. It's designed for fast and efficient conversion of video and audio files.
@@ -24,7 +24,7 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 - Console mode (viewing logs at runtime)
 - Queue
 - Media Information
-- VMAF, PSNR and SSIM perceptual video quality assessment algorithm
+- VMAF, PSNR and SSIM perceptual video quality assessment algorithm. **Must be enabled in the FFmpeg binaries to work properly**
 
 ## Screenshots
 
@@ -44,15 +44,28 @@ Download the latest release for your system from the [Releases page](https://git
 
 Run the installer as administrator and follow the installation steps.
 
+### Flatpak
+
+> **⚠️ Notice**
+>
+> The Flatpak version of this application **does not have access to system libraries**.  
+> As a result, **FFmpeg and FFprobe binaries must be compiled with static libraries** to work correctly within the sandbox environment.
+
+```bash
+flatpak --user install edconv-x.x.x-x86_64.flatpak
+```
+
+```bash
+flatpak run io.github.edneyosf.edconv
+```
+
 ### AppImage
 
-Before running the AppImage, ensure it has execution permissions. Open a terminal and run:
+Before running the AppImage, ensure it has execution permissions.
 
 ```bash
 chmod +x edconv-x.x.x-x86_64.AppImage
 ```
-
-Run the AppImage from the terminal:
 
 ```bash
 ./edconv-x.x.x-x86_64.AppImage
