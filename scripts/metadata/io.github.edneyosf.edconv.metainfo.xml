@@ -3,7 +3,7 @@
 <component type="desktop-application">
   <id>io.github.edneyosf.edconv</id>
   <name>Edconv</name>
-  <summary>An intuitive FFmpeg GUI</summary>
+  <summary>A user-friendly FFmpeg GUI</summary>
 
   <description>
 	  <p>A user-friendly interface that simplifies the power of FFmpeg. It's designed for fast and efficient conversion of video and audio files.</p>

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Edconv
-Comment=An intuitive FFmpeg front-end for converting movies, shows and music
-Comment[pt_BR]=Uma interface intuitiva para FFmpeg para converter filmes, séries e músicas
+Comment=A user-friendly FFmpeg GUI
+Comment[pt_BR]=Uma interface gráfica para FFmpeg amigável
 Exec=edconv
 Icon=io.github.edneyosf.edconv
 Type=Application
