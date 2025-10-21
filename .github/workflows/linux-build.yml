@@ -19,10 +19,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build .deb with Gradle
+      - name: Create .flatpak release
+        run: ./scripts/createFlatpakRelease.sh
+
+      - name: Create .AppImage release
+        run: ./scripts/createAppImageRelease.sh
+
+      - name: Create .deb release
         run: ./gradlew createDeb --no-build-cache
 
-      - name: Build .rpm with Gradle
+      - name: Create .rpm release
         run: ./gradlew packageReleaseRpm --no-build-cache
 
       - name: Upload Artifact
@@ -32,3 +38,5 @@ jobs:
           path: |
             composeApp/build/compose/binaries/main-release/deb/*.deb
             composeApp/build/compose/binaries/main-release/rpm/*.rpm
+            *.flatpak
+            *.AppImage
