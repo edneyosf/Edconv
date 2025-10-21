@@ -20,13 +20,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-disabled: true
 
-      - name: Build .dmg with Gradle
-        run: ./gradlew packageReleaseDmg --no-build-cache
+      - name: Create MacOS release
+        run: ./scripts/createMacRelease.sh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
