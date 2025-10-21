@@ -12,7 +12,6 @@ import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.utils.DateTimeUtils
-import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.home.mappers.toInputMedia
 import edneyosf.edconv.features.metrics.states.MetricsState
 import edneyosf.edconv.features.metrics.states.MetricsStatusState
@@ -21,6 +20,9 @@ import edneyosf.edconv.ffmpeg.ffmpeg.MetricsFFmpeg
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
 import edneyosf.edconv.ffmpeg.metrics.Metrics
 import edneyosf.edconv.ffmpeg.metrics.MetricsScore
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.openFilePicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -174,9 +176,11 @@ class MetricsViewModel(private val config: EdConfig, private val process: EdProc
     }
 
     override fun pickDistortedFile(title: String) {
-        val path = FileUtils.pickFile(title)
-
-        path?.let { _state.update { copy(distorted = it) } }
+        viewModelScope.launch {
+            FileKit.openFilePicker(title = title, mode = FileKitMode.Single)?.let { platformFile ->
+                platformFile.file.absolutePath.let { _state.update { copy(distorted = it) } }
+            }
+        }
     }
 
     override fun setFps(value: String) = _state.update { copy(fps = value.toInt()) }

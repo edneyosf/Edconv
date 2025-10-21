@@ -33,6 +33,7 @@ kotlin {
             implementation(dependencyNotation = libs.koin.core)
             implementation(dependencyNotation = libs.koin.compose)
             implementation(dependencyNotation = libs.koin.compose.viewmodel)
+            implementation(dependencyNotation = libs.filekit.dialogs)
         }
         jvmMain.dependencies {
             implementation(dependencyNotation = compose.desktop.currentOs)
@@ -57,7 +58,10 @@ compose.desktop {
 
             licenseFile.set(File("../LICENSE"))
 
-            linux { iconFile.set(resourceDir.resolve(relative = "icon.png")) }
+            linux {
+                modules("jdk.security.auth")
+                iconFile.set(resourceDir.resolve(relative = "icon.png"))
+            }
             windows { iconFile.set(resourceDir.resolve(relative = "icon.ico")) }
             macOS { iconFile.set(resourceDir.resolve(relative = "icon.icns")) }
         }

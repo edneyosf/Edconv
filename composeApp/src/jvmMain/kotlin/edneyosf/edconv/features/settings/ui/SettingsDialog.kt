@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.LaunchedEffected
-import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.SettingsEvent
 import edneyosf.edconv.features.settings.SettingsViewModel
@@ -30,6 +29,10 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -51,6 +54,7 @@ fun SettingsDialog(onComplete: () -> Unit) {
 
 @Composable
 private fun SettingsState.Content(event: SettingsEvent) {
+    val scope = rememberCoroutineScope()
     val defined = !(ffmpegPath.isBlank() || ffprobePath.isBlank())
     val isLoading = status is SettingsStatusState.Loading
     val pickFFmpegTitle = strings[PICK_FFMPEG_TITLE]
@@ -72,8 +76,11 @@ private fun SettingsState.Content(event: SettingsEvent) {
                         text = strings[SELECT_FFMPEG],
                         loading = isLoading,
                         onClick = {
-                            FileUtils.pickFile(title = pickFFmpegTitle)
-                                ?.let { event.setFFmpegPath(it) }
+                            scope.launch {
+                                FileKit.openFilePicker(title = pickFFmpegTitle, mode = FileKitMode.Single)?.let {
+                                    event.setFFmpegPath(it.file.absolutePath)
+                                }
+                            }
                         }
                     )
                     Spacer(modifier = Modifier.width(width = dimens.md))
@@ -82,8 +89,11 @@ private fun SettingsState.Content(event: SettingsEvent) {
                         text = strings[SELECT_FFPROBE],
                         loading = isLoading,
                         onClick = {
-                            FileUtils.pickFile(title = pickFFprobeTitle)
-                                ?.let { event.setFFprobePath(it) }
+                            scope.launch {
+                                FileKit.openFilePicker(title = pickFFprobeTitle, mode = FileKitMode.Single)?.let {
+                                    event.setFFprobePath(it.file.absolutePath)
+                                }
+                            }
                         }
                     )
                 }

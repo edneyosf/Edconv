@@ -17,7 +17,6 @@ import edneyosf.edconv.core.process.MediaQueue
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.process.QueueStatus
 import edneyosf.edconv.core.utils.DirUtils
-import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
@@ -32,6 +31,8 @@ import edneyosf.edconv.ffmpeg.common.SampleRate
 import edneyosf.edconv.ffmpeg.converter.Converter
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpeg
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.openDirectoryPicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -295,7 +296,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
         if(input != null && type != null && !output?.first.isNullOrBlank() && !state.output.second.isBlank() && command.isNotBlank()) {
             try {
-                val outputFile = File("${output.first}${output.second}")
+                val outputFile = File("${output.first}/${output.second}")
                 val outputExists = outputFile.exists()
 
                 if(!overwrite && outputExists) {
@@ -502,15 +503,13 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun setTitleAudio(title: String) { _state.updateAndSync { copy(titleAudio = title) } }
 
     override fun pickFolder(title: String, fileName: String) {
-        val type = _state.value.type
-        val extension = when(type) {
-            MediaType.AUDIO -> _state.value.encoderAudio?.toFileExtension() ?: ""
-            MediaType.VIDEO -> _state.value.encoderVideo?.toFileExtension() ?: ""
-            else -> ""
-        }
+        viewModelScope.launch {
+            val directory = FileKit.openDirectoryPicker(title = title)?.file?.absolutePath
 
-        FileUtils.saveFile(title, fileName, extension)
-            ?.let { _state.update { copy(output = it) } }
+            if(directory != null) {
+                _state.update { copy(output = output?.copy(first = directory)) }
+            }
+        }
     }
 
     override fun setHdr10ToSdr(enabled: Boolean) { _state.updateAndSync { copy(hdr10ToSdr = enabled) } }

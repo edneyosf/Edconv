@@ -10,7 +10,6 @@ import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
-import edneyosf.edconv.core.utils.FileUtils
 import edneyosf.edconv.features.home.mappers.toInputMedia
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
@@ -18,6 +17,9 @@ import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ffmpeg.data.InputMediaData
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.openFilePicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -136,8 +138,10 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
     override fun setDialog(state: HomeDialogState) = _state.update { copy(dialog = state) }
 
     override fun pickFile(title: String) {
-        FileUtils.pickFile(title = title)?.let {
-            setInput(path = it)
+        viewModelScope.launch {
+            FileKit.openFilePicker(title = title, mode = FileKitMode.Single)?.let {
+                setInput(path = it.file.absolutePath)
+            }
         }
     }
 
