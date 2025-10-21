@@ -1,10 +1,12 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Properties
 
-val appName: String by project
-val appVersion: String by project
-val appAuthor: String by project
-val appDescriptionEn: String by project
-val appDescriptionPt: String by project
+loadEnvFile()
+
+private val appName = System.getProperty("APP_NAME") ?: ""
+private val appVersion = System.getProperty("APP_VERSION") ?: ""
+private val appAuthor = System.getProperty("APP_AUTHOR") ?: ""
+private val appDescriptionEn = System.getProperty("APP_DESCRIPTION_EN") ?: ""
 
 plugins {
     alias(libs.plugins.compose)
@@ -68,77 +70,21 @@ compose.desktop {
     }
 }
 
-tasks.register("createDeb") {
-    dependsOn("createReleaseDistributable")
+private fun loadEnvFile() {
+    val envFile = rootProject.file(".env")
 
-    val arch = "amd64"
-    val build = layout.buildDirectory.dir("createDeb")
-    val output = layout.buildDirectory.dir("compose/binaries/main-release/deb")
-    val dist = layout.buildDirectory.dir("compose/binaries/main-release/app")
+    if (envFile.exists()) {
+        val props = Properties()
 
-    doLast {
-        val buildDir = build.get().asFile
-        val outputDir = output.get().asFile
-        val distDir = dist.get().asFile
-        val outputDeb = outputDir.resolve("${appName}_${appVersion}_${arch}.deb")
-        val targetDir = buildDir.resolve("opt")
-        val shareDir = buildDir.resolve("usr/share/applications")
-        val desktopFile = shareDir.resolve("$appName.desktop")
-        val debianDir = buildDir.resolve("DEBIAN")
-        val controlFile = debianDir.resolve("control")
-        val libDir = targetDir.resolve("$appName/lib")
-        val runtimeLibDir = libDir.resolve("runtime/lib")
-        val binFile = targetDir.resolve("$appName/bin/$appName")
+        envFile.inputStream().use { props.load(it) }
+        props.forEach { (key, value) ->
+            val cleanValue = value.toString()
+                .removeSurrounding(delimiter = "\"")
+                .trim()
 
-        buildDir.run {
-            deleteRecursively()
-            mkdirs()
+            System.setProperty(key.toString(), cleanValue)
         }
-        outputDir.run {
-            deleteRecursively()
-            mkdirs()
-        }
-
-        distDir.copyRecursively(targetDir, overwrite = true)
-        shareDir.mkdirs()
-
-        // .desktop
-        desktopFile.writeText(
-            """
-            [Desktop Entry]
-            Name=${appName.replaceFirstChar { it.uppercase() }}
-            Comment=$appDescriptionEn
-            Comment[pt_BR]=$appDescriptionPt
-            Exec=/opt/$appName/bin/$appName
-            Icon=/opt/$appName/lib/$appName.png
-            Terminal=false
-            Type=Application
-            Categories=AudioVideo;Utility;
-            StartupWMClass=edneyosf-edconv-MainKt
-            """.trimIndent()
-        )
-
-        // DEBIAN/control
-        debianDir.mkdirs()
-        controlFile.writeText(
-            """
-            Package: $appName
-            Version: $appVersion
-            Section: video
-            Priority: optional
-            Architecture: $arch
-            Maintainer: $appAuthor <edney.osf@gmail.com>
-            Description: $appDescriptionEn
-            
-            """.trimIndent()
-        )
-
-        exec { commandLine("chmod", "+x", binFile.absolutePath) }
-        exec { commandLine("chmod", "+x", libDir.resolve("libapplauncher.so").absolutePath) }
-        exec { commandLine("chmod", "+x", runtimeLibDir.resolve("jexec").absolutePath) }
-        exec { commandLine("chmod", "+x", runtimeLibDir.resolve("jspawnhelper").absolutePath) }
-        exec { commandLine("fakeroot", "dpkg-deb", "--build", buildDir.absolutePath, outputDeb.absolutePath) }
-
-        println(".deb generated at: ${outputDeb.absolutePath}")
+    } else {
+        println(".env file not found")
     }
 }
