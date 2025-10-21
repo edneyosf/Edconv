@@ -3,7 +3,7 @@ set -euo pipefail
 
 source ./scripts/config.sh
 
-YAML_PATH="./scripts/packaging/${ID}.json"
+YAML_PATH="${PACKAGING_DIR}/${ID}.json"
 REPO_DIR="repo"
 BUILD_DIR="build-dir"
 BUILDER_DIR=".flatpak-builder"
