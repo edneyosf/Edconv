@@ -1,5 +1,5 @@
 rootProject.name = "edconv"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview(name = "TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
