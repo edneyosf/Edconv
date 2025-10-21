@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Flatpak SDK and extensions
         run: |
-          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           flatpak install -y --user flathub org.freedesktop.Sdk//25.08
           flatpak install -y --user flathub org.freedesktop.Sdk.Extension.openjdk17//25.08    
           
