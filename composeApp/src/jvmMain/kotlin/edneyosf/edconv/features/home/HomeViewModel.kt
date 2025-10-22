@@ -17,9 +17,6 @@ import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.ffmpeg.data.InputMediaData
 import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
-import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.dialogs.FileKitMode
-import io.github.vinceglb.filekit.dialogs.openFilePicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -81,7 +78,7 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         }
     }
 
-    private fun setInput(path: String) {
+    override fun setInput(path: String) {
         _state.update { copy(loading = true) }
 
         viewModelScope.launch(context = Dispatchers.IO) {
@@ -136,14 +133,6 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
     override fun setNavigation(state: HomeNavigationState) { _state.update { copy(navigation = state) } }
 
     override fun setDialog(state: HomeDialogState) = _state.update { copy(dialog = state) }
-
-    override fun pickFile(title: String) {
-        viewModelScope.launch {
-            FileKit.openFilePicker(title = title, mode = FileKitMode.Single)?.let {
-                setInput(path = it.file.absolutePath)
-            }
-        }
-    }
 
     @OptIn(ExperimentalComposeUiApi::class)
     override fun onDragAndDropInput(event: DragAndDropEvent): Boolean {

@@ -39,6 +39,8 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
+import edneyosf.edconv.ui.compositions.fileKitDialogSettings
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -55,7 +57,11 @@ fun HomeScreen() {
 @Composable
 private fun HomeState.Content(event: HomeEvent) {
     val version = remember { PropertyUtils.version }
-    val stringPickFile = strings[TITLE_PICK_FILE]
+    val singleFilePicker = rememberFilePickerLauncher(
+        title = strings[TITLE_PICK_FILE],
+        onResult = { it?.file?.let { file -> event.setInput(path = file.absolutePath) } },
+        dialogSettings = fileKitDialogSettings
+    )
     val modifier = Modifier
         .dragAndDropTarget(
             shouldStartDragAndDrop = { true },
@@ -67,7 +73,7 @@ private fun HomeState.Content(event: HomeEvent) {
             HomeNavigation(
                 onSelected = event::setNavigation,
                 onSettings = { event.setDialog(state = HomeDialogState.Settings) },
-                onPickFile = { event.pickFile(title = stringPickFile) }
+                onPickFile = { singleFilePicker.launch() }
             )
             when {
                 loading -> Loading(appVersion = version)
