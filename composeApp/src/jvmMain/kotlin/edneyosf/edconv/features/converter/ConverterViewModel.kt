@@ -31,8 +31,6 @@ import edneyosf.edconv.ffmpeg.common.SampleRate
 import edneyosf.edconv.ffmpeg.converter.Converter
 import edneyosf.edconv.ffmpeg.data.ProgressData
 import edneyosf.edconv.ffmpeg.ffmpeg.FFmpeg
-import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.dialogs.openDirectoryPicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -460,7 +458,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setDialog(dialog: ConverterDialogState) = _state.update { copy(dialog = dialog) }
 
-    override fun setOutput(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
+    override fun setOutputDirectory(directory: String) = _state.update { copy(output = output?.copy(first = directory)) }
+
+    override fun setOutputFile(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
 
     override fun setIndexAudio(value: Int?) { _state.updateAndSync { copy(indexAudio = value) } }
 
@@ -501,16 +501,6 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun setTitleVideo(title: String) { _state.updateAndSync { copy(titleVideo = title) } }
 
     override fun setTitleAudio(title: String) { _state.updateAndSync { copy(titleAudio = title) } }
-
-    override fun pickFolder(title: String, fileName: String) {
-        viewModelScope.launch {
-            val directory = FileKit.openDirectoryPicker(title = title)?.file?.absolutePath
-
-            if(directory != null) {
-                _state.update { copy(output = output?.copy(first = directory)) }
-            }
-        }
-    }
 
     override fun setHdr10ToSdr(enabled: Boolean) { _state.updateAndSync { copy(hdr10ToSdr = enabled) } }
 

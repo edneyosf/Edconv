@@ -13,7 +13,8 @@ import edneyosf.edconv.ffmpeg.common.SampleRate
 interface ConverterEvent {
     fun setStatus(status: ConverterStatusState) = Unit
     fun setDialog(dialog: ConverterDialogState) = Unit
-    fun setOutput(fileName: String) = Unit
+    fun setOutputFile(fileName: String) = Unit
+    fun setOutputDirectory(directory: String) = Unit
     fun setIndexAudio(value: Int?) = Unit
     fun setIndexVideo(value: Int?) = Unit
     fun setEncoderAudio(encoder: Encoder?) = Unit
@@ -34,7 +35,6 @@ interface ConverterEvent {
     fun addToQueue(fromStart: Boolean = false, overwrite: Boolean = false) = Unit
     fun start(overwrite: Boolean = false) = Unit
     fun stop() = Unit
-    fun pickFolder(title: String, fileName: String) = Unit
     fun setHdr10ToSdr(enabled: Boolean) = Unit
     fun setNoChapters(noChapters: Boolean) = Unit
     fun setTitleVideo(title: String) = Unit

@@ -43,6 +43,7 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 
@@ -70,6 +71,11 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val hasAudio = input?.audios?.isNotEmpty() == true
     val videoEnabled = indexVideo != -1
     val audioEnabled = indexAudio != -1
+    val directoryPicker = rememberDirectoryPickerLauncher(
+        title = stringSaveFile,
+        onResult = { it?.file?.let { file -> event.setOutputDirectory(file.absolutePath) } },
+        dialogSettings = fileKitDialogSettings
+    )
 
     Column(
         modifier = Modifier.padding(all = dimens.md),
@@ -313,7 +319,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                 value = output?.second ?: "",
                 modifier = Modifier.weight(weight = 1f),
                 colors = TextFieldDefaults.colors().custom(),
-                onValueChange = event::setOutput,
+                onValueChange = event::setOutputFile,
                 label = { Text(text = strings[OUTPUT_FILE]) },
                 maxLines = 1,
                 isError = invalidOutputFile,
@@ -331,12 +337,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                 style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
             )
             ElevatedButton(
-                onClick = {
-                    event.pickFolder(
-                        title = stringSaveFile,
-                        fileName = output?.second ?: ""
-                    )
-                }
+                onClick = { directoryPicker.launch() }
             ){
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
