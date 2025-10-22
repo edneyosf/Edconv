@@ -31,6 +31,11 @@ jobs:
           sudo flatpak install -y flathub org.freedesktop.Sdk//25.08
           sudo flatpak install -y flathub org.freedesktop.Sdk.Extension.openjdk17//25.08
 
+      - name: Install libfuse2
+        run: |
+          sudo apt update
+          sudo apt install -y libfuse2
+
       - name: Download appimagetool
         run: |
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
