@@ -42,11 +42,11 @@ jobs:
       - name: Create .AppImage release
         run: ./scripts/createAppImageRelease.sh
 
+      - name: Create .rpm release
+        run: ./scripts/createRpmRelease.sh
+
       - name: Create .deb release
         run: ./gradlew createDeb --no-build-cache
-
-      - name: Create .rpm release
-        run: ./gradlew packageReleaseRpm --no-build-cache
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
