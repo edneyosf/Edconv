@@ -29,10 +29,7 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
-import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.dialogs.FileKitMode
-import io.github.vinceglb.filekit.dialogs.openFilePicker
-import kotlinx.coroutines.launch
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -54,11 +51,19 @@ fun SettingsDialog(onComplete: () -> Unit) {
 
 @Composable
 private fun SettingsState.Content(event: SettingsEvent) {
-    val scope = rememberCoroutineScope()
     val defined = !(ffmpegPath.isBlank() || ffprobePath.isBlank())
     val isLoading = status is SettingsStatusState.Loading
-    val pickFFmpegTitle = strings[PICK_FFMPEG_TITLE]
-    val pickFFprobeTitle = strings[PICK_FFPROBE_TITLE]
+    val pickFFmpeg = rememberFilePickerLauncher(
+        title = strings[PICK_FFMPEG_TITLE],
+        onResult = { it?.file?.let { file -> event.setFFmpegPath(file.absolutePath) } },
+        dialogSettings = fileKitDialogSettings
+    )
+    val pickFFprobe = rememberFilePickerLauncher(
+        title = strings[PICK_FFPROBE_TITLE],
+        onResult = { it?.file?.let { file -> event.setFFprobePath(file.absolutePath) } },
+        dialogSettings = fileKitDialogSettings
+    )
+
 
     SimpleDialog(
         icon = Icons.Rounded.Settings,
@@ -75,26 +80,14 @@ private fun SettingsState.Content(event: SettingsEvent) {
                         icon = Icons.Rounded.CheckCircle.takeIf { ffmpegPath.isNotBlank() },
                         text = strings[SELECT_FFMPEG],
                         loading = isLoading,
-                        onClick = {
-                            scope.launch {
-                                FileKit.openFilePicker(title = pickFFmpegTitle, mode = FileKitMode.Single)?.let {
-                                    event.setFFmpegPath(it.file.absolutePath)
-                                }
-                            }
-                        }
+                        onClick = { pickFFmpeg.launch() }
                     )
                     Spacer(modifier = Modifier.width(width = dimens.md))
                     PrimaryButton(
                         icon = Icons.Rounded.CheckCircle.takeIf { ffprobePath.isNotBlank() },
                         text = strings[SELECT_FFPROBE],
                         loading = isLoading,
-                        onClick = {
-                            scope.launch {
-                                FileKit.openFilePicker(title = pickFFprobeTitle, mode = FileKitMode.Single)?.let {
-                                    event.setFFprobePath(it.file.absolutePath)
-                                }
-                            }
-                        }
+                        onClick = { pickFFprobe.launch() }
                     )
                 }
                 if(status is SettingsStatusState.Failure) {
