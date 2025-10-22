@@ -29,10 +29,12 @@ import edneyosf.edconv.ui.compositions.stringsComp
 import edneyosf.edconv.ui.theme.AppTheme
 import edneyosf.edconv.app.ClosingDialogStrings.Keys.TITLE_CLOSING_DIALOG
 import edneyosf.edconv.app.ClosingDialogStrings.Keys.DESCRIPTION_CLOSING_DIALOG
+import edneyosf.edconv.ui.compositions.fileKitDialogSettingsComp
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.awt.Dimension
@@ -52,7 +54,10 @@ fun ApplicationScope.App() {
         icon = painterResource(resource = Res.drawable.icon)
     ) {
         window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
-        CompositionLocalProvider(value = languageComp provides language) {
+        CompositionLocalProvider(
+            languageComp provides language,
+            fileKitDialogSettingsComp provides FileKitDialogSettings(parentWindow = window)
+        ) {
             AppTheme {
                 ClosingDialog(
                     show = showClosingDialog,
