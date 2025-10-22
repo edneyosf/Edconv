@@ -33,8 +33,8 @@ kotlin {
             implementation(dependencyNotation = libs.koin.core)
             implementation(dependencyNotation = libs.koin.compose)
             implementation(dependencyNotation = libs.koin.compose.viewmodel)
-            implementation(dependencyNotation = libs.filekit.core)
             implementation(dependencyNotation = libs.filekit.dialogs)
+            implementation(dependencyNotation = libs.filekit.dialogs.compose)
         }
         jvmMain.dependencies {
             implementation(dependencyNotation = compose.desktop.currentOs)
