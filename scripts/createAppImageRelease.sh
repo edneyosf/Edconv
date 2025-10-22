@@ -28,7 +28,7 @@ cp $ICON_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${APPLICATIONS_DIR}/"
 cp $METAINFO_FILE "./${METAINFO_DIR}/${APPDATA_FILE_NAME}"
-appimagetool-x86_64.AppImage ${BUILD_DIR} $OUTPUT
+./appimagetool-x86_64.AppImage ${BUILD_DIR} $OUTPUT
 
 echo "🧹 Cleaning..."
 rm -rf $BUILD_DIR
