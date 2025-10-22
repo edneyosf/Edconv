@@ -63,7 +63,6 @@ fun ConverterScreen() {
 
 @Composable
 private fun ConverterState.Content(command: String, event: ConverterEvent) {
-    val stringSaveFile = strings[OUTPUT_SAVE_FILE]
     val outputDir = output?.first?.let { File(it) }
     val outputFile = output?.second?.let { File(it) }
     val invalidOutputFile = outputFile?.extension?.isBlank() == true
@@ -72,7 +71,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val videoEnabled = indexVideo != -1
     val audioEnabled = indexAudio != -1
     val directoryPicker = rememberDirectoryPickerLauncher(
-        title = stringSaveFile,
+        title = strings[OUTPUT_SAVE_FILE],
         onResult = { it?.file?.let { file -> event.setOutputDirectory(file.absolutePath) } },
         dialogSettings = fileKitDialogSettings
     )
