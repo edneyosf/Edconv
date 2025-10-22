@@ -17,6 +17,10 @@ wget -nc -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -P ./gr
 echo "🔨 Building release..."
 ./gradlew composeApp:createReleaseDistributable
 
+echo "📥 Getting appimagetool..."
+wget -nc -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+chmod +x appimagetool-x86_64.AppImage
+
 echo "📦 Creating bundle..."
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
