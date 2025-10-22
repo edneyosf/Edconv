@@ -23,6 +23,7 @@ fun main() {
         modules(modules = metricsFeatureModule)
         modules(modules = consoleModule)
     }
+    System.setProperty("apple.awt.application.appearance", "system")
     FileKit.init(appId = AppConfigs.NAME)
     application { App() }
 }
