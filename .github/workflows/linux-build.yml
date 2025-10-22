@@ -46,7 +46,7 @@ jobs:
         run: ./scripts/createRpmRelease.sh
 
       - name: Create .deb release
-        run: ./gradlew createDeb --no-build-cache
+        run: ./scripts/createDebRelease.sh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
