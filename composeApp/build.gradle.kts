@@ -7,6 +7,7 @@ private val appName = System.getProperty("APP_NAME") ?: ""
 private val appVersion = System.getProperty("APP_VERSION") ?: ""
 private val appAuthor = System.getProperty("APP_AUTHOR") ?: ""
 private val appDescriptionEn = System.getProperty("APP_DESCRIPTION_EN") ?: ""
+private val appCopyright = System.getProperty("APP_COPYRIGHT") ?: ""
 
 plugins {
     alias(libs.plugins.compose)
@@ -63,7 +64,7 @@ compose.desktop {
             packageName = appName
             packageVersion = appVersion
             description = appDescriptionEn
-            copyright = "© 2025 $appAuthor. All rights reserved."
+            copyright = appCopyright
             vendor = appAuthor
 
             licenseFile.set(File("../LICENSE"))
