@@ -2,7 +2,7 @@
 Name=Edconv
 Comment=A user-friendly FFmpeg GUI
 Comment[pt_BR]=Uma interface gráfica para FFmpeg amigável
-Exec=edconv
+Exec=Edconv
 Icon=io.github.edneyosf.edconv
 Type=Application
 Categories=Utility

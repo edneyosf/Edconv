@@ -4,7 +4,7 @@
   "runtime-version": "25.08",
   "sdk": "org.freedesktop.Sdk",
   "sdk-extensions": ["org.freedesktop.Sdk.Extension.openjdk17"],
-  "command": "edconv",
+  "command": "Edconv",
   "finish-args": [
     "--share=ipc",
     "--device=dri",
@@ -29,7 +29,7 @@
       "build-commands": [
         "/usr/lib/sdk/openjdk17/install.sh",
         "./gradlew composeApp:createReleaseDistributable",
-        "cp -r ./composeApp/build/compose/binaries/main-release/app/edconv/* $FLATPAK_DEST/",
+        "cp -r ./composeApp/build/compose/binaries/main-release/app/Edconv/* $FLATPAK_DEST/",
         "install -Dm644 ./scripts/metadata/io.github.edneyosf.edconv.desktop /app/share/applications/io.github.edneyosf.edconv.desktop",
         "install -Dm644 ./assets/io.github.edneyosf.edconv.png /app/share/icons/hicolor/256x256/apps/io.github.edneyosf.edconv.png",
         "install -Dm644 ./scripts/metadata/io.github.edneyosf.edconv.metainfo.xml /app/share/metainfo/io.github.edneyosf.edconv.metainfo.xml"
