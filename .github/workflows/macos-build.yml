@@ -8,7 +8,16 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - runner: macos-13   # Intel (x86_64)
+            arch: x86_64
+          - runner: macos-14   # Apple Silicon (ARM64)
+            arch: arm64
+
+    runs-on: ${{ matrix.runner }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -25,6 +34,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-release
+          name: macos-release-${{ matrix.arch }}
           path: |
             composeApp/build/compose/binaries/main-release/dmg/*.dmg
