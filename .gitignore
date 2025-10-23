@@ -19,3 +19,7 @@ captures
 gradle/wrapper/gradle-8.9-bin.zip
 *.AppImage
 *.flatpak
+*.deb
+*.rpm
+*.exe
+*.dmg
