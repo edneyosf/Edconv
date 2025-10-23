@@ -24,5 +24,6 @@ fun HWND.setWindowAttribute(attribute: DwmAttribute, value: Boolean) {
 private object Dwm : DwmApi by Native.load("dwmapi", DwmApi::class.java, W32APIOptions.DEFAULT_OPTIONS)
 
 private interface DwmApi : Library {
+    @Suppress("FunctionName")
     fun DwmSetWindowAttribute(hwnd: HWND, attribute: Int, value: PointerType?, valueSize: Int): HRESULT
 }
