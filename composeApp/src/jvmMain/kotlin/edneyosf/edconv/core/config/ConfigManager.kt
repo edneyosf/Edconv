@@ -19,12 +19,13 @@ open class ConfigManager(private val fileName: String) {
 
     protected inline fun save(crossinline block: Config.() -> Unit) {
         config.block()
-        configFile.writeText(text = Json.Default.encodeToString(value = config))
+        configFile.writeText(text = Json.encodeToString(value = config))
     }
 
     private fun configDir(): File {
         val baseDir = when {
-            PropertyUtils.isWindows() -> PropertyUtils.userHomeDir
+            PropertyUtils.isWindows() -> "${PropertyUtils.userHomeDir}/AppData/Roaming"
+            PropertyUtils.isMacOS() -> "${PropertyUtils.userHomeDir}/Library/Application Support"
             else -> "${PropertyUtils.userHomeDir}/.config"
         }
 

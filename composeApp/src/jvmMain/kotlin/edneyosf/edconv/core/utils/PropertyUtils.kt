@@ -7,4 +7,5 @@ object PropertyUtils {
     val osName: String = System.getProperty("os.name").lowercase()
 
     fun isWindows(): Boolean = osName.contains(other = "win")
+    fun isMacOS(): Boolean = osName.contains(other = "mac")
 }
