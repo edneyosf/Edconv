@@ -78,7 +78,6 @@ compose.desktop {
                 iconFile.set(resourceDir.resolve(relative = "icon.ico"))
                 dirChooser = true
                 shortcut = true
-                menuGroup = "Utilities"
                 menu = true
             }
             
