@@ -34,6 +34,7 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
+import edneyosf.edconv.ui.theme.setWindowTheme
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
@@ -54,6 +55,7 @@ fun ApplicationScope.App() {
         icon = painterResource(resource = Res.drawable.icon)
     ) {
         window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
+        setWindowTheme(window)
         CompositionLocalProvider(
             languageComp provides language,
             fileKitDialogSettingsComp provides FileKitDialogSettings(parentWindow = window)

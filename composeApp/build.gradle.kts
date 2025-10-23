@@ -43,6 +43,8 @@ kotlin {
         jvmMain.dependencies {
             implementation(dependencyNotation = compose.desktop.currentOs)
             implementation(dependencyNotation = libs.kotlinx.coroutines.swing)
+            implementation(dependencyNotation = libs.jna)
+            implementation(dependencyNotation = libs.jna.platform)
         }
     }
 }
