@@ -16,10 +16,12 @@ plugins {
 }
 
 kotlin {
+    
     jvm()
     
     sourceSets {
-        commonMain.dependencies {
+        
+       commonMain.dependencies {
             implementation(dependencyNotation = compose.runtime)
             implementation(dependencyNotation = compose.foundation)
             implementation(dependencyNotation = compose.material3)
@@ -36,6 +38,7 @@ kotlin {
             implementation(dependencyNotation = libs.filekit.dialogs)
             implementation(dependencyNotation = libs.filekit.dialogs.compose)
         }
+       
         jvmMain.dependencies {
             implementation(dependencyNotation = compose.desktop.currentOs)
             implementation(dependencyNotation = libs.kotlinx.coroutines.swing)
@@ -44,8 +47,14 @@ kotlin {
 }
 
 compose.desktop {
+
     application {
+        
         mainClass = "edneyosf.edconv.MainKt"
+
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
 
         nativeDistributions {
             val resourceDir = File("resources")
@@ -63,8 +72,14 @@ compose.desktop {
                 modules("jdk.security.auth")
                 iconFile.set(resourceDir.resolve(relative = "icon.png"))
             }
-            windows { iconFile.set(resourceDir.resolve(relative = "icon.ico")) }
-            macOS { iconFile.set(resourceDir.resolve(relative = "icon.icns")) }
+
+            windows { 
+                iconFile.set(resourceDir.resolve(relative = "icon.ico")) 
+            }
+            
+            macOS { 
+                iconFile.set(resourceDir.resolve(relative = "icon.icns"))
+            }
         }
     }
 }
