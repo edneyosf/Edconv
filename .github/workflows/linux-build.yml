@@ -42,9 +42,6 @@ jobs:
       - name: Create .AppImage release
         run: ./scripts/createAppImageRelease.sh
 
-      - name: Create .rpm release
-        run: ./scripts/createRpmRelease.sh
-
       - name: Create .deb release
         run: ./scripts/createDebRelease.sh
 
@@ -54,6 +51,5 @@ jobs:
           name: linux-release
           path: |
             composeApp/build/compose/binaries/main-release/deb/*.deb
-            composeApp/build/compose/binaries/main-release/rpm/*.rpm
             *.flatpak
             *.AppImage
