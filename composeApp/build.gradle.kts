@@ -71,10 +71,15 @@ compose.desktop {
             linux {
                 modules("jdk.security.auth")
                 iconFile.set(resourceDir.resolve(relative = "icon.png"))
+                shortcut = true
             }
 
-            windows { 
-                iconFile.set(resourceDir.resolve(relative = "icon.ico")) 
+            windows {
+                iconFile.set(resourceDir.resolve(relative = "icon.ico"))
+                dirChooser = true
+                shortcut = true
+                menuGroup = "Utilities"
+                menu = true
             }
             
             macOS { 
