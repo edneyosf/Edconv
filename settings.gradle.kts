@@ -1,6 +1,3 @@
-rootProject.name = "edconv"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
 pluginManagement {
     repositories {
         mavenLocal()
@@ -17,8 +14,18 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    val githubActor: String by settings
+    val githubToken: String by settings
+
     repositories {
         mavenLocal()
+        maven {
+            url = uri("https://maven.pkg.github.com/edneyosf/FileKit")
+            credentials {
+                username = githubActor
+                password = githubToken
+            }
+        }
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -29,5 +36,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
+rootProject.name = "Edconv"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(":composeApp")
