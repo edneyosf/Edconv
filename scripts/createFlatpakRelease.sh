@@ -3,7 +3,7 @@ set -euo pipefail
 
 source .env
 
-YAML_PATH="${PACKAGING_DIR}/${ID}.json"
+YAML_PATH="${PACKAGING_DIR}/${ID}.yml"
 REPO_DIR="repo"
 BUILD_DIR="build-dir"
 BUILDER_DIR=".flatpak-builder"
