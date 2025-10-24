@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -18,6 +23,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Create Windows release
         run: ./scripts/createWindowsRelease.sh

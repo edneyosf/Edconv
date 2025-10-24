@@ -10,6 +10,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -20,8 +25,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Download Gradle Wrapper
-        run: wget -nc -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -P ./gradle/wrapper/
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Check with Gradle Wrapper
         run: ./gradlew check
