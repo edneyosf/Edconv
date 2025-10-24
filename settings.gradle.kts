@@ -14,16 +14,16 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    val githubActor: String by settings
-    val githubToken: String by settings
+    val githubActor: String? by settings
+    val githubToken: String? by settings
 
     repositories {
         mavenLocal()
         maven {
             url = uri("https://maven.pkg.github.com/edneyosf/FileKit")
             credentials {
-                username = githubActor
-                password = githubToken
+                username = githubActor ?: System.getenv("GITHUB_ACTOR")
+                password = githubToken ?: System.getenv("GITHUB_TOKEN")
             }
         }
         google {
