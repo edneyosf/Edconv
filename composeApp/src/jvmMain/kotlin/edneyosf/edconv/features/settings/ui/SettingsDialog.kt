@@ -25,11 +25,11 @@ import edneyosf.edconv.ui.components.alerts.ErrorAlertText
 import edneyosf.edconv.ui.components.buttons.PrimaryButton
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.*
+import edneyosf.edconv.ui.filekit.rememberFilePickerLauncher
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -55,13 +55,11 @@ private fun SettingsState.Content(event: SettingsEvent) {
     val isLoading = status is SettingsStatusState.Loading
     val pickFFmpeg = rememberFilePickerLauncher(
         title = strings[PICK_FFMPEG_TITLE],
-        onResult = { it?.file?.let { file -> event.setFFmpegPath(file.absolutePath) } },
-        dialogSettings = fileKitDialogSettings
+        onResult = { it?.file?.let { file -> event.setFFmpegPath(file.absolutePath) } }
     )
     val pickFFprobe = rememberFilePickerLauncher(
         title = strings[PICK_FFPROBE_TITLE],
-        onResult = { it?.file?.let { file -> event.setFFprobePath(file.absolutePath) } },
-        dialogSettings = fileKitDialogSettings
+        onResult = { it?.file?.let { file -> event.setFFprobePath(file.absolutePath) } }
     )
 
 

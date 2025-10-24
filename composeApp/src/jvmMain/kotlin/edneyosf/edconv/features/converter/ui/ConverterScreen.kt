@@ -43,8 +43,8 @@ import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
-import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
 import org.koin.compose.viewmodel.koinViewModel
+import edneyosf.edconv.ui.filekit.rememberDirectoryPickerLauncher
 import java.io.File
 
 private const val SLIDER_DENSITY = 0.6f
@@ -73,7 +73,6 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val directoryPicker = rememberDirectoryPickerLauncher(
         title = strings[OUTPUT_SAVE_FILE],
         onResult = { it?.file?.let { file -> event.setOutputDirectory(file.absolutePath) } },
-        dialogSettings = fileKitDialogSettings
     )
 
     Column(
