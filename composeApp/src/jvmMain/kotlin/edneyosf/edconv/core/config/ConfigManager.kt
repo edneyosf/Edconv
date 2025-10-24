@@ -1,6 +1,8 @@
 package edneyosf.edconv.core.config
 
 import edneyosf.edconv.app.AppConfigs
+import edneyosf.edconv.core.common.OS
+import edneyosf.edconv.core.utils.PlatformUtils
 import edneyosf.edconv.core.utils.PropertyUtils
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -23,9 +25,9 @@ open class ConfigManager(private val fileName: String) {
     }
 
     private fun configDir(): File {
-        val baseDir = when {
-            PropertyUtils.isWindows() -> "${PropertyUtils.userHomeDir}/AppData/Roaming"
-            PropertyUtils.isMacOS() -> "${PropertyUtils.userHomeDir}/Library/Application Support"
+        val baseDir = when(PlatformUtils.current) {
+            OS.WINDOWS -> "${PropertyUtils.userHomeDir}/AppData/Roaming"
+            OS.MACOS -> "${PropertyUtils.userHomeDir}/Library/Application Support"
             else -> "${PropertyUtils.userHomeDir}/.config"
         }
 
