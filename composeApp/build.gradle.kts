@@ -37,7 +37,6 @@ kotlin {
             implementation(dependencyNotation = libs.koin.compose)
             implementation(dependencyNotation = libs.koin.compose.viewmodel)
             implementation(dependencyNotation = libs.filekit.dialogs)
-            implementation(dependencyNotation = libs.filekit.dialogs.compose)
         }
        
         jvmMain.dependencies {
