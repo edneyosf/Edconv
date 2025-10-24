@@ -1,0 +1,36 @@
+id: io.github.edneyosf.edconv
+runtime: org.freedesktop.Platform
+runtime-version: "25.08"
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+command: Edconv
+finish-args:
+  - --share=ipc
+  - --device=dri
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --filesystem=home
+modules:
+  - name: edconv
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+      append-path: /usr/lib/sdk/openjdk21/bin
+      env:
+        - JAVA_HOME=/usr/lib/sdk/openjdk21/jvm/openjdk-21
+        - GRADLE_USER_HOME=/run/build/edconv
+      secret-env:
+        - GITHUB_ACTOR
+        - GITHUB_TOKEN
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+      - ./gradlew composeApp:createReleaseDistributable
+      - cp -r ./composeApp/build/compose/binaries/main-release/app/Edconv/* $FLATPAK_DEST/
+      - install -Dm644 ./scripts/metadata/io.github.edneyosf.edconv.desktop /app/share/applications/io.github.edneyosf.edconv.desktop
+      - install -Dm644 ./assets/io.github.edneyosf.edconv.png /app/share/icons/hicolor/256x256/apps/io.github.edneyosf.edconv.png
+      - install -Dm644 ./scripts/metadata/io.github.edneyosf.edconv.metainfo.xml /app/share/metainfo/io.github.edneyosf.edconv.metainfo.xml
+    sources:
+      - type: dir
+        path: ../../
