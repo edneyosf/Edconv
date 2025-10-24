@@ -16,7 +16,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Install Flatpak
@@ -29,7 +29,7 @@ jobs:
           sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Platform//25.08
           sudo flatpak install -y flathub org.freedesktop.Sdk//25.08
-          sudo flatpak install -y flathub org.freedesktop.Sdk.Extension.openjdk17//25.08
+          sudo flatpak install -y flathub org.freedesktop.Sdk.Extension.openjdk21//25.08
 
       - name: Install libfuse2
         run: |
