@@ -11,9 +11,6 @@ APPLICATIONS_DIR="${USR_DIR}/share/applications"
 METAINFO_DIR="${USR_DIR}/share/metainfo"
 OUTPUT="${APP_NAME}-${APP_VERSION}-x86_64.AppImage"
 
-echo "📥 Getting gradle..."
-wget -nc -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -P ./gradle/wrapper/
-
 echo "🔨 Building release..."
 ./gradlew composeApp:createReleaseDistributable
 
