@@ -18,6 +18,10 @@ jobs:
 
     runs-on: ${{ matrix.runner }}
 
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
