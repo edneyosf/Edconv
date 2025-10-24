@@ -58,6 +58,6 @@ jobs:
         with:
           name: linux-release
           path: |
-            composeApp/build/compose/binaries/main-release/deb/*.deb
+            *.deb
             *.flatpak
             *.AppImage

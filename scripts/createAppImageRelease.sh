@@ -33,6 +33,7 @@ ARCH=x86_64 ./appimagetool-x86_64.AppImage --no-appstream ${BUILD_DIR} $OUTPUT
 
 echo "🧹 Cleaning..."
 rm -rf $BUILD_DIR
+rm appimagetool-x86_64.AppImage
 
 echo "Launch it -> ./${OUTPUT}"
 echo "✅ Done -> $OUTPUT"
