@@ -4,11 +4,12 @@ import java.util.Properties
 
 loadEnvFile()
 
-private val appName = System.getProperty("APP_NAME") ?: ""
-private val appVersion = System.getProperty("APP_VERSION") ?: ""
-private val appAuthor = System.getProperty("APP_AUTHOR") ?: ""
-private val appDescriptionEn = System.getProperty("APP_DESCRIPTION_EN") ?: ""
-private val appCopyright = System.getProperty("APP_COPYRIGHT") ?: ""
+private val appName = System.getProperty("APP_NAME")
+private val packageName = System.getProperty("PACKAGE_NAME")
+private val appVersion = System.getProperty("APP_VERSION")
+private val appAuthor = System.getProperty("APP_AUTHOR")
+private val appDescriptionEn = System.getProperty("APP_DESCRIPTION_EN")
+private val appCopyright = System.getProperty("APP_COPYRIGHT")
 
 plugins {
     alias(libs.plugins.compose)
@@ -50,7 +51,7 @@ compose.desktop {
 
     application {
         
-        mainClass = "edneyosf.edconv.MainKt"
+        mainClass = "$packageName.MainKt"
 
         buildTypes.release.proguard {
             configurationFiles.from(project.file("compose-desktop.pro"))
