@@ -7,7 +7,7 @@ YAML_PATH="${PACKAGING_DIR}/${ID}.yml"
 REPO_DIR="repo"
 BUILD_DIR="build-dir"
 BUILDER_DIR=".flatpak-builder"
-OUTPUT="${APP_NAME}-${APP_VERSION}-x86_64.flatpak"
+OUTPUT="${APP_NAME}-${APP_VERSION}.flatpak"
 
 echo "🔨 Building Flatpak for ${ID}..."
 mkdir -p "$REPO_DIR" "$BUILD_DIR"

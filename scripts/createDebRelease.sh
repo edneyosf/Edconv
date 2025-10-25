@@ -4,7 +4,7 @@ set -euo pipefail
 source .env
 
 OUTPUT_DIR="composeApp/build/compose/binaries/main-release/deb"
-OUTPUT="${OUTPUT_DIR}/${APP_NAME}-${APP_VERSION}-x86_64.deb"
+OUTPUT="${OUTPUT_DIR}/${APP_NAME}-${APP_VERSION}.deb"
 USR_DIR="${OUTPUT_DIR}/usr"
 OPT_DIR="${OUTPUT_DIR}/opt"
 DEBIAN_DIR="${OUTPUT_DIR}/DEBIAN"

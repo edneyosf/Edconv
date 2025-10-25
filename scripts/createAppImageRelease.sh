@@ -9,13 +9,15 @@ APPRUN_FILE="${PACKAGING_DIR}/AppRun"
 USR_DIR="${BUILD_DIR}/usr"
 APPLICATIONS_DIR="${USR_DIR}/share/applications"
 METAINFO_DIR="${USR_DIR}/share/metainfo"
-OUTPUT="${APP_NAME}-${APP_VERSION}-x86_64.AppImage"
+OUTPUT="${APP_NAME}-${APP_VERSION}.AppImage"
+ARCH=$(uname -m)
+APPIMAGE_TOOL="appimagetool-${ARCH}.AppImage"
 
 echo "🔨 Building release..."
 ./gradlew composeApp:createReleaseDistributable
 
 echo "📥 Getting appimagetool..."
-wget -nc -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+wget -nc -q https://github.com/AppImage/AppImageKit/releases/download/continuous/${APPIMAGE_TOOL}
 chmod +x appimagetool-x86_64.AppImage
 
 echo "📦 Creating bundle..."
@@ -29,11 +31,11 @@ cp $ICON_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${APPLICATIONS_DIR}/"
 cp $METAINFO_FILE "./${METAINFO_DIR}/${APPDATA_FILE_NAME}"
-ARCH=x86_64 ./appimagetool-x86_64.AppImage --no-appstream ${BUILD_DIR} $OUTPUT
+./${APPIMAGE_TOOL} --no-appstream ${BUILD_DIR} $OUTPUT
 
 echo "🧹 Cleaning..."
 rm -rf $BUILD_DIR
-rm appimagetool-x86_64.AppImage
+rm ${APPIMAGE_TOOL}
 
 echo "Launch it -> ./${OUTPUT}"
 echo "✅ Done -> $OUTPUT"
