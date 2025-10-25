@@ -7,9 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.common.Error
+import edneyosf.edconv.core.common.OS
 import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
+import edneyosf.edconv.core.utils.PlatformUtils
 import edneyosf.edconv.features.home.mappers.toInputMedia
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
@@ -153,5 +155,34 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         }
 
         return false
+    }
+
+    fun findFFmpeg(): String? {
+        val platform = PlatformUtils.current
+        val candidates = when(platform) {
+            OS.WINDOWS -> listOf(
+                // Windows: Chocolatey, pasta padrão e PATH
+                "C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe",
+                "C:\\ffmpeg\\bin\\ffmpeg.exe"
+            )
+            OS.MACOS -> listOf(
+                // macOS: Homebrew Intel/ARM e PATH
+                "/usr/local/bin/ffmpeg",
+                "/opt/homebrew/bin/ffmpeg"
+            )
+            else -> listOf(
+                // Linux: distribuições Debian/Fedora e PATH
+                "/usr/bin/ffmpeg",
+                "/usr/local/bin/ffmpeg"
+            )
+        }
+
+        // Primeiro verifica PATH
+        val pathFromEnv = System.getenv("PATH")?.split(File.pathSeparator)?.map { it.trim() + File.separator + "ffmpeg" } ?: emptyList()
+        val pathCandidates = if (platform == OS.WINDOWS) pathFromEnv.map { "$it.exe" } else pathFromEnv
+
+        // Junta candidatos e verifica existência
+        val allCandidates = candidates + pathCandidates
+        return allCandidates.firstOrNull { File(it).exists() }
     }
 }
