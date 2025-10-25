@@ -25,7 +25,7 @@ jobs:
           - runner: windows-11-arm
             arch: arm64
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
 
     env:
       GITHUB_ACTOR: ${{ github.actor }}
