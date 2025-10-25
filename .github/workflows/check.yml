@@ -9,7 +9,17 @@ on:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: [x86_64, arm64]
+          - runner: macos-latest
+            arch: [x86_64, arm64]
+          - runner: windows-latest
+            arch: [ x86_64, arm64 ]
+
+    runs-on: ${{ matrix.runner }}
 
     env:
       GITHUB_ACTOR: ${{ github.actor }}
