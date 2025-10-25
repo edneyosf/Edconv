@@ -11,8 +11,19 @@ jobs:
   check:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        arch: [x86_64, arm64]
+        include:
+          - runner: ubuntu-latest
+            arch: x86_64
+          - runner: ubuntu-24.04-arm64
+            arch: arm64
+          - runner: macos-13
+            arch: x86_64
+          - runner: macos-latest
+            arch: arm64
+          - runner: windows-latest
+            arch: x86_64
+          - runner: windows-11-arm
+            arch: arm64
 
     runs-on: ${{ matrix.os }}
 
