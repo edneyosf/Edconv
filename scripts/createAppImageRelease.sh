@@ -31,7 +31,7 @@ cp $ICON_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${APPLICATIONS_DIR}/"
 cp $METAINFO_FILE "./${METAINFO_DIR}/${APPDATA_FILE_NAME}"
-./${APPIMAGE_TOOL} --no-appstream ${BUILD_DIR} $OUTPUT
+ARCH=$(uname -m) ./${APPIMAGE_TOOL} --no-appstream ${BUILD_DIR} $OUTPUT
 
 echo "🧹 Cleaning..."
 rm -rf $BUILD_DIR

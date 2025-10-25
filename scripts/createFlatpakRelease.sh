@@ -8,10 +8,11 @@ REPO_DIR="repo"
 BUILD_DIR="build-dir"
 BUILDER_DIR=".flatpak-builder"
 OUTPUT="${APP_NAME}-${APP_VERSION}.flatpak"
+ARCH=$(uname -m)
 
 echo "🔨 Building Flatpak for ${ID}..."
 mkdir -p "$REPO_DIR" "$BUILD_DIR"
-flatpak-builder --force-clean --repo="$REPO_DIR" "$BUILD_DIR" "$YAML_PATH"
+flatpak-builder --arch=$ARCH --force-clean --repo="$REPO_DIR" "$BUILD_DIR" "$YAML_PATH"
 
 echo "📦 Creating bundle ${OUTPUT}..."
 flatpak build-bundle "$REPO_DIR" "$OUTPUT" "$ID"
