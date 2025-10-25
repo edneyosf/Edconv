@@ -13,7 +13,7 @@ OUTPUT="${APP_NAME}-${APP_VERSION}.AppImage"
 ARCH=$(uname -m)
 APPIMAGE_TOOL="appimagetool-${ARCH}.AppImage"
 
-echo "🔨 Building release..."
+echo "🔨 Building $ARCH release..."
 ./gradlew composeApp:createReleaseDistributable
 
 echo "📥 Getting appimagetool..."
