@@ -13,7 +13,7 @@ jobs:
         include:
           - runner: ubuntu-latest
             arch: x86_64
-          - runner: ubuntu-24.04-arm64
+          - runner: ubuntu-24.04-arm
             arch: arm64
 
     runs-on: ${{ matrix.runner }}
