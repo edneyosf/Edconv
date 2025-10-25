@@ -8,15 +8,11 @@ on:
 
 jobs:
   build:
+    runs-on: windows-latest
+
     strategy:
       matrix:
-        include:
-          - runner: windows-latest
-            arch: x86_64
-          - runner: windows-11-arm
-            arch: arm64
-
-    runs-on: ${{ matrix.runner }}
+        arch: [x86_64, arm64]
 
     env:
       GITHUB_ACTOR: ${{ github.actor }}
