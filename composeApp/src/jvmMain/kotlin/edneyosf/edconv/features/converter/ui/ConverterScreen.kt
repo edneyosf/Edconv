@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.common.models.Video
@@ -52,8 +53,8 @@ private const val SLIDER_DENSITY = 0.6f
 @Composable
 fun ConverterScreen() {
     val viewModel = koinViewModel<ConverterViewModel>()
-    val state by viewModel.state.collectAsState()
-    val commandState by viewModel.commandState.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val commandState by viewModel.commandState.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = viewModel)

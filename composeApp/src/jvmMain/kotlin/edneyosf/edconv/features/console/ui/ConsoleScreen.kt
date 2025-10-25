@@ -29,7 +29,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edconv.composeapp.generated.resources.Res
 import edconv.composeapp.generated.resources.icon
 import edneyosf.edconv.app.AppConfigs.MIN_SUB_WINDOW_HEIGHT
@@ -62,8 +62,8 @@ import java.awt.Dimension
 @Composable
 fun ConsoleScreen(onFinish: () -> Unit) {
     val viewModel = koinViewModel<ConsoleViewModel>()
-    val logs by viewModel.logsState.collectAsState()
-    val command by viewModel.commandState.collectAsState()
+    val logs by viewModel.logsState.collectAsStateWithLifecycle()
+    val command by viewModel.commandState.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides consoleScreenStrings) {
         Window(

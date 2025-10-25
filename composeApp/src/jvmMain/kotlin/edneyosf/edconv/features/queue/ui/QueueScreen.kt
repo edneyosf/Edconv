@@ -21,7 +21,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.window.Window
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edconv.composeapp.generated.resources.Res
 import edconv.composeapp.generated.resources.icon
 import edneyosf.edconv.app.AppConfigs.MIN_SUB_WINDOW_HEIGHT
@@ -63,7 +63,7 @@ import java.io.File
 @Composable
 fun QueueScreen(onClose: () -> Unit) {
     val viewModel = koinViewModel<QueueViewModel>()
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides queueScreenStrings) {
         Window(

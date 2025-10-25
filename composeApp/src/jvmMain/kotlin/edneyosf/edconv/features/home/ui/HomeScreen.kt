@@ -12,13 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.features.converter.ui.ConverterScreen
 import edneyosf.edconv.features.home.HomeEvent
@@ -45,7 +45,7 @@ import edneyosf.edconv.ui.filekit.rememberFilePickerLauncher
 @Composable
 fun HomeScreen() {
     val viewModel = koinViewModel<HomeViewModel>()
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
         state.Content(event = viewModel)
