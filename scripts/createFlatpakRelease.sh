@@ -8,6 +8,7 @@ REPO_DIR="repo"
 BUILD_DIR="build-dir"
 BUILDER_DIR=".flatpak-builder"
 OUTPUT="${APP_NAME}-${APP_VERSION}.flatpak"
+ARCH=$(uname -m)
 
 echo "🔨 Building $ARCH release..."
 mkdir -p "$REPO_DIR" "$BUILD_DIR"

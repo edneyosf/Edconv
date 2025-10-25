@@ -8,17 +8,19 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        include:
+          - runner: ubuntu-latest
+            arch: x86_64
+          - runner: ubuntu-24.04-arm64
+            arch: arm64
+
+    runs-on: ${{ matrix.runner }}
 
     env:
       GITHUB_ACTOR: ${{ github.actor }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      ARCH: ${{ matrix.arch }}
-      DEB_ARCH: ${{ matrix.arch == 'x86_64' && 'amd64' || matrix.arch }}
 
     steps:
       - name: Checkout source
@@ -41,9 +43,9 @@ jobs:
       - name: Install Flatpak SDK and extensions
         run: |
           sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub org.freedesktop.Platform/${ARCH}/25.08
-          sudo flatpak install -y flathub org.freedesktop.Sdk/${ARCH}/25.08
-          sudo flatpak install -y flathub org.freedesktop.Sdk.Extension.openjdk21/${ARCH}/25.08
+          sudo flatpak install -y flathub org.freedesktop.Platform//25.08
+          sudo flatpak install -y flathub org.freedesktop.Sdk//25.08
+          sudo flatpak install -y flathub org.freedesktop.Sdk.Extension.openjdk21//25.08
 
       - name: Install libfuse2
         run: |

@@ -9,6 +9,7 @@ USR_DIR="${OUTPUT_DIR}/usr"
 OPT_DIR="${OUTPUT_DIR}/opt"
 DEBIAN_DIR="${OUTPUT_DIR}/DEBIAN"
 APPLICATIONS_DIR="${USR_DIR}/share/applications"
+ARCH=$(dpkg-architecture -qDEB_HOST_ARCH)
 
 echo "🔨 Building $DEB_ARCH release..."
 ./gradlew composeApp:createReleaseDistributable

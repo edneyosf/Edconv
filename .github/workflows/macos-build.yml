@@ -8,16 +8,19 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
-
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        include:
+          - runner: macos-13
+            arch: x86_64
+          - runner: macos-latest
+            arch: arm64
+
+    runs-on: ${{ matrix.runner }}
 
     env:
       GITHUB_ACTOR: ${{ github.actor }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      ARCH: ${{ matrix.arch }}
 
     steps:
       - name: Checkout source

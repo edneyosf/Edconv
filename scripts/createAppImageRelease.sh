@@ -10,6 +10,7 @@ USR_DIR="${BUILD_DIR}/usr"
 APPLICATIONS_DIR="${USR_DIR}/share/applications"
 METAINFO_DIR="${USR_DIR}/share/metainfo"
 OUTPUT="${APP_NAME}-${APP_VERSION}.AppImage"
+ARCH=$(uname -m)
 APPIMAGE_TOOL="appimagetool-${ARCH}.AppImage"
 
 echo "🔨 Building $ARCH release..."
