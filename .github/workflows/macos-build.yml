@@ -8,15 +8,11 @@ on:
 
 jobs:
   build:
+    runs-on: macos-latest
+
     strategy:
       matrix:
-        include:
-          - runner: macos-13   # Intel (x86_64)
-            arch: x86_64
-          - runner: macos-14   # Apple Silicon (ARM64)
-            arch: arm64
-
-    runs-on: ${{ matrix.runner }}
+        arch: [x86_64, arm64]
 
     env:
       GITHUB_ACTOR: ${{ github.actor }}
