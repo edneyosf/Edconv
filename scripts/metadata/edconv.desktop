@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Edconv
-Comment=A user-friendly FFmpeg GUI
-Comment[pt_BR]=Uma interface gráfica para FFmpeg amigável
-Exec=/opt/Edconv/bin/Edconv
-Icon=/opt/Edconv/lib/Edconv.png
-Type=Application
-Categories=Utility
-StartupWMClass=edneyosf-edconv-MainKt
