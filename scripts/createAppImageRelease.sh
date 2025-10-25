@@ -10,7 +10,6 @@ USR_DIR="${BUILD_DIR}/usr"
 APPLICATIONS_DIR="${USR_DIR}/share/applications"
 METAINFO_DIR="${USR_DIR}/share/metainfo"
 OUTPUT="${APP_NAME}-${APP_VERSION}.AppImage"
-ARCH=$(uname -m)
 APPIMAGE_TOOL="appimagetool-${ARCH}.AppImage"
 
 echo "🔨 Building $ARCH release..."
@@ -31,7 +30,7 @@ cp $ICON_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${BUILD_DIR}/"
 cp $DESKTOP_FILE "./${APPLICATIONS_DIR}/"
 cp $METAINFO_FILE "./${METAINFO_DIR}/${APPDATA_FILE_NAME}"
-ARCH=$(uname -m) ./${APPIMAGE_TOOL} --no-appstream ${BUILD_DIR} $OUTPUT
+./${APPIMAGE_TOOL} --no-appstream ${BUILD_DIR} $OUTPUT
 
 echo "🧹 Cleaning..."
 rm -rf $BUILD_DIR

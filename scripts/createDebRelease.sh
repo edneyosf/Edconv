@@ -9,9 +9,8 @@ USR_DIR="${OUTPUT_DIR}/usr"
 OPT_DIR="${OUTPUT_DIR}/opt"
 DEBIAN_DIR="${OUTPUT_DIR}/DEBIAN"
 APPLICATIONS_DIR="${USR_DIR}/share/applications"
-ARCH=$(dpkg-architecture -qDEB_HOST_ARCH)
 
-echo "🔨 Building $ARCH release..."
+echo "🔨 Building $DEB_ARCH release..."
 ./gradlew composeApp:createReleaseDistributable
 
 echo "📦 Creating bundle..."
@@ -37,7 +36,7 @@ Package: edconv
 Version: $APP_VERSION
 Section: video
 Priority: optional
-Architecture: $ARCH
+Architecture: $DEB_ARCH
 Maintainer: $APP_AUTHOR <$APP_EMAIL>
 Description: $APP_DESCRIPTION_EN
 Homepage: $APP_HOMEPAGE
