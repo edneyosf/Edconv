@@ -18,7 +18,7 @@ echo "🔨 Building release..."
 
 echo "📥 Getting appimagetool..."
 wget -nc -q https://github.com/AppImage/AppImageKit/releases/download/continuous/${APPIMAGE_TOOL}
-chmod +x appimagetool-x86_64.AppImage
+chmod +x $APPIMAGE_TOOL
 
 echo "📦 Creating bundle..."
 rm -rf $BUILD_DIR
