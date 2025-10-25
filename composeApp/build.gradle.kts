@@ -28,18 +28,12 @@ kotlin {
     sourceSets {
         
        commonMain.dependencies {
-            implementation(dependencyNotation = compose.runtime)
-            implementation(dependencyNotation = compose.foundation)
             implementation(dependencyNotation = compose.material3)
-            implementation(dependencyNotation = compose.ui)
             implementation(dependencyNotation = compose.components.resources)
             implementation(dependencyNotation = compose.components.uiToolingPreview)
             implementation(dependencyNotation = compose.materialIconsExtended)
             implementation(dependencyNotation = libs.kotlinx.serialization)
-            implementation(dependencyNotation = libs.lifecycle.viewmodel.compose)
             implementation(dependencyNotation = libs.lifecycle.runtime.compose)
-            implementation(dependencyNotation = libs.koin.core)
-            implementation(dependencyNotation = libs.koin.compose)
             implementation(dependencyNotation = libs.koin.compose.viewmodel)
             implementation(dependencyNotation = libs.filekit.dialogs)
         }
@@ -47,7 +41,6 @@ kotlin {
         jvmMain.dependencies {
             implementation(dependencyNotation = compose.desktop.currentOs)
             implementation(dependencyNotation = libs.kotlinx.coroutines.swing)
-            implementation(dependencyNotation = libs.jna)
             implementation(dependencyNotation = libs.jna.platform)
         }
     }
