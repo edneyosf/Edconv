@@ -13,3 +13,5 @@ fun String.normalizeCommand(): String {
         .replace(regex, replacement = " ")
         .trim()
 }
+
+fun String.startEllipsis(max: Int) = if (this.length > max) "…${this.takeLast(n = max)}" else this
