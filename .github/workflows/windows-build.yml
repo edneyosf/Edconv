@@ -36,7 +36,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Create Windows release
-        run: ./scripts/createWindowsRelease.sh
+        run: .\scripts\createWindowsRelease.bat
         shell: bash
 
       - name: Upload artifact
