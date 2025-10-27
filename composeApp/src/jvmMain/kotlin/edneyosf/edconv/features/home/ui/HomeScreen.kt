@@ -69,6 +69,7 @@ private fun HomeState.Content(event: HomeEvent) {
     Scaffold(modifier = modifier) { innerPadding ->
         Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
             HomeNavigation(
+                event = event,
                 onSelected = event::setNavigation,
                 onSettings = { event.setDialog(state = HomeDialogState.Settings) },
                 onPickFile = { singleFilePicker.launch() }

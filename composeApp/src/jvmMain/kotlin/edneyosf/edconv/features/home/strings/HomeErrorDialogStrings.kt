@@ -21,7 +21,8 @@ class HomeErrorDialogStrings(override val language: String): Strings(language) {
         NO_DURATION_INPUT_MEDIA to "Falha ao obter a duração do arquivo de mídia.",
         NO_CHANNELS_INPUT_MEDIA to "Falha ao obter a quantidade de canais do arquivo de áudio.",
         NO_RESOLUTION_INPUT_MEDIA to "Falha ao obter a resolução do arquivo de vídeo.",
-        NO_STREAM_FOUND_INPUT_MEDIA to "Nenhum fluxo de mídia encontrado no arquivo."
+        NO_STREAM_FOUND_INPUT_MEDIA to "Nenhum fluxo de mídia encontrado no arquivo.",
+        OPEN_LINK to "Falha ao abrir link."
     )
 
     override val en = mapOf(
@@ -30,7 +31,8 @@ class HomeErrorDialogStrings(override val language: String): Strings(language) {
         NO_DURATION_INPUT_MEDIA to "Failed to retrieve the media file duration.",
         NO_CHANNELS_INPUT_MEDIA to "Failed to retrieve the number of channels from the audio file.",
         NO_RESOLUTION_INPUT_MEDIA to "Failed to retrieve the video file resolution.",
-        NO_STREAM_FOUND_INPUT_MEDIA to "No media stream found in the file."
+        NO_STREAM_FOUND_INPUT_MEDIA to "No media stream found in the file.",
+        OPEN_LINK to "Failed to open link."
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -41,6 +43,7 @@ class HomeErrorDialogStrings(override val language: String): Strings(language) {
         NO_DURATION_INPUT_MEDIA,
         NO_CHANNELS_INPUT_MEDIA,
         NO_RESOLUTION_INPUT_MEDIA,
-        NO_STREAM_FOUND_INPUT_MEDIA
+        NO_STREAM_FOUND_INPUT_MEDIA,
+        OPEN_LINK
     }
 }

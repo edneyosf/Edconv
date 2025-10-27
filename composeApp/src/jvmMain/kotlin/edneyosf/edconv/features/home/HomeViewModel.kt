@@ -9,6 +9,7 @@ import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.common.OS
 import edneyosf.edconv.core.config.EdConfig
+import edneyosf.edconv.core.config.RemoteConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.PlatformUtils
@@ -27,7 +28,11 @@ import kotlinx.coroutines.launch
 import java.awt.datatransfer.DataFlavor
 import java.io.File
 
-class HomeViewModel(private val config: EdConfig, private val process: EdProcess): ViewModel(), HomeEvent {
+class HomeViewModel(
+    private val config: EdConfig,
+    private val remoteConfig: RemoteConfig,
+    private val process: EdProcess
+): ViewModel(), HomeEvent {
 
     private val _state = MutableStateFlow(value = HomeState())
     val state: StateFlow<HomeState> = _state
@@ -41,6 +46,16 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         try {
             config.load()
             setNoConfigStatusIfNecessary()
+            viewModelScope.launch {
+                remoteConfig.loadEnv()
+                _state.update {
+                    copy(
+                        latestVersion = remoteConfig.latestVersion,
+                        donationUrl = remoteConfig.donationUrl,
+                        releasesUrl = remoteConfig.releasesUrl
+                    )
+                }
+            }
         }
         catch (e: Exception) {
             e.printStackTrace()
@@ -166,6 +181,10 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         }
 
         return false
+    }
+
+    override fun openLink(url: String) {
+        if (!PlatformUtils.openLink(url)) setDialog(HomeDialogState.Failure(Error.OPEN_LINK))
     }
 
     private fun findFFBinary(name: String): String? {

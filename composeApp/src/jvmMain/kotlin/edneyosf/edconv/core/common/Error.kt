@@ -26,5 +26,6 @@ enum class Error(val code: String) {
     ON_STARTING_METRICS_REQUIREMENTS(code = "000M"),
     NO_VIDEO_INPUT_MEDIA(code = "000N"),
     METRICS_MODEL_SAVE(code = "000O"),
-    FILE_ALREADY_EXISTS(code = "000P")
+    FILE_ALREADY_EXISTS(code = "000P"),
+    OPEN_LINK(code = "000Q")
 }

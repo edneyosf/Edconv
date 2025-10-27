@@ -5,22 +5,28 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileOpen
+import androidx.compose.material.icons.rounded.NewReleases
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.features.common.models.Audio
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.common.models.Video
+import edneyosf.edconv.features.home.HomeEvent
 import edneyosf.edconv.ffmpeg.common.MediaType
 import edneyosf.edconv.features.home.states.HomeNavigationState
 import edneyosf.edconv.features.home.states.HomeState
 import edneyosf.edconv.features.home.strings.HomeScreenStrings.Keys.*
 import edneyosf.edconv.features.home.strings.homeScreenStrings
 import edneyosf.edconv.ui.components.TextTooltip
+import edneyosf.edconv.ui.components.VibratingIcon
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.compositions.strings
 import edneyosf.edconv.ui.compositions.stringsComp
@@ -31,8 +37,12 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun HomeState.HomeNavigation(
-    onSelected: (HomeNavigationState) -> Unit, onSettings: () -> Unit, onPickFile: () -> Unit
+    event: HomeEvent,
+    onSelected: (HomeNavigationState) -> Unit,
+    onSettings: () -> Unit,
+    onPickFile: () -> Unit
 ) {
+    val version = remember { PropertyUtils.version }
     val items = listOf(
         Triple(
             first = HomeNavigationState.Media,
@@ -87,6 +97,34 @@ fun HomeState.HomeNavigation(
             )
         }
         Spacer(modifier = Modifier.weight(weight = 1f))
+        if(!version.isNullOrBlank() && !latestVersion.isNullOrBlank()) {
+            val text = "v$latestVersion ${strings[VERSION_AVAILABLE]}"
+
+            TextTooltip(text = text) {
+                IconButton(
+                    onClick = { if (!releasesUrl.isNullOrBlank()) event.openLink(releasesUrl) }
+                ) {
+                    VibratingIcon(enabled = latestVersion != version) {
+                        Icon(
+                            imageVector = Icons.Rounded.NewReleases,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            contentDescription = text
+                        )
+                    }
+                }
+            }
+        }
+        if(!donationUrl.isNullOrBlank()) {
+            TextTooltip(text = strings[DONATION]) {
+                IconButton(onClick = { event.openLink(url = donationUrl) }) {
+                    Icon(
+                        imageVector = Icons.Rounded.VolunteerActivism,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        contentDescription = strings[DONATION]
+                    )
+                }
+            }
+        }
         TextTooltip(text = strings[SETTINGS]) {
             IconButton(enabled = !loading, onClick = { onSettings() }) {
                 Icon(
@@ -115,6 +153,7 @@ private fun DefaultPreview() {
 
         HomeState(navigation = HomeNavigationState.Media, input = inputData)
             .HomeNavigation(
+                event = object : HomeEvent{},
                 onSelected = {},
                 onSettings = {},
                 onPickFile = {}

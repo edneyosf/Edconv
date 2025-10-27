@@ -33,6 +33,7 @@ fun HomeErrorDialog(error: Error, onFinish: () -> Unit) {
             Error.NO_STREAM_FOUND_INPUT_MEDIA -> strings[NO_STREAM_FOUND_INPUT_MEDIA]
             Error.NO_CHANNELS_INPUT_MEDIA -> strings[NO_CHANNELS_INPUT_MEDIA]
             Error.NO_RESOLUTION_INPUT_MEDIA -> strings[NO_RESOLUTION_INPUT_MEDIA]
+            Error.OPEN_LINK -> strings[OPEN_LINK]
             else -> commonStrings[ERROR_DEFAULT]
         }
 

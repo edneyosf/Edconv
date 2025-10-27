@@ -20,7 +20,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         MEDIA_NAVIGATION_ITEM to "Mídia",
         METRICS_NAVIGATION_ITEM to "Métricas",
         SELECT_MEDIA_FILE to "Selecionar mídia",
-        SETTINGS to "Configurações"
+        SETTINGS to "Configurações",
+        DONATION to "Doação",
+        VERSION_AVAILABLE to "disponível"
     )
 
     override val en = mapOf(
@@ -28,7 +30,9 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         MEDIA_NAVIGATION_ITEM to "Media",
         METRICS_NAVIGATION_ITEM to "Metrics",
         SELECT_MEDIA_FILE to "Select media",
-        SETTINGS to "Settings"
+        SETTINGS to "Settings",
+        DONATION to "Donation",
+        VERSION_AVAILABLE to "available"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -38,6 +42,8 @@ class HomeScreenStrings(override val language: String): Strings(language) {
         MEDIA_NAVIGATION_ITEM,
         METRICS_NAVIGATION_ITEM,
         SELECT_MEDIA_FILE,
-        SETTINGS
+        SETTINGS,
+        DONATION,
+        VERSION_AVAILABLE
     }
 }

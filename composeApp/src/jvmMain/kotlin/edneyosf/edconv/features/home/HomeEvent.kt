@@ -9,4 +9,5 @@ interface HomeEvent {
     fun setDialog(state: HomeDialogState) = Unit
     fun onDragAndDropInput(event: DragAndDropEvent) = false
     fun setInput(path: String) = Unit
+    fun openLink(url: String) = Unit
 }
