@@ -62,7 +62,7 @@ Run the installer and follow the installation steps.
 > As a result, **FFmpeg and FFprobe binaries must be compiled with static libraries** to work correctly within the sandbox environment.
 
 ```bash
-flatpak --user install edconv-x.x.x-x86_64.flatpak
+flatpak --user install Edconv-x.x.x-x86_64.flatpak
 ```
 
 ```bash
@@ -74,16 +74,16 @@ flatpak run io.github.edneyosf.edconv
 Before running the AppImage, ensure it has execution permissions.
 
 ```bash
-chmod +x edconv-x.x.x-x86_64.AppImage
+chmod +x Edconv-x.x.x-x86_64.AppImage
 ```
 
 ```bash
-./edconv-x.x.x-x86_64.AppImage
+./Edconv-x.x.x-x86_64.AppImage
 ```
 
 ### Debian-based systems:  
 ```bash
-sudo apt install ./edconv_x.x.x.deb
+sudo apt install ./Edconv_x.x.x-86_64.deb
 ```
 
 ## Support & Donations
