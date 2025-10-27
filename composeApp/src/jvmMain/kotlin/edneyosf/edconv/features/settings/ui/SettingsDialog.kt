@@ -9,9 +9,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.LaunchedEffected
+import edneyosf.edconv.core.extensions.startEllipsis
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.settings.SettingsEvent
 import edneyosf.edconv.features.settings.SettingsViewModel
@@ -51,6 +55,7 @@ fun SettingsDialog(onComplete: () -> Unit) {
 
 @Composable
 private fun SettingsState.Content(event: SettingsEvent) {
+    val maxPathLength = 64
     val defined = !(ffmpegPath.isBlank() || ffprobePath.isBlank())
     val isLoading = status is SettingsStatusState.Loading
     val pickFFmpeg = rememberFilePickerLauncher(
@@ -62,7 +67,6 @@ private fun SettingsState.Content(event: SettingsEvent) {
         onResult = { it?.file?.let { file -> event.setFFprobePath(file.absolutePath) } }
     )
 
-
     SimpleDialog(
         icon = Icons.Rounded.Settings,
         title = strings[TITLE],
@@ -72,6 +76,19 @@ private fun SettingsState.Content(event: SettingsEvent) {
                     text = if(defined) strings[DEFINED] else strings[NO_DEFINED],
                     textAlign = TextAlign.Center
                 )
+                if (ffmpegPath.isNotBlank() || ffprobePath.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(height = dimens.xl))
+                    Column {
+                        ColoredLabelText(
+                            label = "FFmpeg",
+                            value = ffmpegPath.startEllipsis(max = maxPathLength)
+                        )
+                        ColoredLabelText(
+                            label = "FFprobe",
+                            value = ffprobePath.startEllipsis(max = maxPathLength)
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(height = dimens.xl))
                 Row {
                     PrimaryButton(
@@ -105,6 +122,19 @@ private fun SettingsState.Content(event: SettingsEvent) {
         confirmationText = commonStrings[CONFIRMATION_BUTTON],
         onConfirmation = { event.onSave() },
         onDismissRequest = { }
+    )
+}
+
+@Composable
+fun ColoredLabelText(label: String, value: String) {
+    Text(
+        text = buildAnnotatedString {
+            append(label)
+            append(": ")
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
+                append(value)
+            }
+        }
     )
 }
 
