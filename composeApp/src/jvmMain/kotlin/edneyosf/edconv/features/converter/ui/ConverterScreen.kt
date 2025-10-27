@@ -106,7 +106,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if(input.videos.size > 1) {
+                            if(input.audios.isNotEmpty()) {
                                 IndexInput(
                                     value = indexVideo?.takeIf { it >= 0 },
                                     max = input.videos.size,
@@ -114,6 +114,8 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                     onValueChange = event::setIndexVideo,
                                     onClick = { event.setIndexVideo(0) }
                                 )
+                            }
+                            if(input.videos.size > 1) {
                                 AllIndexesInput(
                                     enabled = indexVideo == null,
                                     onClick = { event.setIndexVideo(null) }
@@ -212,7 +214,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                             horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if(input.audios.size > 1) {
+                            if(input.audios.size > 1 || type == MediaType.VIDEO) {
                                 IndexInput(
                                     value = indexAudio?.takeIf { it >= 0 },
                                     max = input.audios.size,
