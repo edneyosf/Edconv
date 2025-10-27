@@ -97,14 +97,14 @@ fun HomeState.HomeNavigation(
             )
         }
         Spacer(modifier = Modifier.weight(weight = 1f))
-        if(!version.isNullOrBlank() && !latestVersion.isNullOrBlank()) {
+        if(!version.isNullOrBlank() && !latestVersion.isNullOrBlank() && latestVersion != version) {
             val text = "v$latestVersion ${strings[VERSION_AVAILABLE]}"
 
             TextTooltip(text = text) {
                 IconButton(
                     onClick = { if (!releasesUrl.isNullOrBlank()) event.openLink(releasesUrl) }
                 ) {
-                    VibratingIcon(enabled = latestVersion != version) {
+                    VibratingIcon {
                         Icon(
                             imageVector = Icons.Rounded.NewReleases,
                             tint = MaterialTheme.colorScheme.tertiary,
