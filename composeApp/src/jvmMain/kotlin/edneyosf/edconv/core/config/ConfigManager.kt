@@ -26,7 +26,7 @@ open class ConfigManager(private val fileName: String) {
 
     private fun configDir(): File {
         val baseDir = when(PlatformUtils.current) {
-            OS.WINDOWS -> "${PropertyUtils.userHomeDir}/AppData/Roaming"
+            OS.WINDOWS -> "${PropertyUtils.userHomeDir}\\AppData\\Roaming"
             OS.MACOS -> "${PropertyUtils.userHomeDir}/Library/Application Support"
             else -> "${PropertyUtils.userHomeDir}/.config"
         }

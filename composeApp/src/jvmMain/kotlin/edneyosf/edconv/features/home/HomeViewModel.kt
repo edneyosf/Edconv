@@ -63,20 +63,31 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
     }
 
     private fun setNoConfigStatusIfNecessary() {
-        val ffmpegPath = config.ffmpegPath
-        val ffprobePath = config.ffprobePath
+        viewModelScope.launch(context = Dispatchers.IO) {
+            updateFFBinaryPath(
+                currentPath = config.ffmpegPath,
+                name = "ffmpeg"
+            ) {  config.ffmpegPath  = it }
+            updateFFBinaryPath(
+                currentPath = config.ffprobePath,
+                name = "ffprobe"
+            ) {  config.ffprobePath  = it }
 
-        if (ffmpegPath.isBlank() || ffprobePath.isBlank()) {
-            setDialog(HomeDialogState.Settings)
-            return
-        }
+            val ffmpegPath = config.ffmpegPath
+            val ffprobePath = config.ffprobePath
 
-        val ffmpegFile = File(ffmpegPath)
-        val ffprobeFile = File(ffprobePath)
+            if (ffmpegPath.isBlank() || ffprobePath.isBlank()) {
+                setDialog(HomeDialogState.Settings)
+                return@launch
+            }
 
-        if (!ffmpegFile.exists() || !ffmpegFile.isFile ||
-            !ffprobeFile.exists() || !ffprobeFile.isFile) {
-            setDialog(HomeDialogState.Settings)
+            val ffmpegFile = File(ffmpegPath)
+            val ffprobeFile = File(ffprobePath)
+
+            if (!ffmpegFile.exists() || !ffmpegFile.isFile ||
+                !ffprobeFile.exists() || !ffprobeFile.isFile) {
+                setDialog(HomeDialogState.Settings)
+            }
         }
     }
 
@@ -157,32 +168,36 @@ class HomeViewModel(private val config: EdConfig, private val process: EdProcess
         return false
     }
 
-    fun findFFmpeg(): String? {
+    private fun findFFBinary(name: String): String? {
         val platform = PlatformUtils.current
         val candidates = when(platform) {
             OS.WINDOWS -> listOf(
-                // Windows: Chocolatey, pasta padrão e PATH
-                "C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe",
-                "C:\\ffmpeg\\bin\\ffmpeg.exe"
+                "C:\\ProgramData\\chocolatey\\bin\\${name}.exe",
+                "C:\\Program Files\\ffmpeg\\bin\\${name}.exe",
+                "C:\\ffmpeg\\bin\\${name}.exe"
             )
             OS.MACOS -> listOf(
-                // macOS: Homebrew Intel/ARM e PATH
-                "/usr/local/bin/ffmpeg",
-                "/opt/homebrew/bin/ffmpeg"
+                "/usr/local/bin/${name}",
+                "/opt/homebrew/bin/${name}"
             )
             else -> listOf(
-                // Linux: distribuições Debian/Fedora e PATH
-                "/usr/bin/ffmpeg",
-                "/usr/local/bin/ffmpeg"
+                "/usr/bin/${name}",
+                "/usr/local/bin/${name}"
             )
         }
 
-        // Primeiro verifica PATH
-        val pathFromEnv = System.getenv("PATH")?.split(File.pathSeparator)?.map { it.trim() + File.separator + "ffmpeg" } ?: emptyList()
-        val pathCandidates = if (platform == OS.WINDOWS) pathFromEnv.map { "$it.exe" } else pathFromEnv
+        return candidates.firstOrNull { File(it).exists() }
+    }
 
-        // Junta candidatos e verifica existência
-        val allCandidates = candidates + pathCandidates
-        return allCandidates.firstOrNull { File(it).exists() }
+    private suspend fun updateFFBinaryPath(currentPath: String, name: String, savePath: (String) -> Unit) {
+        if (currentPath.isBlank()) {
+            findFFBinary(name)?.takeIf { it.isNotBlank() }?.let { path ->
+                try { savePath(path) }
+                catch (e: Exception) {
+                    e.printStackTrace()
+                    notifyMain { setDialog(HomeDialogState.Failure(Error.CONFIGURATION_SAVE)) }
+                }
+            }
+        }
     }
 }
