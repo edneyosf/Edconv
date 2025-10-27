@@ -37,7 +37,6 @@ jobs:
 
       - name: Create Windows release
         run: .\scripts\createWindowsRelease.bat
-        shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
