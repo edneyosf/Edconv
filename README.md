@@ -9,6 +9,7 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
   <a href="https://github.com/edneyosf/Edconv/releases"><img src="https://img.shields.io/github/downloads/edneyosf/Edconv/total"/></a>
 
   <a href="https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/linux-build.yml/badge.svg"/></a>
+  <a href="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/macos-build.yml/badge.svg"/></a>
   <a href="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml/badge.svg"/></a>
 
   <h4>Download</h4> 
@@ -19,12 +20,17 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
 
 ## Features ✨
 
-- Convert video and audio using FFmpeg
-- Custom FFmpeg arguments
-- Console mode (viewing logs at runtime)
-- Queue
-- Media Information
-- VMAF, PSNR and SSIM perceptual video quality assessment algorithm. **Must be enabled in the FFmpeg binaries to work properly**
+- You can convert video and audio using FFmpeg
+- You can queue multiple jobs and watch them process in real time
+- You can pass custom FFmpeg arguments if you want full control
+- You still see all the logs (so you know exactly what’s happening)
+- You can convert video and audio using FFmpeg
+- You can see all the media information
+- You can run VMAF, PSNR, SSIM analysis right inside the app
+
+> **⚠️ Notice**
+>
+> To use VMAF, it must be enabled in the FFmpeg binaries.
 
 ## Screenshots
 
@@ -43,6 +49,10 @@ Download the latest release for your system from the [Releases page](https://git
 ### Windows:
 
 Run the installer as administrator and follow the installation steps.
+
+### macOS:
+
+Run the installer and follow the installation steps.
 
 ### Flatpak
 
@@ -74,11 +84,6 @@ chmod +x edconv-x.x.x-x86_64.AppImage
 ### Debian-based systems:  
 ```bash
 sudo apt install ./edconv_x.x.x.deb
-```
-
-### RPM-based systems:
-```bash
-sudo dnf install edconv_x.x.x.rpm
 ```
 
 ## Support & Donations
