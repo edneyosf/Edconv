@@ -22,7 +22,9 @@ class MetricsCompleteDialogStrings(override val language: String): Strings(langu
         DURATION_TIME to "Duração total:",
         VMAF_SCORE to "VMAF:",
         PSNR_SCORE to "PSNR:",
-        SSIM_SCORE to "SSIM:"
+        SSIM_SCORE to "SSIM:",
+        DONATION_TEXT to "Este app é gratuito e feito com carinho. Ajude a mantê-lo vivo com uma pequena doação. Deus te abençoe!",
+        DONATION to "Doação"
     )
 
     override val en = mapOf(
@@ -32,7 +34,9 @@ class MetricsCompleteDialogStrings(override val language: String): Strings(langu
         DURATION_TIME to "Total duration:",
         VMAF_SCORE to "VMAF:",
         PSNR_SCORE to "PSNR:",
-        SSIM_SCORE to "SSIM:"
+        SSIM_SCORE to "SSIM:",
+        DONATION_TEXT to "This app is free and made with love. Help keep it alive with a small donation. God bless you!",
+        DONATION to "Donation"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -44,6 +48,8 @@ class MetricsCompleteDialogStrings(override val language: String): Strings(langu
         DURATION_TIME,
         VMAF_SCORE,
         PSNR_SCORE,
-        SSIM_SCORE
+        SSIM_SCORE,
+        DONATION_TEXT,
+        DONATION
     }
 }

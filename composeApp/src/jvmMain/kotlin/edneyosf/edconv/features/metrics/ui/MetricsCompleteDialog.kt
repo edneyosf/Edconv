@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.VolunteerActivism
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
+import edneyosf.edconv.core.utils.PlatformUtils
 import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.metrics.strings.MetricsCompleteDialogStrings.Keys.*
@@ -29,7 +34,12 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun MetricsCompleteDialog(
-    vmafScore: String?, psnrScore: String?, ssimScore: String?, startTime: String, finishTime: String,
+    vmafScore: String?,
+    psnrScore: String?,
+    ssimScore: String?,
+    startTime: String,
+    finishTime: String,
+    donationUrl: String?,
     duration: String, onFinish: () -> Unit
 ) {
     CompositionLocalProvider(value = stringsComp provides metricsCompleteDialogStrings) {
@@ -56,11 +66,27 @@ fun MetricsCompleteDialog(
                     vmafScore?.let { Score(label = strings[VMAF_SCORE], value = it) }
                     psnrScore?.let { Score(label = strings[PSNR_SCORE], value = it) }
                     ssimScore?.let { Score(label = strings[SSIM_SCORE], value = it) }
+                    Spacer(modifier = Modifier.height(height = dimens.xl))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.VolunteerActivism,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(width = dimens.xs))
+                        Text(
+                            text = strings[DONATION_TEXT],
+                            style = TextStyle(fontSize = 12.sp)
+                        )
+                    }
                 }
             },
             icon = Icons.Rounded.CheckCircle,
             onConfirmation = onFinish,
-            confirmationText = commonStrings[CONFIRMATION_BUTTON]
+            confirmationText = commonStrings[CONFIRMATION_BUTTON],
+            cancelText = if(donationUrl.isNullOrBlank()) null else strings[DONATION],
+            onCancel = {
+                donationUrl?.let { PlatformUtils.openLink(url = it) }
+            }
         )
     }
 }
@@ -90,6 +116,7 @@ private fun DefaultPreview() = MetricsCompleteDialog(
     startTime = "123",
     finishTime = "123",
     duration = "123",
+    donationUrl = "url",
     onFinish = {}
 )
 

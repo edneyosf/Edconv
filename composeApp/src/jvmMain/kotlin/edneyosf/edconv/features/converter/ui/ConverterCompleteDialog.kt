@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.VolunteerActivism
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
+import edneyosf.edconv.core.utils.PlatformUtils
 import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.converter.strings.ConverterCompleteDialogStrings.Keys.*
@@ -28,7 +33,13 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
-fun ConverterCompleteDialog(startTime: String, finishTime: String, duration: String, onFinish: () -> Unit) {
+fun ConverterCompleteDialog(
+    startTime: String,
+    finishTime: String,
+    duration: String,
+    donationUrl: String?,
+    onFinish: () -> Unit
+) {
     CompositionLocalProvider(value = stringsComp provides converterCompleteDialogStrings) {
         SimpleDialog(
             title = strings[TITLE],
@@ -55,11 +66,27 @@ fun ConverterCompleteDialog(startTime: String, finishTime: String, duration: Str
                         Spacer(modifier = Modifier.width(width = dimens.xxs))
                         Text(text = duration, style = MaterialTheme.typography.titleMedium.copy(color = color))
                     }
+                    Spacer(modifier = Modifier.height(height = dimens.xl))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.VolunteerActivism,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(width = dimens.xs))
+                        Text(
+                            text = strings[DONATION_TEXT],
+                            style = TextStyle(fontSize = 12.sp)
+                        )
+                    }
                 }
             },
             icon = Icons.Rounded.CheckCircle,
             onConfirmation = onFinish,
-            confirmationText = commonStrings[CONFIRMATION_BUTTON]
+            confirmationText = commonStrings[CONFIRMATION_BUTTON],
+            cancelText = if(donationUrl.isNullOrBlank()) null else strings[DONATION],
+            onCancel = {
+                donationUrl?.let { PlatformUtils.openLink(url = it) }
+            }
         )
     }
 }
@@ -69,6 +96,7 @@ private fun DefaultPreview() = ConverterCompleteDialog(
     startTime = "123",
     finishTime = "123",
     duration = "123",
+    donationUrl = "url",
     onFinish = {}
 )
 
