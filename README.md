@@ -83,7 +83,7 @@ chmod +x Edconv-x.x.x-x86_64.AppImage
 
 ### Debian-based systems:  
 ```bash
-sudo apt install ./Edconv_x.x.x-86_64.deb
+sudo apt install ./Edconv-x.x.x-x86_64.deb
 ```
 
 ## Support & Donations
