@@ -59,6 +59,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import java.awt.Dimension
 import java.io.File
+import edneyosf.edconv.ui.theme.setWindowTheme
 
 @Composable
 fun QueueScreen(onClose: () -> Unit) {
@@ -72,6 +73,7 @@ fun QueueScreen(onClose: () -> Unit) {
             icon = painterResource(resource = Res.drawable.icon)
         ) {
             window.minimumSize = Dimension(MIN_SUB_WINDOW_WIDTH, MIN_SUB_WINDOW_HEIGHT)
+            setWindowTheme(window)
             state.Content(event = viewModel)
         }
     }

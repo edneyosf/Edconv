@@ -45,6 +45,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import org.jetbrains.compose.resources.painterResource
 import java.awt.Dimension
 import java.io.File
+import edneyosf.edconv.ui.theme.setWindowTheme
 
 @Composable
 fun InputMedia.MediaInfoScreen(onFinish: () -> Unit) {
@@ -54,6 +55,7 @@ fun InputMedia.MediaInfoScreen(onFinish: () -> Unit) {
             title = strings[TITLE],
             content = {
                 window.minimumSize = Dimension(MIN_SUB_WINDOW_WIDTH, MIN_SUB_WINDOW_HEIGHT)
+                setWindowTheme(window)
                 Content()
             },
             onCloseRequest = onFinish
