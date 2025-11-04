@@ -55,6 +55,7 @@ import edneyosf.edconv.ui.previews.EnglishLightPreview
 import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.ui.theme.firaCodeFont
+import edneyosf.edconv.ui.theme.setWindowTheme
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import java.awt.Dimension
@@ -71,6 +72,7 @@ fun ConsoleScreen(onFinish: () -> Unit) {
             title = strings[TITLE],
             content = {
                 window.minimumSize = Dimension(MIN_SUB_WINDOW_WIDTH, MIN_SUB_WINDOW_HEIGHT)
+                setWindowTheme(window)
                 Content(logs, command, event = viewModel)
             },
             onCloseRequest = onFinish
