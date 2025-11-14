@@ -18,7 +18,7 @@ echo "🔨 Building $ARCH release..."
 ./gradlew composeApp:createReleaseDistributable
 
 echo "📥 Getting appimagetool..."
-wget -nc -q https://github.com/AppImage/AppImageKit/releases/download/continuous/${APPIMAGE_TOOL}
+wget -nc -q https://github.com/AppImage/appimagetool/releases/download/continuous/${APPIMAGE_TOOL}
 chmod +x $APPIMAGE_TOOL
 
 echo "📦 Creating bundle..."
