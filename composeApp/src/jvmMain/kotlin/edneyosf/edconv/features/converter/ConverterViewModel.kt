@@ -76,12 +76,12 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     private fun observeInput() {
         viewModelScope.launch {
             combine(
-                flow = process.input,
+                flow = process.inputs,
                 flow2 = process.inputType,
                 transform = ::Pair
             )
-            .collectLatest { (input, type) ->
-                setInput(newInput = input, newType = type)
+            .collectLatest { (inputs, type) ->
+                setInput(newInputs = inputs, newType = type)
             }
         }
     }
@@ -107,8 +107,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             encoderAudio = audio
                         )
 
-                        if(input != null) newState.copy(output = encoder?.toOutput(inputMedia = input))
-                        else newState
+                        if(inputs != null && inputs.isNotEmpty())
+                            newState.copy(output = encoder?.toOutput(inputMedia = inputs.first()))
+                        else
+                            newState
                     }
                 }
         }
@@ -120,23 +122,26 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 .distinctUntilChanged()
                 .collectLatest { (_, video) ->
                     val state = _state.value
-                    val input = state.input
+                    val input = state.inputs?.firstOrNull()
                     val encoder = state.type?.currentEncoder(
                         indexVideo = video,
                         encoderVideo = state.encoderVideo,
                         encoderAudio = state.encoderAudio
                     )
 
-                    if(input != null) _state.update { copy(output = encoder?.toOutput(inputMedia = input)) }
+                    input?.let {
+                        _state.update { copy(output = encoder?.toOutput(inputMedia = it)) }
+                    }
                 }
         }
     }
 
-    fun setInput(newInput: InputMedia?, newType: MediaType?) {
-        if(newInput != null && newType != null) {
+    fun setInput(newInputs: List<InputMedia>?, newType: MediaType?) {
+        if(newInputs?.isNotEmpty() == true && newType != null) {
             _state.updateAndSync {
-                val video = newInput.videos.firstOrNull()
-                val audio = newInput.audios.firstOrNull()
+                val first = newInputs.first()
+                val video = first.videos.firstOrNull()
+                val audio = first.audios.firstOrNull()
 
                 val newResolution = resolution
                     ?: Resolution.fromValues(width = video?.width, height = video?.height)
@@ -160,17 +165,17 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 )
 
                 copy(
-                    input = newInput,
+                    inputs = newInputs,
                     type = newType,
-                    indexVideo = if(newInput.videos.isEmpty()) -1 else 0,
-                    indexAudio = if(newInput.audios.isEmpty()) -1 else 0,
+                    indexVideo = if(first.videos.isEmpty()) -1 else 0,
+                    indexAudio = if(first.audios.isEmpty()) -1 else 0,
                     encoderAudio = newEncoderAudio,
                     encoderVideo = newEncoderVideo,
                     resolution = newResolution,
                     pixelFormat = newPixelFormat,
                     channels = newChannels,
                     sampleRate = newSampleRate,
-                    output = newEncoder.toOutput(inputMedia = newInput)
+                    output = newEncoder.toOutput(inputMedia = first)
                 )
             }
         }
@@ -195,9 +200,11 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         }
 
         state.run {
+            val first = inputs?.firstOrNull()
+
             val ffmpeg = when (type) {
                 MediaType.AUDIO -> {
-                    val stream = input?.audios?.firstOrNull()
+                    val stream = first?.audios?.firstOrNull()
 
                     if(stream != null && encoderAudio != null) {
                         val inputChannels = stream.channels
@@ -228,8 +235,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 MediaType.VIDEO -> {
                     if(presetVideo.isNullOrBlank() || (bitrateControlVideo == null && bitrateVideo == null)) return@run
 
-                    val streamVideo = input?.videos?.firstOrNull()
-                    val streamAudio = input?.audios?.firstOrNull()
+                    val streamVideo = first?.videos?.firstOrNull()
+                    val streamAudio = first?.audios?.firstOrNull()
                     var inputChannels: Int?
                     var customChannelsArgs: List<String>? = null
 
@@ -287,12 +294,12 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun addToQueue(fromStart: Boolean, overwrite: Boolean) {
         val state = _state.value
-        val input = state.input
+        val inputs = state.inputs
         val type = state.type
         val output = state.output
         val command = process.command.value
 
-        if(input != null && type != null && !output?.first.isNullOrBlank() && !state.output.second.isBlank() && command.isNotBlank()) {
+        if(inputs?.isNotEmpty() == true && type != null && !output?.first.isNullOrBlank() && !state.output.second.isBlank() && command.isNotBlank()) {
             try {
                 val outputFile = File("${output.first}/${output.second}")
                 val outputExists = outputFile.exists()
@@ -311,15 +318,17 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     onError(Error.FILE_ALREADY_EXISTS)
                 }
                 else {
-                    process.addToQueue(
-                        item = MediaQueue(
-                            id = UUID.randomUUID().toString(),
-                            input = input,
-                            type = type,
-                            command = command.normalizeCommand(),
-                            outputFile = outputFile
+                    inputs.forEach {
+                        process.addToQueue(
+                            item = MediaQueue(
+                                id = UUID.randomUUID().toString(),
+                                input = it,
+                                type = type,
+                                command = command.normalizeCommand(),
+                                outputFile = outputFile
+                            )
                         )
-                    )
+                    }
                 }
             }
             catch (e: Exception) {

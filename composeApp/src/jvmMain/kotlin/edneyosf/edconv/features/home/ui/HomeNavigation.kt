@@ -63,7 +63,14 @@ fun HomeState.HomeNavigation(
                 onClick = onPickFile
             ) {
                 BadgedBox(
-                    badge = { input?.let { Badge() } }
+                    badge = {
+                        inputs?.let {
+                            val size = inputs.size
+
+                            if(size > 1) Badge { Text(text = size.toString()) }
+                            else Badge()
+                        }
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.FileOpen,
@@ -75,6 +82,7 @@ fun HomeState.HomeNavigation(
         Spacer(modifier = Modifier.height(height = dimens.xl))
         items.forEachIndexed { _, item ->
             val state = item.first
+            val input = inputs?.firstOrNull()
             val hasAudio = input?.audios?.isNotEmpty()
             val hasVideo = input?.videos?.isNotEmpty()
             val enabled = when(state) {
@@ -151,7 +159,7 @@ private fun DefaultPreview() {
             videos = listOf(Video(height = 123, width = 123))
         )
 
-        HomeState(navigation = HomeNavigationState.Media, input = inputData)
+        HomeState(navigation = HomeNavigationState.Media, inputs = listOf(inputData))
             .HomeNavigation(
                 event = object : HomeEvent{},
                 onSelected = {},

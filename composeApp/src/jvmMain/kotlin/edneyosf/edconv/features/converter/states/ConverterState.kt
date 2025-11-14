@@ -6,7 +6,7 @@ import edneyosf.edconv.ffmpeg.common.*
 data class ConverterState(
     val status: ConverterStatusState = ConverterStatusState.Initial,
     val dialog: ConverterDialogState = ConverterDialogState.None,
-    val input: InputMedia? = null,
+    val inputs: List<InputMedia>? = null,
     val type: MediaType? = null,
     val output: Pair<String, String>? = null,
     val queueSize: Int = 0,

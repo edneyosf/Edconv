@@ -40,7 +40,8 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
 import org.koin.compose.viewmodel.koinViewModel
-import edneyosf.edconv.ui.filekit.rememberFilePickerLauncher
+import edneyosf.edconv.ui.filekit.rememberFilesPickerLauncher
+import io.github.vinceglb.filekit.PlatformFile
 
 @Composable
 fun HomeScreen() {
@@ -56,9 +57,9 @@ fun HomeScreen() {
 @Composable
 private fun HomeState.Content(event: HomeEvent) {
     val version = remember { PropertyUtils.version }
-    val singleFilePicker = rememberFilePickerLauncher(
+    val singleFilePicker = rememberFilesPickerLauncher(
         title = strings[TITLE_PICK_FILE],
-        onResult = { it?.file?.let { file -> event.setInput(path = file.absolutePath) } }
+        onResult = { event.setInputs(it.toPaths()) }
     )
     val modifier = Modifier
         .dragAndDropTarget(
@@ -76,7 +77,7 @@ private fun HomeState.Content(event: HomeEvent) {
             )
             when {
                 loading -> Loading(appVersion = version)
-                input == null -> NoMediaScreen(appVersion = version)
+                inputs == null || inputs.isEmpty() -> NoMediaScreen(appVersion = version)
                 navigation is HomeNavigationState.Media -> ConverterScreen()
                 navigation is HomeNavigationState.Metrics -> MetricsScreen()
             }
@@ -103,6 +104,14 @@ private fun buildDropTarget(homeEvent: HomeEvent): DragAndDropTarget =
             return homeEvent.onDragAndDropInput(event)
         }
     }
+
+private fun List<PlatformFile>?.toPaths(): List<String> {
+    val paths = mutableListOf<String>()
+
+    this?.forEach { paths.add(it.file.absolutePath) }
+
+    return paths
+}
 
 
 @Composable

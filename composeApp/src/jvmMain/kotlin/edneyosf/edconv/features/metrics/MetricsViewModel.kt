@@ -61,8 +61,8 @@ class MetricsViewModel(private val config: EdConfig, private val process: EdProc
 
     private fun observeInput() {
         viewModelScope.launch {
-            process.input.collectLatest {
-                _state.update { copy(reference = it) }
+            process.inputs.collectLatest {
+                _state.update { copy(reference = it.firstOrNull()) }
             }
         }
     }

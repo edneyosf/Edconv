@@ -8,6 +8,6 @@ interface HomeEvent {
     fun setNavigation(state: HomeNavigationState) = Unit
     fun setDialog(state: HomeDialogState) = Unit
     fun onDragAndDropInput(event: DragAndDropEvent) = false
-    fun setInput(path: String) = Unit
+    fun setInputs(paths: List<String>) = Unit
     fun openLink(url: String) = Unit
 }

@@ -10,8 +10,8 @@ class EdProcess {
     var conversion: Process? = null
     var analysis: Process? = null
 
-    private val _input = MutableStateFlow<InputMedia?>(value = null)
-    val input = _input.asStateFlow()
+    private val _inputs = MutableStateFlow(value = listOf<InputMedia>())
+    val inputs = _inputs.asStateFlow()
 
     private val _inputType = MutableStateFlow<MediaType?>(value = null)
     val inputType = _inputType.asStateFlow()
@@ -31,7 +31,7 @@ class EdProcess {
     private val _command = MutableStateFlow(value = "")
     val command = _command.asStateFlow()
 
-    fun setInput(inputMedia: InputMedia?) { _input.value = inputMedia }
+    fun setInputs(data: List<InputMedia>) { _inputs.value = data }
 
     fun setInputType(mediaType: MediaType?) { _inputType.value = mediaType }
 

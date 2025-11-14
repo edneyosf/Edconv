@@ -67,6 +67,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
     val outputDir = output?.first?.let { File(it) }
     val outputFile = output?.second?.let { File(it) }
     val invalidOutputFile = outputFile?.extension?.isBlank() == true
+    val input = inputs?.firstOrNull()
     val hasVideo = input?.videos?.isNotEmpty() == true
     val hasAudio = input?.audios?.isNotEmpty() == true
     val videoEnabled = indexVideo != -1
@@ -318,6 +319,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
         ) {
             TextField(
                 value = output?.second ?: "",
+                enabled = inputs?.size == 1,
                 modifier = Modifier.weight(weight = 1f),
                 colors = TextFieldDefaults.colors().custom(),
                 onValueChange = event::setOutputFile,
@@ -408,7 +410,8 @@ private fun ConverterState.Actions(
     }
 
     if(showMediaInfo) {
-        input?.MediaInfoScreen(
+        //TODO
+        inputs?.firstOrNull()?.MediaInfoScreen(
             onFinish = { showMediaInfo = false }
         )
     }
@@ -462,7 +465,7 @@ private fun ConverterState.Actions(
                     )
                 }
             }
-            input?.let {
+            if(inputs?.isNotEmpty() == true) {
                 TextTooltip(text = strings[MEDIA_INFO]) {
                     IconButton(
                         onClick = { showMediaInfo = true }
@@ -963,7 +966,7 @@ private fun DefaultPreview() {
 
         ConverterState(
             status = ConverterStatusState.Initial,
-            input = input,
+            inputs = listOf(input),
             type = type,
             output = output,
             encoderAudio = Encoder.OPUS,

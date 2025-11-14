@@ -13,6 +13,7 @@ import edneyosf.edconv.core.config.RemoteConfig
 import edneyosf.edconv.core.extensions.notifyMain
 import edneyosf.edconv.core.extensions.update
 import edneyosf.edconv.core.utils.PlatformUtils
+import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.features.home.mappers.toInputMedia
 import edneyosf.edconv.features.home.states.HomeDialogState
 import edneyosf.edconv.features.home.states.HomeNavigationState
@@ -65,13 +66,14 @@ class HomeViewModel(
 
     private fun observeInput() {
         viewModelScope.launch {
-            process.input.collectLatest {
-                val navigation = when(it?.type) {
+            process.inputs.collectLatest {
+                val first = it.firstOrNull()
+                val navigation = when(first?.type) {
                     MediaType.AUDIO, MediaType.VIDEO -> HomeNavigationState.Media
                     else -> HomeNavigationState.Initial
                 }
 
-                process.setInputType(it?.type)
+                process.setInputType(first?.type)
                 setNavigation(navigation)
             }
         }
@@ -106,34 +108,47 @@ class HomeViewModel(
         }
     }
 
-    override fun setInput(path: String) {
-        _state.update { copy(loading = true) }
+    override fun setInputs(paths: List<String>) {
+        if(paths.isNotEmpty()) {
+            _state.update { copy(loading = true) }
+            viewModelScope.launch(context = Dispatchers.IO) {
+                val data = mutableListOf<InputMedia>()
+                var error: Error? = null
 
-        viewModelScope.launch(context = Dispatchers.IO) {
-            val inputFile = File(path)
-            val ffprobe = FFprobe(ffprobePath = config.ffprobePath, file = inputFile)
-            val data = ffprobe.analyze()
-            val error = data.run {
-                when {
-                    this == null -> Error.UNKNOWN_INPUT_MEDIA
-                    duration == null -> Error.NO_DURATION_INPUT_MEDIA
-                    type == MediaType.AUDIO -> validateAudioStream()
-                    type == MediaType.VIDEO -> validateVideoStream()
-                    else -> null
+                paths.forEach { path ->
+                    val inputFile = File(path)
+                    val ffprobe = FFprobe(ffprobePath = config.ffprobePath, file = inputFile)
+                    val inputData = ffprobe.analyze()
+
+                    error = inputData.run {
+                        when {
+                            this == null -> Error.UNKNOWN_INPUT_MEDIA
+                            duration == null -> Error.NO_DURATION_INPUT_MEDIA
+                            type == MediaType.AUDIO -> validateAudioStream()
+                            type == MediaType.VIDEO -> validateVideoStream()
+                            else -> null
+                        }
+                    }
+
+                    if(error != null) {
+                        data.clear()
+                        return@forEach
+                    }
+                    else {
+                        val input = inputData?.toInputMedia()
+
+                        input?.let { data.add(it) }
+                    }
                 }
-            }
 
-            val dialog = error
-                ?.let { HomeDialogState.Failure(error = it) }
-                ?: HomeDialogState.None
+                val dialog = error
+                    ?.let { HomeDialogState.Failure(error = it) }
+                    ?: HomeDialogState.None
 
-            val input = data
-                .takeIf { error == null }
-                ?.toInputMedia()
-
-            notifyMain {
-                process.setInput(inputMedia = input)
-                _state.update { copy(input = input, loading = false, dialog = dialog) }
+                notifyMain {
+                    process.setInputs(data)
+                    _state.update { copy(inputs = data, loading = false, dialog = dialog) }
+                }
             }
         }
     }
@@ -169,9 +184,10 @@ class HomeViewModel(
 
             if (data is List<*>) {
                 val files = data.filterIsInstance<File>()
-                val file = files.firstOrNull()
+                val inputs = mutableListOf<String>()
 
-                file?.let { setInput(file.absolutePath) }
+                files.forEach { inputs.add(it.absolutePath) }
+                setInputs(inputs)
 
                 return true
             }
