@@ -302,27 +302,62 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         if(inputs?.isNotEmpty() == true && type != null && !output?.first.isNullOrBlank() && !state.output.second.isBlank() && command.isNotBlank()) {
             try {
                 val outputFile = File("${output.first}/${output.second}")
-                val outputExists = outputFile.exists()
 
-                if(!overwrite && outputExists) {
-                    val action = if(fromStart) FileExistsAction.START else FileExistsAction.ADD_TO_QUEUE
+                if(inputs.size > 1) {
+                    inputs.forEach { input ->
+                        val inputPath = input.path
+                        val extension = outputFile.extension
+                        val outputName = File(inputPath).nameWithoutExtension
+                        val outputFile = File("${output.first}/$outputName.$extension")
+                        val outputExists = outputFile.exists()
 
-                    setDialog(ConverterDialogState.FileExists(action))
-                    return
-                }
-                else if(overwrite) {
-                    setDialog(ConverterDialogState.None)
-                }
+                        if(!overwrite && outputExists) {
+                            val action = if(fromStart) FileExistsAction.START else FileExistsAction.ADD_TO_QUEUE
 
-                if(process.queue.value.any { it.outputFile.path == outputFile.path }){
-                    onError(Error.FILE_ALREADY_EXISTS)
-                }
-                else {
-                    inputs.forEach {
+                            setDialog(ConverterDialogState.FileExists(action))
+                            return
+                        }
+                        else if(overwrite) {
+                            setDialog(ConverterDialogState.None)
+                        }
+
+                        if(process.queue.value.any { it.outputFile.path == outputFile.path }){
+                            onError(Error.FILE_ALREADY_EXISTS)
+                            return@forEach
+                        }
+                        else {
+                            process.addToQueue(
+                                item = MediaQueue(
+                                    id = UUID.randomUUID().toString(),
+                                    input = input,
+                                    type = type,
+                                    command = command.normalizeCommand(),
+                                    outputFile = outputFile
+                                )
+                            )
+                        }
+                    }
+                } else {
+                    val outputExists = outputFile.exists()
+
+                    if(!overwrite && outputExists) {
+                        val action = if(fromStart) FileExistsAction.START else FileExistsAction.ADD_TO_QUEUE
+
+                        setDialog(ConverterDialogState.FileExists(action))
+                        return
+                    }
+                    else if(overwrite) {
+                        setDialog(ConverterDialogState.None)
+                    }
+
+                    if(process.queue.value.any { it.outputFile.path == outputFile.path }){
+                        onError(Error.FILE_ALREADY_EXISTS)
+                    }
+                    else {
                         process.addToQueue(
                             item = MediaQueue(
                                 id = UUID.randomUUID().toString(),
-                                input = it,
+                                input = inputs.first(),
                                 type = type,
                                 command = command.normalizeCommand(),
                                 outputFile = outputFile
