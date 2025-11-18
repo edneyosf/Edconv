@@ -3,6 +3,7 @@ package edneyosf.edconv.features.common.models
 import edneyosf.edconv.ffmpeg.common.MediaType
 
 data class InputMedia(
+    val id: String,
     val path: String,
     val type: MediaType,
     val size: Long,
