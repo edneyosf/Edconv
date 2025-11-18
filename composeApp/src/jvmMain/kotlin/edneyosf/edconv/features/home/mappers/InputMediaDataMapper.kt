@@ -5,6 +5,7 @@ import edneyosf.edconv.core.extensions.toReadableBitrate
 import edneyosf.edconv.core.extensions.toReadableSize
 import edneyosf.edconv.features.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.data.InputMediaData
+import java.util.UUID
 
 @Throws(IllegalStateException::class)
 fun InputMediaData.toInputMedia(): InputMedia {
@@ -13,6 +14,7 @@ fun InputMediaData.toInputMedia(): InputMedia {
     }
 
     return InputMedia(
+        id = UUID.randomUUID().toString(),
         path = path,
         type = type,
         size = size,

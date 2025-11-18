@@ -199,6 +199,7 @@ private fun DefaultPreview() {
     val filePath = "/Dir/File.ed"
     val outputFile = File(filePath)
     val input = InputMedia(
+        id = "123",
         path = filePath,
         type = MediaType.VIDEO,
         size = 123456L,

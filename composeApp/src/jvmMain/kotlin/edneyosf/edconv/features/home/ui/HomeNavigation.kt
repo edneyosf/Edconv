@@ -149,6 +149,7 @@ fun HomeState.HomeNavigation(
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
         val inputData = InputMedia(
+            id = "123",
             path = "Sample",
             type = MediaType.AUDIO,
             size = 123L,
