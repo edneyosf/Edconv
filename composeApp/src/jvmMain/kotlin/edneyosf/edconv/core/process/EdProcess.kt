@@ -33,6 +33,8 @@ class EdProcess {
 
     fun setInputs(data: List<InputMedia>) { _inputs.value = data }
 
+    fun removeFromInputs(item: InputMedia) { _inputs.value -= item }
+
     fun setInputType(mediaType: MediaType?) { _inputType.value = mediaType }
 
     fun setConverting(status: Boolean) { _converting.value = status }

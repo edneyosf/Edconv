@@ -39,6 +39,7 @@ import edneyosf.edconv.ui.previews.PortugueseDarkPreview
 import edneyosf.edconv.ui.previews.PortugueseLightPreview
 import edneyosf.edconv.features.common.commonStrings
 import edneyosf.edconv.features.common.CommonStrings.Keys.VERSION
+import edneyosf.edconv.features.common.models.InputMedia
 import org.koin.compose.viewmodel.koinViewModel
 import edneyosf.edconv.ui.filekit.rememberFilesPickerLauncher
 import io.github.vinceglb.filekit.PlatformFile
@@ -47,15 +48,16 @@ import io.github.vinceglb.filekit.PlatformFile
 fun HomeScreen() {
     val viewModel = koinViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val inputsState by viewModel.inputsState.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
-        state.Content(event = viewModel)
+        state.Content(inputs = inputsState, event = viewModel)
         state.Dialogs(event = viewModel)
     }
 }
 
 @Composable
-private fun HomeState.Content(event: HomeEvent) {
+private fun HomeState.Content(inputs: List<InputMedia>, event: HomeEvent) {
     val version = remember { PropertyUtils.version }
     val singleFilePicker = rememberFilesPickerLauncher(
         title = strings[TITLE_PICK_FILE],
@@ -71,13 +73,14 @@ private fun HomeState.Content(event: HomeEvent) {
         Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
             HomeNavigation(
                 event = event,
+                inputs = inputs,
                 onSelected = event::setNavigation,
                 onSettings = { event.setDialog(state = HomeDialogState.Settings) },
                 onPickFile = { singleFilePicker.launch() }
             )
             when {
                 loading -> Loading(appVersion = version)
-                inputs == null || inputs.isEmpty() -> NoMediaScreen(appVersion = version)
+                inputs.isEmpty() -> NoMediaScreen(appVersion = version)
                 navigation is HomeNavigationState.Media -> ConverterScreen()
                 navigation is HomeNavigationState.Metrics -> MetricsScreen()
             }
@@ -113,11 +116,13 @@ private fun List<PlatformFile>?.toPaths(): List<String> {
     return paths
 }
 
-
 @Composable
 private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
-        HomeState().Content(event = object : HomeEvent {})
+        HomeState().Content(
+            inputs = listOf(),
+            event = object : HomeEvent {}
+        )
     }
 }
 

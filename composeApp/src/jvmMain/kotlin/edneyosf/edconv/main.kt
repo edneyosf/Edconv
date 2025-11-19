@@ -7,6 +7,7 @@ import edneyosf.edconv.core.coreModule
 import edneyosf.edconv.features.console.consoleModule
 import edneyosf.edconv.features.converter.converterModule
 import edneyosf.edconv.features.home.homeFeatureModule
+import edneyosf.edconv.features.mediainfo.mediaInfoModule
 import edneyosf.edconv.features.queue.queueFeatureModule
 import edneyosf.edconv.features.settings.settingsFeatureModule
 import edneyosf.edconv.features.metrics.metricsFeatureModule
@@ -20,6 +21,7 @@ fun main() {
         modules(modules = settingsFeatureModule)
         modules(modules = converterModule)
         modules(modules = queueFeatureModule)
+        modules(modules = mediaInfoModule)
         modules(modules = metricsFeatureModule)
         modules(modules = consoleModule)
     }

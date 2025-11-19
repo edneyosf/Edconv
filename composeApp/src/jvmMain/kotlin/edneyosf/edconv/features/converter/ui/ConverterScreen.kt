@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,7 +34,7 @@ import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
 import edneyosf.edconv.features.converter.strings.converterScreenStrings
 import edneyosf.edconv.features.converter.strings.ConverterScreenStrings.Keys.*
-import edneyosf.edconv.features.mediainfo.MediaInfoScreen
+import edneyosf.edconv.features.mediainfo.ui.MediaInfoScreen
 import edneyosf.edconv.features.queue.ui.QueueScreen
 import edneyosf.edconv.ui.components.ActionsTool
 import edneyosf.edconv.ui.components.Selector
@@ -410,8 +411,7 @@ private fun ConverterState.Actions(
     }
 
     if(showMediaInfo) {
-        //TODO
-        inputs?.firstOrNull()?.MediaInfoScreen(
+        inputs?.MediaInfoScreen(
             onFinish = { showMediaInfo = false }
         )
     }
@@ -467,13 +467,24 @@ private fun ConverterState.Actions(
             }
             if(inputs?.isNotEmpty() == true) {
                 TextTooltip(text = strings[MEDIA_INFO]) {
-                    IconButton(
-                        onClick = { showMediaInfo = true }
+                    BadgedBox(
+                        modifier = Modifier.padding(end = dimens.md),
+                        badge = {
+                            inputs.size.takeIf { it > 0 }?.let {
+                                Badge {
+                                    Text(text = if (it > 99) "99+" else it.toString())
+                                }
+                            }
+                        }
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = strings[MEDIA_INFO]
-                        )
+                        IconButton(
+                            onClick = { showMediaInfo = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.InsertDriveFile,
+                                contentDescription = strings[MEDIA_INFO]
+                            )
+                        }
                     }
                 }
             }
@@ -954,6 +965,7 @@ private fun DefaultPreview() {
         val type = MediaType.VIDEO
         val output = Pair(first = "Edconv", second = "video.mkv")
         val input = InputMedia(
+            id = "123",
             path = "/sdfsd",
             type = type,
             size = 123456L,

@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.FileOpen
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import edneyosf.edconv.features.common.models.InputMedia
-import edneyosf.edconv.features.mediainfo.MediaInfoScreen
+import edneyosf.edconv.features.mediainfo.ui.MediaInfoScreen
 import edneyosf.edconv.features.metrics.strings.MetricsScreenStrings.Keys.MEDIA_INFO
 import edneyosf.edconv.features.metrics.strings.MetricsScreenStrings.Keys.*
 import edneyosf.edconv.features.metrics.MetricsEvent
@@ -72,8 +72,8 @@ private fun MetricsState.Content(event: MetricsEvent) {
     val stringPickFile = strings[TITLE_PICK_FILE]
     var showMediaInfo by remember { mutableStateOf(value = false) }
 
-    if(showMediaInfo) {
-        reference?.MediaInfoScreen(
+    if(showMediaInfo && reference != null) {
+        listOf(reference).MediaInfoScreen(
             onFinish = { showMediaInfo = false }
         )
     }
@@ -97,7 +97,7 @@ private fun MetricsState.Content(event: MetricsEvent) {
                             onClick = { showMediaInfo = true }
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.Info,
+                                imageVector = Icons.AutoMirrored.Rounded.InsertDriveFile,
                                 contentDescription = strings[MEDIA_INFO]
                             )
                         }
@@ -248,6 +248,7 @@ private fun DefaultPreview() {
     CompositionLocalProvider(value = stringsComp provides metricsScreenStrings) {
         val type = MediaType.VIDEO
         val input = InputMedia(
+            id = "123",
             path = "/dir/video.mkv",
             type = type,
             size = 123456L,

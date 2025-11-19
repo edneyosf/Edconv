@@ -37,6 +37,7 @@ import edneyosf.edconv.ui.previews.PortugueseLightPreview
 
 @Composable
 fun HomeState.HomeNavigation(
+    inputs: List<InputMedia>,
     event: HomeEvent,
     onSelected: (HomeNavigationState) -> Unit,
     onSettings: () -> Unit,
@@ -62,27 +63,16 @@ fun HomeState.HomeNavigation(
                 enabled = !loading,
                 onClick = onPickFile
             ) {
-                BadgedBox(
-                    badge = {
-                        inputs?.let {
-                            val size = inputs.size
-
-                            if(size > 1) Badge { Text(text = size.toString()) }
-                            else Badge()
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.FileOpen,
-                        contentDescription = strings[SELECT_MEDIA_FILE]
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Rounded.FileOpen,
+                    contentDescription = strings[SELECT_MEDIA_FILE]
+                )
             }
         }
         Spacer(modifier = Modifier.height(height = dimens.xl))
         items.forEachIndexed { _, item ->
             val state = item.first
-            val input = inputs?.firstOrNull()
+            val input = inputs.firstOrNull()
             val hasAudio = input?.audios?.isNotEmpty()
             val hasVideo = input?.videos?.isNotEmpty()
             val enabled = when(state) {
@@ -160,8 +150,9 @@ private fun DefaultPreview() {
             videos = listOf(Video(height = 123, width = 123))
         )
 
-        HomeState(navigation = HomeNavigationState.Media, inputs = listOf(inputData))
+        HomeState(navigation = HomeNavigationState.Media)
             .HomeNavigation(
+                inputs = listOf(inputData),
                 event = object : HomeEvent{},
                 onSelected = {},
                 onSettings = {},
