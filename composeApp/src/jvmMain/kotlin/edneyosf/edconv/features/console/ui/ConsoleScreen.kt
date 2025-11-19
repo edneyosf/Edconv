@@ -6,6 +6,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -84,9 +86,7 @@ fun ConsoleScreen(onFinish: () -> Unit) {
 private fun Content(logs: List<String>, command: String, event: ConsoleEvent) {
     Scaffold { innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues = innerPadding)
-                .padding(all = dimens.md)
+            modifier = Modifier.padding(paddingValues = innerPadding)
         ) {
             if(logs.isNotEmpty()) LogsView(data = logs)
             else {
@@ -108,15 +108,16 @@ private fun Content(logs: List<String>, command: String, event: ConsoleEvent) {
                     Spacer(modifier = Modifier.weight(weight = 1f))
                 }
             }
-            Spacer(modifier = Modifier.height(height = dimens.sm))
-            TextField(
-                value = command,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
-                colors = TextFieldDefaults.colors().custom(),
-                onValueChange = event::setCommand,
-                label = { Text(text = strings[COMMAND_INPUT]) }
-            )
+            Box(modifier = Modifier.padding(all = dimens.md)) {
+                TextField(
+                    value = command,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
+                    colors = TextFieldDefaults.colors().custom(),
+                    onValueChange = event::setCommand,
+                    label = { Text(text = strings[COMMAND_INPUT]) }
+                )
+            }
         }
     }
 }
@@ -126,8 +127,12 @@ private fun ColumnScope.LogsView(data: List<String>) {
     val scrollState = rememberLazyListState()
     val modifier = Modifier
         .fillMaxWidth()
+        .padding(
+            start = dimens.md,
+            end = dimens.xxs,
+            top = dimens.md
+        )
         .weight(weight = 1f)
-        .padding(end = dimens.sm)
 
     LaunchedEffect(data.size) {
         if(data.isNotEmpty()) {
@@ -135,9 +140,9 @@ private fun ColumnScope.LogsView(data: List<String>) {
         }
     }
 
-    Box(modifier = modifier) {
+    Row (modifier = modifier) {
         SelectionContainer(
-            modifier = Modifier
+            modifier = Modifier.weight(weight = 1f)
         ) {
             LazyColumn(state = scrollState) {
                 items(items = data) {
@@ -153,14 +158,13 @@ private fun ColumnScope.LogsView(data: List<String>) {
                 }
             }
         }
+        Spacer(modifier = Modifier.width(width = dimens.xxs))
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(scrollState),
             style = LocalScrollbarStyle.current.copy(
                 hoverColor = MaterialTheme.colorScheme.surfaceContainer
             ),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .fillMaxHeight()
+            modifier = Modifier.fillMaxHeight()
         )
     }
 }
