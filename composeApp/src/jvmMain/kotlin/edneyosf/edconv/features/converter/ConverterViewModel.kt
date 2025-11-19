@@ -304,7 +304,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 val outputFile = File("${output.first}/${output.second}")
 
                 if(inputs.size > 1) {
-                    inputs.forEach { input ->
+                    for (input in inputs) {
                         val inputPath = input.path
                         val extension = outputFile.extension
                         val outputName = File(inputPath).nameWithoutExtension
@@ -323,7 +323,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
                         if(process.queue.value.any { it.outputFile.path == outputFile.path }){
                             onError(Error.FILE_ALREADY_EXISTS)
-                            return@forEach
+                            break
                         }
                         else {
                             process.addToQueue(

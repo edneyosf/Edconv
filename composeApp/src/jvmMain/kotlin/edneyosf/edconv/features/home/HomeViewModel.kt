@@ -117,7 +117,7 @@ class HomeViewModel(
                 val data = mutableListOf<InputMedia>()
                 var error: Error? = null
 
-                paths.forEach { path ->
+                for (path in paths) {
                     val inputFile = File(path)
                     val ffprobe = FFprobe(ffprobePath = config.ffprobePath, file = inputFile)
                     val inputData = ffprobe.analyze()
@@ -134,7 +134,7 @@ class HomeViewModel(
 
                     if(error != null) {
                         data.clear()
-                        return@forEach
+                        break
                     }
                     else {
                         val input = inputData?.toInputMedia()
