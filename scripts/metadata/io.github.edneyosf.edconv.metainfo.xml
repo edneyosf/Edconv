@@ -1,68 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright 2025 Edconv -->
 <component type="desktop-application">
-  <id>io.github.edneyosf.edconv</id>
-  <name>Edconv</name>
-  <summary>A user-friendly FFmpeg GUI</summary>
+    <id>io.github.edneyosf.edconv</id>
+    <name>Edconv</name>
+    <summary>A user-friendly FFmpeg GUI</summary>
 
-  <description>
-	  <p>A user-friendly interface that simplifies the power of FFmpeg. It's designed for fast and efficient conversion of video and audio files.</p>
-  </description>
+    <description>
+        <p>A user-friendly interface that simplifies the power of FFmpeg. It's designed for fast and efficient
+            conversion of video and audio files.
+        </p>
+    </description>
 
-  <project_license>GPL-2.0-only</project_license>
-  <metadata_license>CC-BY-SA-4.0</metadata_license>
+    <project_license>GPL-3.0-only</project_license>
+    <metadata_license>CC-BY-SA-4.0</metadata_license>
 
-  <url type="homepage">https://github.com/edneyosf/Edconv</url>
-  <url type="bugtracker">https://github.com/edneyosf/Edconv/issues</url>
-  <url type="donation">https://buymeacoffee.com/edneyosf</url>
-  <url type="contact">https://www.reddit.com/user/EdneyOsf</url>
+    <url type="homepage">https://github.com/edneyosf/Edconv</url>
+    <url type="bugtracker">https://github.com/edneyosf/Edconv/issues</url>
+    <url type="donation">https://buymeacoffee.com/edneyosf</url>
+    <url type="contact">https://www.reddit.com/user/EdneyOsf</url>
 
-  <developer id="io.github.edneyosf">
-    <id>edneyosf</id>
-    <name>Edney Osf</name>
-  </developer>
+    <developer id="io.github.edneyosf">
+        <id>edneyosf</id>
+        <name>Edney Osf</name>
+    </developer>
 
-  <recommends>
-    <control>keyboard</control>
-    <control>pointing</control>
-  </recommends>
+    <recommends>
+        <control>keyboard</control>
+        <control>pointing</control>
+    </recommends>
 
-  <content_rating type="oars-1.1" />
+    <content_rating type="oars-1.1"/>
 
-  <screenshots>
-    <screenshot type="default">
-      <image>https://raw.githubusercontent.com/edneyosf/Edconv/main/assets/edconv.png</image>
-      <caption>A caption</caption>
-    </screenshot>
-  </screenshots>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://raw.githubusercontent.com/edneyosf/Edconv/main/assets/edconv.png</image>
+            <caption>A caption</caption>
+        </screenshot>
+    </screenshots>
 
-  <releases>
-    <release date="2025-10-18" version="1.4.0">
-      <description>
-        <p>**What's new**</p>
-        <ul>
-          <li>Copy encoder support</li>
-          <li>HDR10 to SDR filter</li>
-          <li>Support for prediction with PSNR and SSIM</li>
-          <li>Multiple simultaneous metrics</li>
-          <li>Added QHD and 8K resolution options</li>
-          <li>Convert audio and video simultaneously with index stream</li>
-        </ul>
+    <releases>
+        <release date="2025-10-19" version="1.5.0">
+            <description>
+                <p>**What's new**</p>
+                <ul>
+                    <li>Added support for multiple files</li>
+                    <li>Updated Compose and Kotlin libraries</li>
+                </ul>
 
-        <p>**Improvements**</p>
-        <ul>
-          <li>Logs now display in window mode</li>
-          <li>Choose folder to save output with file manager</li>
-          <li>Removed 240p and 360p resolutions</li>
-          <li>Slider component scaling adjusted to 0.6</li>
-          <li>Video scale filter changed from lanczos to spline36</li>
-          <li>FFmpeg loglevel set to Warning</li>
-          <li>Updated internal libraries</li>
-        </ul>
-      </description>
-    </release>
-  </releases>
+                <p>**Fixes**</p>
+                <ul>
+                    <li>Added dark theme to the Console window (Windows)</li>
+                    <li>Added socket=x11 instead of fallback-x11 (Flatpak)</li>
+                </ul>
+            </description>
+        </release>
+        <release date="2025-10-28" version="1.4.3">
+            <description>
+                <p>**What's new**</p>
+                <ul>
+                    <li>Added macOS support</li>
+                    <li>Added ARM64 architecture support</li>
+                    <li>Added AppImage build</li>
+                    <li>Added Flatpak build</li>
+                    <li>Added a field to set a media stream title, making it easier to customize your streams</li>
+                    <li>Added update notification, alerting users when a new version is available</li>
+                </ul>
 
-  <launchable type="desktop-id">io.github.edneyosf.edconv.desktop</launchable>
+                <p>**Fixes**</p>
+                <ul>
+                    <li>Fixed window theme issue on Windows, ensuring consistent appearance with the system</li>
+                    <li>Fixed issue when opening the file manager on some Linux distributions</li>
+                    <li>Fixed issue when disabling/enabling a stream (in some cases, a disabled stream couldn’t be re-enabled)</li>
+                </ul>
+            </description>
+        </release>
+        <release date="2025-10-17" version="1.4.0">
+            <description>
+                <p>**What's new**</p>
+                <ul>
+                    <li>Copy encoder support</li>
+                    <li>HDR10 to SDR filter</li>
+                    <li>Support for prediction with PSNR and SSIM</li>
+                    <li>Multiple simultaneous metrics</li>
+                    <li>Added QHD and 8K resolution options</li>
+                    <li>Convert audio and video simultaneously with index stream</li>
+                </ul>
+
+                <p>**Improvements**</p>
+                <ul>
+                    <li>Logs now display in window mode</li>
+                    <li>Choose folder to save output with file manager</li>
+                    <li>Removed 240p and 360p resolutions</li>
+                    <li>Slider component scaling adjusted to 0.6</li>
+                    <li>Video scale filter changed from lanczos to spline36</li>
+                    <li>FFmpeg loglevel set to Warning</li>
+                    <li>Updated internal libraries</li>
+                </ul>
+            </description>
+        </release>
+    </releases>
+
+    <launchable type="desktop-id">io.github.edneyosf.edconv.desktop</launchable>
 
 </component>
