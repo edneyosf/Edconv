@@ -1,11 +1,15 @@
 [versions]
-compose = "1.9.3"
-lifecycle = "2.9.4"
-kotlin = "2.2.21"
+compose = "1.10.3"
+compose-material3 = "1.9.0"
+compose-components = "1.10.3"
+compose-ui-tooling = "1.10.3"
+compose-icons = "1.7.3"
+lifecycle = "2.10.0"
+kotlin = "2.3.20"
 coroutines = "1.10.2"
-serialization = "1.9.0"
-koin = "4.1.1"
-filekit = "0.12.0-Edconv"
+serialization = "1.11.0"
+koin = "4.2.1"
+filekit = "0.13.0"
 jna = "5.18.1"
 
 [libraries]
@@ -15,6 +19,10 @@ lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecyc
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
 filekit-dialogs = { group = "io.github.vinceglb", name = "filekit-dialogs", version.ref = "filekit" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-components" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-ui-tooling" }
+compose-material-icons = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-icons" }
 
 [plugins]
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }

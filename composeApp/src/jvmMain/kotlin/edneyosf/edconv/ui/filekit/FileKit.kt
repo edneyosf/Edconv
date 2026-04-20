@@ -22,9 +22,8 @@ fun rememberFilePickerLauncher(
     onResult: (PlatformFile?) -> Unit,
 ): PickerResultLauncher {
     val scope = rememberCoroutineScope()
-    val dialogSettings = fileKitDialogSettings
+    val dialogSettings = fileKitDialogSettings.copy(title = title)
     val currentType by rememberUpdatedState(newValue = type)
-    val currentTitle by rememberUpdatedState(newValue = title)
     val currentDirectory by rememberUpdatedState(newValue = directory)
     val currentOnResult by rememberUpdatedState(newValue = onResult)
 
@@ -33,7 +32,6 @@ fun rememberFilePickerLauncher(
             scope.launch {
                 currentOnResult(FileKit.openFilePicker(
                     type = currentType,
-                    title = currentTitle,
                     directory = currentDirectory,
                     dialogSettings = dialogSettings,
                 ))
@@ -50,9 +48,8 @@ fun rememberFilesPickerLauncher(
     onResult: (List<PlatformFile>?) -> Unit,
 ): PickerResultLauncher {
     val scope = rememberCoroutineScope()
-    val dialogSettings = fileKitDialogSettings
+    val dialogSettings = fileKitDialogSettings.copy(title = title)
     val currentType by rememberUpdatedState(newValue = type)
-    val currentTitle by rememberUpdatedState(newValue = title)
     val currentDirectory by rememberUpdatedState(newValue = directory)
     val currentOnResult by rememberUpdatedState(newValue = onResult)
 
@@ -62,7 +59,6 @@ fun rememberFilesPickerLauncher(
                 currentOnResult(FileKit.openFilePicker(
                     type = currentType,
                     mode = FileKitMode.Multiple(),
-                    title = currentTitle,
                     directory = currentDirectory,
                     dialogSettings = dialogSettings,
                 ))
@@ -78,8 +74,7 @@ fun rememberDirectoryPickerLauncher(
     onResult: (PlatformFile?) -> Unit,
 ): PickerResultLauncher {
     val scope = rememberCoroutineScope()
-    val dialogSettings = fileKitDialogSettings
-    val currentTitle by rememberUpdatedState(newValue = title)
+    val dialogSettings = fileKitDialogSettings.copy(title = title)
     val currentDirectory by rememberUpdatedState(newValue = directory)
     val currentOnResult by rememberUpdatedState(newValue = onResult)
 
@@ -87,7 +82,6 @@ fun rememberDirectoryPickerLauncher(
         PickerResultLauncher {
             scope.launch {
                 currentOnResult(FileKit.openDirectoryPicker(
-                    title = currentTitle,
                     directory = currentDirectory,
                     dialogSettings = dialogSettings,
                 ))

@@ -21,6 +21,7 @@ import edneyosf.edconv.ffmpeg.ffprobe.FFprobe
 import edneyosf.edconv.ffmpeg.metrics.Metrics
 import edneyosf.edconv.ffmpeg.metrics.MetricsScore
 import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.openFilePicker
 import kotlinx.coroutines.Dispatchers
@@ -177,7 +178,10 @@ class MetricsViewModel(private val config: EdConfig, private val process: EdProc
 
     override fun pickDistortedFile(title: String) {
         viewModelScope.launch {
-            FileKit.openFilePicker(title = title, mode = FileKitMode.Single)?.let { platformFile ->
+            val settings = FileKitDialogSettings.createDefault()
+                .copy(title = title)
+
+            FileKit.openFilePicker(mode = FileKitMode.Single, dialogSettings = settings)?.let { platformFile ->
                 platformFile.file.absolutePath.let { _state.update { copy(distorted = it) } }
             }
         }

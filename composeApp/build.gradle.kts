@@ -29,14 +29,14 @@ kotlin {
     sourceSets {
         
        commonMain.dependencies {
-            implementation(dependencyNotation = compose.material3)
-            implementation(dependencyNotation = compose.components.resources)
-            implementation(dependencyNotation = compose.components.uiToolingPreview)
-            implementation(dependencyNotation = compose.materialIconsExtended)
-            implementation(dependencyNotation = libs.kotlinx.serialization)
-            implementation(dependencyNotation = libs.lifecycle.runtime.compose)
-            implementation(dependencyNotation = libs.koin.compose.viewmodel)
-            implementation(dependencyNotation = libs.filekit.dialogs)
+           implementation(dependencyNotation = libs.compose.material3)
+           implementation(dependencyNotation = libs.compose.components.resources)
+           implementation(dependencyNotation = libs.compose.ui.tooling.preview)
+           implementation(dependencyNotation = libs.compose.material.icons)
+           implementation(dependencyNotation = libs.kotlinx.serialization)
+           implementation(dependencyNotation = libs.lifecycle.runtime.compose)
+           implementation(dependencyNotation = libs.koin.compose.viewmodel)
+           implementation(dependencyNotation = libs.filekit.dialogs)
         }
        
         jvmMain.dependencies {
