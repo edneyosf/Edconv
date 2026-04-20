@@ -96,9 +96,9 @@ enum class Encoder(
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
         defaultCRF = 35,
-        minCRF = 0,
-        maxCRF = 63,
-        defaultPreset = AV1Preset.P4.value,
+        minCRF = 1,
+        maxCRF = 70,
+        defaultPreset = AV1Preset.P8.value,
         minPreset = 0,
         maxPreset = 13,
         defaultBitrate = Bitrate.M3
