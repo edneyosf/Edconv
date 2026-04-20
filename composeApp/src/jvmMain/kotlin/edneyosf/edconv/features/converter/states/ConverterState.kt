@@ -30,5 +30,6 @@ data class ConverterState(
     val hdr10ToSdr: Boolean = false,
     val noChapters: Boolean = false,
     val titleVideo: String? = null,
-    val titleAudio: String? = null
+    val titleAudio: String? = null,
+    val languageAudio: String? = null,
 )

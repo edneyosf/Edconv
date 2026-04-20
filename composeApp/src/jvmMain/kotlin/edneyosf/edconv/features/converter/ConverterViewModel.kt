@@ -140,8 +140,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
         if(newInputs?.isNotEmpty() == true && newType != null) {
             _state.updateAndSync {
                 val first = newInputs.first()
-                val video = first.videos.firstOrNull()
-                val audio = first.audios.firstOrNull()
+                val audios = first.audios
+                val videos = first.videos
+                val video = videos.firstOrNull()
+                val audio = audios.firstOrNull()
 
                 val newResolution = resolution
                     ?: Resolution.fromValues(width = video?.width, height = video?.height)
@@ -175,6 +177,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     pixelFormat = newPixelFormat,
                     channels = newChannels,
                     sampleRate = newSampleRate,
+                    titleVideo = videos.getOrNull(index = 0)?.title,
+                    titleAudio = audios.getOrNull(index = 0)?.title,
+                    languageAudio = audios.getOrNull(index = 0)?.language,
                     output = newEncoder.toOutput(inputMedia = first)
                 )
             }
@@ -226,7 +231,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             noMetadata = noMetadata,
                             noChapters = noChapters,
                             custom = customChannelsArgs,
-                            title = titleAudio
+                            title = titleAudio,
+                            language = languageAudio
                         )
                     }
                     else return@run
@@ -279,7 +285,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             noChapters = noChapters,
                             noMetadata = noMetadata,
                             titleVideo = titleVideo,
-                            titleAudio = titleAudio
+                            titleAudio = titleAudio,
+                            languageAudio = languageAudio
                         )
                     }
                     else return@run
@@ -506,7 +513,22 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setOutputFile(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
 
-    override fun setIndexAudio(value: Int?) { _state.updateAndSync { copy(indexAudio = value) } }
+    override fun setIndexAudio(value: Int?) {
+        val audio = value?.let {
+            _state.value.inputs
+                ?.firstOrNull()
+                ?.audios
+                ?.getOrNull(index = it)
+        }
+
+        _state.updateAndSync {
+            copy(
+                indexAudio = value,
+                titleAudio = audio?.title,
+                languageAudio = audio?.language
+            )
+        }
+    }
 
     override fun setIndexVideo(value: Int?) { _state.updateAndSync { copy(indexVideo = value) } }
 
@@ -547,6 +569,8 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     override fun setTitleAudio(title: String) { _state.updateAndSync { copy(titleAudio = title) } }
 
     override fun setHdr10ToSdr(enabled: Boolean) { _state.updateAndSync { copy(hdr10ToSdr = enabled) } }
+
+    override fun setLanguageAudio(language: String) { _state.updateAndSync { copy(languageAudio = language) } }
 
     private fun MediaType.currentEncoder(indexVideo: Int?, encoderVideo: Encoder?, encoderAudio: Encoder?) =
         when {

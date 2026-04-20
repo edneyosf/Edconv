@@ -30,7 +30,8 @@ class FFmpeg private constructor(
     val uncompressedVideo: Boolean = false,
     val uncompressedAudio: Boolean = false,
     val titleVideo: String? = null,
-    val titleAudio: String? = null
+    val titleAudio: String? = null,
+    val languageAudio: String? = null,
 ) {
 
     companion object {
@@ -38,7 +39,7 @@ class FFmpeg private constructor(
             logLevel: String, indexAudio: Int?, encoder: String, compressionType: CompressionType?,
             sampleRate: String? = null, bitrateControl: Int?, bitrate: String?, channels: String? = null,
             filter: String? = null, noMetadata: Boolean = false, custom: List<String>? = null,
-            noChapters: Boolean = false, title: String? = null
+            noChapters: Boolean = false, title: String? = null, language: String? = null
         ): FFmpeg {
 
             return FFmpeg(
@@ -55,7 +56,8 @@ class FFmpeg private constructor(
                 noMetadata = noMetadata,
                 noChapters = noChapters,
                 customAudio = custom,
-                titleAudio = title
+                titleAudio = title,
+                languageAudio = language
             )
         }
 
@@ -67,7 +69,7 @@ class FFmpeg private constructor(
             filterAudio: String? = null, sampleRate: String? = null, channels: String? = null,
             noSubtitle: Boolean = false, noMetadata: Boolean = false, customVideo: List<String>? = null,
             customAudio: List<String>? = null, noChapters: Boolean = false, titleVideo: String? = null,
-            titleAudio: String? = null
+            titleAudio: String? = null, languageAudio: String? = null
         ): FFmpeg {
 
             return FFmpeg(
@@ -96,7 +98,8 @@ class FFmpeg private constructor(
                 customAudio = customAudio,
                 customVideo = customVideo,
                 titleVideo = titleVideo,
-                titleAudio = titleAudio
+                titleAudio = titleAudio,
+                languageAudio = languageAudio
             )
         }
     }
@@ -150,6 +153,10 @@ class FFmpeg private constructor(
 
             if(!titleAudio.isNullOrBlank()) {
                 data.addCmd(param = "${FFmpegArgs.METADATA}:s:a", value = "title=\"$titleAudio\"")
+            }
+
+            if (!languageAudio.isNullOrBlank()) {
+               data.addCmd(param = "${FFmpegArgs.METADATA}:s:a", value = "language=\"$languageAudio\"")
             }
         }
 

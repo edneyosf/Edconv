@@ -39,4 +39,5 @@ interface ConverterEvent {
     fun setNoChapters(noChapters: Boolean) = Unit
     fun setTitleVideo(title: String) = Unit
     fun setTitleAudio(title: String) = Unit
+    fun setLanguageAudio(language: String) = Unit
 }

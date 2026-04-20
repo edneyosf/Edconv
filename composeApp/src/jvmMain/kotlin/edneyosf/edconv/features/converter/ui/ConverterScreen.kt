@@ -1,6 +1,5 @@
 package edneyosf.edconv.features.converter.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -19,6 +18,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -240,6 +240,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                         }
                         if(audioEnabled) {
                             Row(
+                                horizontalArrangement = Arrangement.spacedBy(space = dimens.xl),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 TextField(
@@ -249,6 +250,19 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                     onValueChange = event::setTitleAudio,
                                     label = { Text(text = strings[TITLE]) },
                                     maxLines = 1
+                                )
+
+                                TextField(
+                                    modifier = Modifier.widthIn(max = 100.dp),
+                                    value = languageAudio ?: "",
+                                    colors = TextFieldDefaults.colors().custom(),
+                                    label = { Text(text = strings[LANGUAGE]) },
+                                    maxLines = 1,
+                                    onValueChange = { text ->
+                                        if (text.length <= 3 && text.all { it.isLetter() }) {
+                                            event.setLanguageAudio(text.lowercase())
+                                        }
+                                    },
                                 )
                             }
                             Row(
