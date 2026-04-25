@@ -253,7 +253,7 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                 )
 
                                 TextField(
-                                    modifier = Modifier.widthIn(max = 100.dp),
+                                    modifier = Modifier.widthIn(max = 125.dp),
                                     value = languageAudio ?: "",
                                     colors = TextFieldDefaults.colors().custom(),
                                     label = { Text(text = strings[LANGUAGE]) },
@@ -995,6 +995,8 @@ private fun DefaultPreview() {
             inputs = listOf(input),
             type = type,
             output = output,
+            indexVideo = 0,
+            indexAudio = 0,
             encoderAudio = Encoder.OPUS,
             encoderVideo = Encoder.AV1,
             presetVideo = "4",
