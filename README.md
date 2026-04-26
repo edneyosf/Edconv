@@ -12,6 +12,8 @@ A user-friendly interface that simplifies the power of **FFmpeg**. It's designed
   <a href="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/macos-build.yml/badge.svg"/></a>
   <a href="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml"><img src="https://github.com/edneyosf/Edconv/actions/workflows/windows-build.yml/badge.svg"/></a>
 
+  <a href="https://trendshift.io/repositories/15212" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15212" alt="edneyosf%2FEdconv | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
   <h4>Download</h4> 
   <a href="https://github.com/edneyosf/Edconv/releases">
     <img src="assets/badge_github.png" height="80">
