@@ -39,6 +39,41 @@
     </screenshots>
 
     <releases>
+        <release date="2026-04-26" version="1.5.2">
+            <description>
+                <p>**What's new**</p>
+                <ul>
+                    <li>Shut down when complete</li>
+                    <li>Added pending job count on queue</li>
+                    <li>Enabled text selection on metrics score</li>
+                    <li>Enabled text selection on media information</li>
+                    <li>Enabled text selection on queue item command</li>
+                </ul>
+
+                <p>**Improvements**</p>
+                <ul>
+                    <li>Updated macos x86_64 runner to macos-26-intel</li>
+                </ul>
+
+                <p>**Fixes**</p>
+                <ul>
+                    <li>Fix language textfield size</li>
+                </ul>
+            </description>
+        </release>
+        <release date="2026-04-20" version="1.5.1">
+            <description>
+                <p>**What's new**</p>
+                <ul>
+                    <li>Added a new field that allows users to specify the language of the audio stream</li>
+                </ul>
+
+                <p>**Improvements**</p>
+                <ul>
+                    <li>Updated the project dependencies to their latest versions</li>
+                </ul>
+            </description>
+        </release>
         <release date="2025-10-19" version="1.5.0">
             <description>
                 <p>**What's new**</p>
