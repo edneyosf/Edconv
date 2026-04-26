@@ -1,11 +1,12 @@
 package edneyosf.edconv.features.metrics.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.VolunteerActivism
@@ -63,9 +64,13 @@ fun MetricsCompleteDialog(
                         Text(text = duration, style = MaterialTheme.typography.labelLarge)
                     }
                     Spacer(modifier = Modifier.height(height = dimens.xs))
-                    vmafScore?.let { Score(label = strings[VMAF_SCORE], value = it) }
-                    psnrScore?.let { Score(label = strings[PSNR_SCORE], value = it) }
-                    ssimScore?.let { Score(label = strings[SSIM_SCORE], value = it) }
+                    SelectionContainer {
+                        Column {
+                            vmafScore?.let { Score(label = strings[VMAF_SCORE], value = it) }
+                            psnrScore?.let { Score(label = strings[PSNR_SCORE], value = it) }
+                            ssimScore?.let { Score(label = strings[SSIM_SCORE], value = it) }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(height = dimens.xl))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(

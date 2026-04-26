@@ -38,7 +38,7 @@ class HomeViewModel(
     private val _state = MutableStateFlow(value = HomeState())
     val state: StateFlow<HomeState> = _state
 
-    val inputsState: StateFlow<List<InputMedia>> = process.inputs
+    val inputs = process.inputs
 
     init {
         loadConfigs()
@@ -68,7 +68,7 @@ class HomeViewModel(
 
     private fun observeInput() {
         viewModelScope.launch {
-            inputsState.collectLatest {
+            inputs.collectLatest {
                 val first = it.firstOrNull()
                 val navigation = when(first?.type) {
                     MediaType.AUDIO, MediaType.VIDEO -> HomeNavigationState.Media

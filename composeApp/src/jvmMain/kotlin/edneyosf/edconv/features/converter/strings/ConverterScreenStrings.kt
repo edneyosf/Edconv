@@ -36,7 +36,7 @@ class ConverterScreenStrings(override val language: String): Strings(language) {
         LOGS_VIEW to "Registros",
         MEDIA_INFO to "Informações da mídia",
         QUEUE to "Fila",
-        PENDING_JOBS to "Trabalhos pendentes",
+        PENDING_JOBS to "Trabalhos pendente",
         OUTPUT_SAVE_FILE to "Salvar arquivo",
         OUTPUT_TO to "Para:",
         CONSOLE to "Console",

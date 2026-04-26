@@ -25,7 +25,10 @@ class QueueScreenStrings(override val language: String): Strings(language) {
         END_TIME to "Término",
         DURATION_TIME to "Duração",
         COMMAND to "Comando",
-        EMPTY to "Fila vazia"
+        EMPTY to "Fila vazia",
+        PENDING_JOB to "Trabalho pendente",
+        PENDING_JOBS to "Trabalhos pendente",
+        SHUTDOWN to "Desligar ao concluir"
     )
 
     override val en = mapOf(
@@ -38,7 +41,10 @@ class QueueScreenStrings(override val language: String): Strings(language) {
         END_TIME to "End",
         DURATION_TIME to "Duration",
         COMMAND to "Command",
-        EMPTY to "Empty queue"
+        EMPTY to "Empty queue",
+        PENDING_JOB to "Pending job",
+        PENDING_JOBS to "Pending jobs",
+        SHUTDOWN to "Shut down when complete"
     )
 
     override val texts = mapOf(PT to pt, EN to en)
@@ -53,6 +59,9 @@ class QueueScreenStrings(override val language: String): Strings(language) {
         END_TIME,
         DURATION_TIME,
         COMMAND,
-        EMPTY
+        EMPTY,
+        PENDING_JOB,
+        PENDING_JOBS,
+        SHUTDOWN
     }
 }

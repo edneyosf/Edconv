@@ -17,6 +17,7 @@ import edneyosf.edconv.core.process.MediaQueue
 import edneyosf.edconv.core.process.EdProcess
 import edneyosf.edconv.core.process.QueueStatus
 import edneyosf.edconv.core.utils.DirUtils
+import edneyosf.edconv.core.utils.PlatformUtils
 import edneyosf.edconv.features.converter.states.ConverterDialogState
 import edneyosf.edconv.features.converter.states.ConverterState
 import edneyosf.edconv.features.converter.states.ConverterStatusState
@@ -46,6 +47,8 @@ import java.io.File
 import java.time.Instant
 import java.util.UUID
 
+private const val SHUTDOWN_DELAY = 10_000L
+
 class ConverterViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), ConverterEvent {
 
     private var conversion: Job? = null
@@ -59,7 +62,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     private val _state = MutableStateFlow(value = ConverterState())
     val state: StateFlow<ConverterState> = _state
 
-    val commandState: StateFlow<String> = process.command
+    val command = process.command
 
     init {
         converter = Converter(
@@ -480,14 +483,21 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
     }
 
     private fun notifyCompletion(startTime: Instant) {
-        val finishTime = Instant.now()
-
         if(_state.value.status !is ConverterStatusState.Failure) {
+            val finishTime = Instant.now()
+
             setStatus(ConverterStatusState.Complete(
                 startTime = startTime.formatTime(),
                 finishTime = finishTime.formatTime(),
                 duration = startTime.durationUntil(end = finishTime)
             ))
+
+            if (process.shutdown.value) {
+                viewModelScope.launch {
+                    delay(timeMillis = SHUTDOWN_DELAY)
+                    PlatformUtils.shutdown()
+                }
+            }
         }
     }
 

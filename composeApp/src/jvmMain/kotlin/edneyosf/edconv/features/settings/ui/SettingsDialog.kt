@@ -1,6 +1,5 @@
 package edneyosf.edconv.features.settings.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -13,6 +12,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import edneyosf.edconv.core.common.Error
 import edneyosf.edconv.core.extensions.LaunchedEffected
 import edneyosf.edconv.core.extensions.startEllipsis

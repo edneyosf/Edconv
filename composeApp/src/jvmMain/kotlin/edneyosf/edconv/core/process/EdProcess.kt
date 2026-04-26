@@ -31,6 +31,9 @@ class EdProcess {
     private val _command = MutableStateFlow(value = "")
     val command = _command.asStateFlow()
 
+    private val _shutdown = MutableStateFlow(value = false)
+    val shutdown = _shutdown.asStateFlow()
+
     fun setInputs(data: List<InputMedia>) { _inputs.value = data }
 
     fun removeFromInputs(item: InputMedia) { _inputs.value -= item }
@@ -77,4 +80,6 @@ class EdProcess {
     fun addLogs(data: List<String>) { _logs.value += data }
 
     fun setCommand(it: String) { _command.value = it }
+
+    fun setShutdown(value: Boolean) { _shutdown.value = value }
 }

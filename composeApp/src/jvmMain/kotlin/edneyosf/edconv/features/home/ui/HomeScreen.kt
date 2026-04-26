@@ -1,6 +1,5 @@
 package edneyosf.edconv.features.home.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edneyosf.edconv.core.utils.PropertyUtils
 import edneyosf.edconv.features.converter.ui.ConverterScreen
@@ -48,10 +48,10 @@ import io.github.vinceglb.filekit.PlatformFile
 fun HomeScreen() {
     val viewModel = koinViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val inputsState by viewModel.inputsState.collectAsStateWithLifecycle()
+    val inputs by viewModel.inputs.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides homeScreenStrings) {
-        state.Content(inputs = inputsState, event = viewModel)
+        state.Content(inputs, event = viewModel)
         state.Dialogs(event = viewModel)
     }
 }

@@ -33,4 +33,14 @@ object PlatformUtils {
 
         return success
     }
+
+    fun shutdown() {
+        val command = when (current) {
+            OS.WINDOWS -> arrayOf("shutdown", "/s", "/t", "0")
+            OS.MACOS -> arrayOf("osascript", "-e", "'tell app \"System Events\" to shut down'")
+            OS.LINUX -> arrayOf("systemctl", "poweroff")
+        }
+
+        Runtime.getRuntime().exec(command)
+    }
 }

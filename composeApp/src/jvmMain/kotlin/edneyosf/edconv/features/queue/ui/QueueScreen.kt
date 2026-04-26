@@ -1,7 +1,7 @@
 package edneyosf.edconv.features.queue.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,11 +9,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Queue
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Window
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edconv.composeapp.generated.resources.Res
@@ -61,10 +66,17 @@ import java.awt.Dimension
 import java.io.File
 import edneyosf.edconv.ui.theme.setWindowTheme
 
+private val pendingStatuses = setOf(
+    QueueStatus.NOT_STARTED,
+    QueueStatus.STARTED,
+    QueueStatus.IN_PROGRESS
+)
+
 @Composable
 fun QueueScreen(onClose: () -> Unit) {
     val viewModel = koinViewModel<QueueViewModel>()
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val queue by viewModel.queue.collectAsStateWithLifecycle()
+    val shutdown by viewModel.shutdown.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides queueScreenStrings) {
         Window(
@@ -74,14 +86,16 @@ fun QueueScreen(onClose: () -> Unit) {
         ) {
             window.minimumSize = Dimension(MIN_SUB_WINDOW_WIDTH, MIN_SUB_WINDOW_HEIGHT)
             setWindowTheme(window)
-            state.Content(event = viewModel)
+            queue.Content(shutdown, event = viewModel)
         }
     }
 }
 
 @Composable
-private fun List<MediaQueue>.Content(event: QueueEvent) {
+private fun List<MediaQueue>.Content(shutdown: Boolean, event: QueueEvent) {
     var selected by remember { mutableStateOf(value = firstOrNull()) }
+    val pendingSize = count { it.status in pendingStatuses }
+    val plural = pendingSize > 1
 
     LaunchedEffect(this) {
         selected = if(none { it.id == selected?.id }) firstOrNull()
@@ -90,36 +104,63 @@ private fun List<MediaQueue>.Content(event: QueueEvent) {
 
     Scaffold { innerPadding ->
         if(isNotEmpty()) {
-            Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
-                Column(modifier = Modifier.weight(weight = 1f)) {
-                    LazyColumn(modifier = Modifier.weight(weight = 1f)) {
-                        items(items = this@Content) {
-                            QueueItem(
-                                selected = selected?.id == it.id,
-                                mediaType = it.type,
-                                fileName = it.outputFile.name,
-                                status = it.status,
-                                onClick = { selected = it },
-                                onRemove = { event.removeItem(item = it) }
+            Column(modifier = Modifier.padding(paddingValues = innerPadding)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = dimens.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    val pendingText = if (plural) strings[PENDING_JOBS] else strings[PENDING_JOB]
+
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = "$pendingSize $pendingText"
+                    )
+                    Text(
+                        text = strings[SHUTDOWN],
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                    Checkbox(
+                        checked = shutdown,
+                        onCheckedChange = { event.setShutdown(value = it) }
+                    )
+                }
+                HorizontalDivider(color = DividerDefaults.customColor())
+                Row {
+                    Column(modifier = Modifier.weight(weight = 1f)) {
+                        LazyColumn(modifier = Modifier.weight(weight = 1f)) {
+                            items(items = this@Content) {
+                                QueueItem(
+                                    selected = selected?.id == it.id,
+                                    mediaType = it.type,
+                                    fileName = it.outputFile.name,
+                                    status = it.status,
+                                    onClick = { selected = it },
+                                    onRemove = { event.removeItem(item = it) }
+                                )
+                            }
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(all = dimens.md)
+                        ) {
+                            PrimaryButton(
+                                icon = Icons.Rounded.Delete,
+                                text = strings[CLEAN],
+                                onClick = event::clear
                             )
                         }
                     }
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(all = dimens.md)
-                    ) {
-                        PrimaryButton(
-                            icon = Icons.Rounded.Delete,
-                            text = strings[CLEAN],
-                            onClick = event::clear
-                        )
+                    selected?.let {
+                        VerticalDivider(color = DividerDefaults.customColor())
+                        it.Details(modifier = Modifier.weight(weight = 1.25f))
                     }
-                }
-                selected?.let {
-                    VerticalDivider(color = DividerDefaults.customColor())
-                    it.Details(modifier = Modifier.weight(weight = 1.25f))
                 }
             }
         }
@@ -172,10 +213,20 @@ private fun MediaQueue.Details(modifier: Modifier) {
                 value = it.toReadableCommand()
             )
         }
-        DetailItem(
-            label = strings[COMMAND],
-            value = command.toReadableCommand()
-        )
+        Card {
+            SelectionContainer {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(all = dimens.xs)
+                ) {
+                    Text(
+                        text = command.toReadableCommand(),
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -241,7 +292,7 @@ private fun DefaultPreview() {
     ))
 
     CompositionLocalProvider(value = stringsComp provides queueScreenStrings) {
-        queue.Content(event = object : QueueEvent {})
+        queue.Content(shutdown = false, event = object : QueueEvent {})
     }
 }
 

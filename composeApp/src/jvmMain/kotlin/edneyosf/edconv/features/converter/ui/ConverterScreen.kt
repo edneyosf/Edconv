@@ -55,11 +55,11 @@ private const val SLIDER_DENSITY = 0.6f
 fun ConverterScreen() {
     val viewModel = koinViewModel<ConverterViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val commandState by viewModel.commandState.collectAsStateWithLifecycle()
+    val command by viewModel.command.collectAsStateWithLifecycle()
 
     CompositionLocalProvider(value = stringsComp provides converterScreenStrings) {
         state.Dialogs(event = viewModel)
-        state.Content(command = commandState, event = viewModel)
+        state.Content(command, event = viewModel)
     }
 }
 

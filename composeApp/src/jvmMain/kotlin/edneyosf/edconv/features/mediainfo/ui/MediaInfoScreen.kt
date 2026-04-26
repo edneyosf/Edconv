@@ -1,6 +1,5 @@
 package edneyosf.edconv.features.mediainfo.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Window
 import edconv.composeapp.generated.resources.Res
 import edconv.composeapp.generated.resources.icon
@@ -86,111 +87,113 @@ private fun List<InputMedia>.Content(onRemoveItem: (InputMedia) -> Unit) {
     }
 
     Scaffold { innerPadding ->
-        Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
-            if(size > 1) {
-                Column(modifier = Modifier.weight(weight = 1f)) {
-                    LazyColumn(modifier = Modifier.weight(weight = 1f)) {
-                        items(items = this@Content) {
-                            val file = File(it.path)
+        SelectionContainer {
+            Row(modifier = Modifier.padding(paddingValues = innerPadding)) {
+                if(size > 1) {
+                    Column(modifier = Modifier.weight(weight = 1f)) {
+                        LazyColumn(modifier = Modifier.weight(weight = 1f)) {
+                            items(items = this@Content) {
+                                val file = File(it.path)
 
-                            MediaInfoItem(
-                                selected = selected?.id == it.id,
-                                mediaType = it.type,
-                                fileName = file.name,
-                                onClick = { selected = it },
-                                onRemove = { onRemoveItem(it) }
-                            )
+                                MediaInfoItem(
+                                    selected = selected?.id == it.id,
+                                    mediaType = it.type,
+                                    fileName = file.name,
+                                    onClick = { selected = it },
+                                    onRemove = { onRemoveItem(it) }
+                                )
+                            }
                         }
                     }
+                    VerticalDivider(color = DividerDefaults.customColor())
                 }
-                VerticalDivider(color = DividerDefaults.customColor())
-            }
-            selected?.run {
-                Column(
-                    modifier = Modifier
-                        .padding(paddingValues = innerPadding)
-                        .padding(all = dimens.md)
-                        .verticalScroll(state = scroll)
-                        .weight(weight = 1f)
-                ) {
-                    if(path.isNotBlank()) {
-                        val file = File(path)
+                selected?.run {
+                    Column(
+                        modifier = Modifier
+                            .padding(paddingValues = innerPadding)
+                            .padding(all = dimens.md)
+                            .verticalScroll(state = scroll)
+                            .weight(weight = 1f)
+                    ) {
+                        if(path.isNotBlank()) {
+                            val file = File(path)
 
-                        ItemMediaInfo(label = strings[FILE], value = file.name)
-                    }
-                    ItemMediaInfo(label = strings[TYPE], value = type.TypeMediaInfoString())
-                    ItemMediaInfo(label = strings[FORMAT], value = formatName)
-                    ItemMediaInfo(label = strings[DURATION], value = durationText)
-                    ItemMediaInfo(label = strings[BITRATE], value = bitRateText)
-                    ItemMediaInfo(label = strings[SIZE], value = sizeText)
-                    if(videos.isNotEmpty() || audios.isNotEmpty() || subtitles.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(height = dimens.xl))
-                    }
-                    if(videos.isNotEmpty()) {
-                        TitleMediaInfo(text = strings[VIDEO])
-                        Spacer(modifier = Modifier.height(height = dimens.md))
-                        videos.forEachIndexed { index, it ->
-                            ItemMediaInfo(label = strings[INDEX], value = index.toString())
-                            ItemMediaInfo(label = strings[CODEC], value = it.codec)
-                            ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
-                            ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
-                            ItemMediaInfo(label = strings[PROFILE], value = it.profile)
-                            ItemMediaInfo(label = strings[WIDTH], value = it.width.toString())
-                            ItemMediaInfo(
-                                label = strings[HEIGHT],
-                                value = it.height.toString()
-                            )
-                            ItemMediaInfo(
-                                label = strings[BIT_DEPTH],
-                                value = it.bitDepth?.let { "$it-bit" }
-                            )
-                            ItemMediaInfo(label = strings[PIX_FMT], value = it.pixFmt)
-                            ItemMediaInfo(label = strings[FPS], value = it.fps?.toString())
-                            ItemMediaInfo(label = strings[LEVEL], value = it.level?.toString())
-                            ItemMediaInfo(label = strings[FILM_GRAIN], value = it.filmGrain.toText())
-                            ItemMediaInfo(
-                                label = strings[DISPLAY_ASPECT_RATIO],
-                                value = it.displayAspectRatio
-                            )
-                            ItemMediaInfo(label = strings[FIELD_ORDER], value = it.fieldOrder)
-                            Spacer(modifier = Modifier.height(height = dimens.sm))
+                            ItemMediaInfo(label = strings[FILE], value = file.name)
                         }
-                    }
-                    if(videos.isNotEmpty()) Spacer(modifier = Modifier.height(height = dimens.md))
-                    if(audios.isNotEmpty()) {
-                        TitleMediaInfo(text = strings[AUDIO])
-                        Spacer(modifier = Modifier.height(height = dimens.md))
-                        audios.forEachIndexed { index, it ->
-                            ItemMediaInfo(label = strings[INDEX], value = index.toString())
-                            ItemMediaInfo(label = strings[CODEC], value = it.codec)
-                            ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
-                            ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
-                            ItemMediaInfo(label = strings[PROFILE], value = it.profile)
-                            ItemMediaInfo(label = strings[BITRATE], value = it.bitRateText)
-                            ItemMediaInfo(label = strings[CHANNELS], value = it.channels.toString())
-                            ItemMediaInfo(
-                                label = strings[SAMPLE_RATE],
-                                value = it.sampleRate?.let { "$it Hz" }
-                            )
-                            ItemMediaInfo(
-                                label = strings[BIT_DEPTH],
-                                value = it.bitDepth?.let { "$it-bit" }
-                            )
-                            Spacer(modifier = Modifier.height(height = dimens.sm))
+                        ItemMediaInfo(label = strings[TYPE], value = type.TypeMediaInfoString())
+                        ItemMediaInfo(label = strings[FORMAT], value = formatName)
+                        ItemMediaInfo(label = strings[DURATION], value = durationText)
+                        ItemMediaInfo(label = strings[BITRATE], value = bitRateText)
+                        ItemMediaInfo(label = strings[SIZE], value = sizeText)
+                        if(videos.isNotEmpty() || audios.isNotEmpty() || subtitles.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(height = dimens.xl))
                         }
-                    }
-                    if(videos.isNotEmpty() || audios.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(height = dimens.md))
-                    }
-                    if(subtitles.isNotEmpty()) {
-                        TitleMediaInfo(text = strings[SUBTITLE])
-                        Spacer(modifier = Modifier.height(height = dimens.md))
-                        subtitles.forEachIndexed { index, it ->
-                            ItemMediaInfo(label = strings[INDEX], value = index.toString())
-                            ItemMediaInfo(label = strings[CODEC], value = it.codec)
-                            ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
-                            ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
-                            Spacer(modifier = Modifier.height(height = dimens.sm))
+                        if(videos.isNotEmpty()) {
+                            TitleMediaInfo(text = strings[VIDEO])
+                            Spacer(modifier = Modifier.height(height = dimens.md))
+                            videos.forEachIndexed { index, it ->
+                                ItemMediaInfo(label = strings[INDEX], value = index.toString())
+                                ItemMediaInfo(label = strings[CODEC], value = it.codec)
+                                ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
+                                ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
+                                ItemMediaInfo(label = strings[PROFILE], value = it.profile)
+                                ItemMediaInfo(label = strings[WIDTH], value = it.width.toString())
+                                ItemMediaInfo(
+                                    label = strings[HEIGHT],
+                                    value = it.height.toString()
+                                )
+                                ItemMediaInfo(
+                                    label = strings[BIT_DEPTH],
+                                    value = it.bitDepth?.let { "$it-bit" }
+                                )
+                                ItemMediaInfo(label = strings[PIX_FMT], value = it.pixFmt)
+                                ItemMediaInfo(label = strings[FPS], value = it.fps?.toString())
+                                ItemMediaInfo(label = strings[LEVEL], value = it.level?.toString())
+                                ItemMediaInfo(label = strings[FILM_GRAIN], value = it.filmGrain.toText())
+                                ItemMediaInfo(
+                                    label = strings[DISPLAY_ASPECT_RATIO],
+                                    value = it.displayAspectRatio
+                                )
+                                ItemMediaInfo(label = strings[FIELD_ORDER], value = it.fieldOrder)
+                                Spacer(modifier = Modifier.height(height = dimens.sm))
+                            }
+                        }
+                        if(videos.isNotEmpty()) Spacer(modifier = Modifier.height(height = dimens.md))
+                        if(audios.isNotEmpty()) {
+                            TitleMediaInfo(text = strings[AUDIO])
+                            Spacer(modifier = Modifier.height(height = dimens.md))
+                            audios.forEachIndexed { index, it ->
+                                ItemMediaInfo(label = strings[INDEX], value = index.toString())
+                                ItemMediaInfo(label = strings[CODEC], value = it.codec)
+                                ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
+                                ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
+                                ItemMediaInfo(label = strings[PROFILE], value = it.profile)
+                                ItemMediaInfo(label = strings[BITRATE], value = it.bitRateText)
+                                ItemMediaInfo(label = strings[CHANNELS], value = it.channels.toString())
+                                ItemMediaInfo(
+                                    label = strings[SAMPLE_RATE],
+                                    value = it.sampleRate?.let { "$it Hz" }
+                                )
+                                ItemMediaInfo(
+                                    label = strings[BIT_DEPTH],
+                                    value = it.bitDepth?.let { "$it-bit" }
+                                )
+                                Spacer(modifier = Modifier.height(height = dimens.sm))
+                            }
+                        }
+                        if(videos.isNotEmpty() || audios.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(height = dimens.md))
+                        }
+                        if(subtitles.isNotEmpty()) {
+                            TitleMediaInfo(text = strings[SUBTITLE])
+                            Spacer(modifier = Modifier.height(height = dimens.md))
+                            subtitles.forEachIndexed { index, it ->
+                                ItemMediaInfo(label = strings[INDEX], value = index.toString())
+                                ItemMediaInfo(label = strings[CODEC], value = it.codec)
+                                ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
+                                ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
+                                Spacer(modifier = Modifier.height(height = dimens.sm))
+                            }
                         }
                     }
                 }

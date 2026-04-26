@@ -1,12 +1,12 @@
 package edneyosf.edconv.ui.components
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import edneyosf.edconv.ui.components.extensions.custom
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.previews.DarkPreview
