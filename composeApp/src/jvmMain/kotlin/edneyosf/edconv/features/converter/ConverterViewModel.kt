@@ -48,6 +48,7 @@ import java.time.Instant
 import java.util.UUID
 
 private const val SHUTDOWN_DELAY = 10_000L
+private const val DELAY_BETWEEN_ITEM_QUEUE = 2_000L
 
 class ConverterViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), ConverterEvent {
 
@@ -409,6 +410,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     notifyMain { updateCurrentStatus(status = QueueStatus.STARTED) }
                     logsCache.clear()
                     startLogMonitor()
+                    delay(timeMillis = DELAY_BETWEEN_ITEM_QUEUE)
 
                     val error = converter.run(
                         ffmpeg = config.ffmpegPath,
