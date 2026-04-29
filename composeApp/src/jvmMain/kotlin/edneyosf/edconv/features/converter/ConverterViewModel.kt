@@ -110,7 +110,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                             encoderAudio = audio
                         )
 
-                        if(inputs != null && inputs.isNotEmpty())
+                        if(!inputs.isNullOrEmpty())
                             newState.copy(output = encoder?.toOutput(inputMedia = inputs.first()))
                         else
                             newState
@@ -150,16 +150,20 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
                 val newResolution = resolution
                     ?: Resolution.fromValues(width = video?.width, height = video?.height)
+                    ?: Resolution.P1080
 
                 val newPixelFormat = pixelFormat
                     ?: PixelFormat.fromValue(value = video?.bitDepth)
                     ?: PixelFormat.fromValue(value = video?.pixFmt)
+                    ?: PixelFormat.BIT_8
 
                 val newChannels = channels
                     ?: Channels.fromValue(value = audio?.channels)
+                    ?: Channels.STEREO
 
                 val newSampleRate = sampleRate
                     ?: SampleRate.fromValue(value = audio?.sampleRate)
+                    ?: SampleRate.HZ_48000
 
                 val newEncoderAudio = encoderAudio ?: Encoder.OPUS
                 val newEncoderVideo = encoderVideo ?: Encoder.AV1
@@ -523,6 +527,30 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setOutputFile(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
 
+    override fun setIndexVideo(value: Int?) {
+        val video = value?.let {
+            _state.value.inputs
+                ?.firstOrNull()
+                ?.videos
+                ?.getOrNull(index = it)
+        }
+        val resolution = video?.let {
+            Resolution.fromValues(width = it.width, height = it.height)
+        } ?: Resolution.P1080
+        val pixelFormat = video?.let {
+            PixelFormat.fromValue(value = it.bitDepth) ?: PixelFormat.fromValue(value = it.pixFmt)
+        } ?: PixelFormat.BIT_8
+
+        _state.updateAndSync {
+            copy(
+                indexVideo = value,
+                titleVideo = video?.title,
+                resolution = resolution,
+                pixelFormat = pixelFormat
+            )
+        }
+    }
+
     override fun setIndexAudio(value: Int?) {
         val audio = value?.let {
             _state.value.inputs
@@ -535,12 +563,12 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
             copy(
                 indexAudio = value,
                 titleAudio = audio?.title,
-                languageAudio = audio?.language
+                languageAudio = audio?.language,
+                channels = Channels.fromValue(audio?.channels) ?: Channels.STEREO,
+                sampleRate = SampleRate.fromValue(audio?.sampleRate) ?: SampleRate.HZ_48000
             )
         }
     }
-
-    override fun setIndexVideo(value: Int?) { _state.updateAndSync { copy(indexVideo = value) } }
 
     override fun setEncoderAudio(encoder: Encoder?) = _state.updateAndSync { copy(encoderAudio = encoder) }
 
