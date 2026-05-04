@@ -166,8 +166,12 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     ?: SampleRate.fromValue(value = audio?.sampleRate)
                     ?: SampleRate.HZ_48000
 
-                val newEncoderAudio = encoderAudio ?: Encoder.OPUS
-                val newEncoderVideo = encoderVideo ?: Encoder.AV1
+                val newEncoderVideo = encoderVideo
+                    ?: video?.codecName?.let { Encoder.fromCodecName(name = it) ?: Encoder.AV1 }
+                    ?: Encoder.AV1
+                val newEncoderAudio = encoderAudio
+                    ?: audio?.codecName?.let { Encoder.fromCodecName(name = it) ?: Encoder.OPUS }
+                    ?: Encoder.OPUS
                 val newEncoder = type?.currentEncoder(
                     indexVideo = indexVideo,
                     encoderVideo = newEncoderVideo,

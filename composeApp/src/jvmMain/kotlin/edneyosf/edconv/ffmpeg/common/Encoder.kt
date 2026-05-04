@@ -32,20 +32,20 @@ enum class Encoder(
         text = "Opus",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K128
+        defaultBitrate = Bitrate.K160
     ),
     AC3(
         value = "ac3",
         text = "AC3", mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K448
+        defaultBitrate = Bitrate.K640
     ),
     EAC3(
         value = "eac3",
         text = "E-AC3",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K384
+        defaultBitrate = Bitrate.K448
     ),
     FLAC(
         value = "flac",
@@ -80,16 +80,6 @@ enum class Encoder(
         maxPreset = 9,
         defaultBitrate = Bitrate.M3_5
     ),
-    /*VP9(
-        value = "libvpx-vp9",
-        text = "VP9",
-        mediaType = MediaType.VIDEO,
-        compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 32,
-        minCRF = 0,
-        maxCRF = 63,
-        defaultBitrate = Bitrate.M3_5
-    ),*/
     AV1(
         value = "libsvtav1",
         text = "SVT-AV1",
@@ -123,8 +113,6 @@ enum class Encoder(
         AC3 -> "ac3"
         EAC3 -> "eac3"
         FLAC -> "flac"
-
-        //VP9 -> "webm"
         H264, H265 -> "mp4"
         AV1 -> "mkv"
     }
@@ -145,5 +133,17 @@ enum class Encoder(
 
     companion object {
         fun getAll() = entries.toList()
+
+        fun fromCodecName(name: String) = when(name.lowercase()) {
+            "aac" -> AAC_FDK
+            "opus" -> OPUS
+            "ac3" -> AC3
+            "eac3" -> EAC3
+            "flac" -> FLAC
+            "h264" -> H264
+            "hevc" -> H265
+            "av1" -> AV1
+            else -> null
+        }
     }
 }
