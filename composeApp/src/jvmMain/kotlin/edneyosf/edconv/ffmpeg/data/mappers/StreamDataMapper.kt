@@ -7,7 +7,8 @@ import edneyosf.edconv.ffmpeg.data.VideoData
 import edneyosf.edconv.ffmpeg.data.extensions.toFrameRate
 
 fun StreamData.toVideoStream() = VideoData(
-    codec = codecLongName,
+    codecName = codecName,
+    codecLongName = codecLongName,
     title = tags?.title,
     language = tags?.language,
     profile = profile,
@@ -23,7 +24,8 @@ fun StreamData.toVideoStream() = VideoData(
 )
 
 fun StreamData.toAudioStream() = AudioData(
-    codec = codecLongName,
+    codecName = codecName,
+    codecLongName = codecLongName,
     title = tags?.title,
     language = tags?.language,
     profile = profile,
@@ -34,7 +36,8 @@ fun StreamData.toAudioStream() = AudioData(
 )
 
 fun StreamData.toSubtitleStream() = SubtitleData(
-    codec = codecLongName,
+    codecName = codecName,
+    codecLongName = codecLongName,
     title = tags?.title,
     language = tags?.language
 )

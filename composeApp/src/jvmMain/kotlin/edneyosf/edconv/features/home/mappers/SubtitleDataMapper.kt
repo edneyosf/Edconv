@@ -6,7 +6,8 @@ import edneyosf.edconv.ffmpeg.data.SubtitleData
 fun List<SubtitleData>.toSubtitleList() = map { it.toSubtitle() }
 
 fun SubtitleData.toSubtitle() = Subtitle(
-    codec = codec,
+    codecName = codecName,
+    codecLongName = codecLongName,
     title = title,
     language = language
 )

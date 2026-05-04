@@ -6,7 +6,8 @@ import edneyosf.edconv.ffmpeg.data.VideoData
 fun List<VideoData>.toVideoList() = mapNotNull { data ->
     if (data.width != null && data.height != null) {
         Video(
-            codec = data.codec,
+            codecName = data.codecName,
+            codecLongName = data.codecLongName,
             title = data.title,
             language = data.language,
             profile = data.profile,

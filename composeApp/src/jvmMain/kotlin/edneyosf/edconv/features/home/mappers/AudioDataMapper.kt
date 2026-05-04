@@ -7,7 +7,8 @@ import edneyosf.edconv.ffmpeg.data.AudioData
 fun List<AudioData>.toAudioList() = mapNotNull { data ->
     data.channels?.let {
         Audio(
-            codec = data.codec,
+            codecName = data.codecName,
+            codecLongName = data.codecLongName,
             title = data.title,
             language = data.language,
             profile = data.profile,
