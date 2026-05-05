@@ -20,7 +20,8 @@ fun StreamData.toVideoStream() = VideoData(
     level = level,
     filmGrain = filmGrain == 1,
     displayAspectRatio = displayAspectRatio,
-    fieldOrder = fieldOrder
+    fieldOrder = fieldOrder,
+    bitRate = bitRate ?: tags?.bps
 )
 
 fun StreamData.toAudioStream() = AudioData(
@@ -32,7 +33,7 @@ fun StreamData.toAudioStream() = AudioData(
     channels = channels,
     sampleRate = sampleRate,
     bitDepth = bitDepth,
-    bitRate = bitRate
+    bitRate = bitRate ?: tags?.bps
 )
 
 fun StreamData.toSubtitleStream() = SubtitleData(

@@ -67,7 +67,7 @@ class FFprobe(private val ffprobePath: String, private val file: File) {
     }
 
     private fun streamTagsEntries(): String {
-        val entries = mutableListOf("title", "language")
+        val entries = mutableListOf("title", "language", "BPS")
 
         return "$STREAM_TAGS=${entries.joinToString(separator = ",")}"
     }

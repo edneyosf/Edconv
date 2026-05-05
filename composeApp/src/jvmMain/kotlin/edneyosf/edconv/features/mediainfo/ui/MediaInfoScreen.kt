@@ -138,6 +138,7 @@ private fun List<InputMedia>.Content(onRemoveItem: (InputMedia) -> Unit) {
                                 ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
                                 ItemMediaInfo(label = strings[PROFILE], value = it.profile)
+                                ItemMediaInfo(label = strings[BITRATE], value = it.bitRateText)
                                 ItemMediaInfo(label = strings[WIDTH], value = it.width.toString())
                                 ItemMediaInfo(
                                     label = strings[HEIGHT],

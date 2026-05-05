@@ -14,5 +14,7 @@ data class Video(
     val level: Int? = null,
     val filmGrain: Boolean = false,
     val displayAspectRatio: String? = null,
-    val fieldOrder: String? = null
+    val fieldOrder: String? = null,
+    val bitRate: Long? = null,
+    val bitRateText: String? = null
 )

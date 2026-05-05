@@ -1,5 +1,6 @@
 package edneyosf.edconv.features.home.mappers
 
+import edneyosf.edconv.core.extensions.toReadableBitrate
 import edneyosf.edconv.features.common.models.Video
 import edneyosf.edconv.ffmpeg.data.VideoData
 
@@ -19,7 +20,9 @@ fun List<VideoData>.toVideoList() = mapNotNull { data ->
             level = data.level,
             filmGrain = data.filmGrain,
             displayAspectRatio = data.displayAspectRatio,
-            fieldOrder = data.fieldOrder
+            fieldOrder = data.fieldOrder,
+            bitRate = data.bitRate,
+            bitRateText = data.bitRate?.toReadableBitrate()
         )
     }
     else {
