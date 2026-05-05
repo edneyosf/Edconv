@@ -71,9 +71,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
             onStdout = ::onStdout,
             onProgress = ::onProgress
         )
+        observeInput()
         observeEncoders()
         observeIndexes()
-        observeInput()
         observeQueue()
     }
 
@@ -122,9 +122,10 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                 .distinctUntilChanged()
                 .collectLatest { audio ->
                     val channelsList = audio?.let { Channels.getFromEncoder(it) } ?: emptyList()
-                    val channels = channelsList.firstOrNull { it == _state.value.channels } ?: Channels.STEREO
 
                     _state.updateAndSync {
+                        val channels = channels?.takeIf { channelsList.contains(it) } ?: Channels.STEREO
+
                         val newState = copy(
                             channels = channels,
                             bitrateAudio = audio?.fromAudioChannel(channels) ,
