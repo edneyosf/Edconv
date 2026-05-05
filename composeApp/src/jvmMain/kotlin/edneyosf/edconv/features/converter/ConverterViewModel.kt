@@ -92,14 +92,13 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     private fun observeEncoders() {
         viewModelScope.launch {
-            _state.map { it.encoderAudio to it.encoderVideo }
+            state.map { it.encoderVideo }
                 .distinctUntilChanged()
-                .collectLatest { (audio, video) ->
+                .collectLatest { video ->
                     _state.updateAndSync {
                         val newState = copy(
-                            bitrateAudio = audio?.defaultBitrate,
-                            bitrateControlAudio = audio?.defaultVBR,
-                            compressionTypeAudio = audio?.compressions?.firstOrNull(),
+                            channels = channels,
+                            bitrateAudio = bitrateAudio ,
                             bitrateVideo = video?.defaultBitrate,
                             bitrateControlVideo = video?.defaultCRF,
                             presetVideo = video?.defaultPreset,
@@ -108,6 +107,33 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                         val encoder = type?.currentEncoder(
                             indexVideo = indexVideo,
                             encoderVideo = video,
+                            encoderAudio = state.value.encoderAudio
+                        )
+
+                        if(!inputs.isNullOrEmpty())
+                            newState.copy(output = encoder?.toOutput(inputMedia = inputs.first()))
+                        else
+                            newState
+                    }
+                }
+        }
+        viewModelScope.launch {
+            state.map { it.encoderAudio }
+                .distinctUntilChanged()
+                .collectLatest { audio ->
+                    val channelsList = audio?.let { Channels.getFromEncoder(it) } ?: emptyList()
+                    val channels = channelsList.firstOrNull { it == _state.value.channels } ?: Channels.STEREO
+
+                    _state.updateAndSync {
+                        val newState = copy(
+                            channels = channels,
+                            bitrateAudio = audio?.fromAudioChannel(channels) ,
+                            bitrateControlAudio = audio?.defaultVBR,
+                            compressionTypeAudio = audio?.compressions?.firstOrNull()
+                        )
+                        val encoder = type?.currentEncoder(
+                            indexVideo = indexVideo,
+                            encoderVideo = state.value.encoderVideo,
                             encoderAudio = audio
                         )
 
@@ -584,7 +610,16 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setCompressionTypeVideo(type: CompressionType?) = _state.updateAndSync { copy(compressionTypeVideo = type) }
 
-    override fun setChannels(channels: Channels?) = _state.updateAndSync { copy(channels = channels) }
+    override fun setChannels(channels: Channels?) {
+        val bitrate = channels?.let { state.value.encoderAudio?.fromAudioChannel(channels = it) }
+
+        _state.updateAndSync {
+            copy(
+                channels = channels,
+                bitrateAudio = bitrate
+            )
+        }
+    }
 
     override fun setBitrateControlAudio(value: Int?) { _state.updateAndSync { copy(bitrateControlAudio = value) } }
 
