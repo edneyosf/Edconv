@@ -68,7 +68,7 @@ enum class Encoder(
         value = "libmp3lame",
         text = "MP3", mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrateMono = Bitrate.K128,
+        defaultBitrateMono = Bitrate.K96,
         defaultBitrateStereo = Bitrate.K256
     ),
     FLAC(
