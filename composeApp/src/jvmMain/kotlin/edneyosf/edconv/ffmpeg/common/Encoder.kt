@@ -5,17 +5,33 @@ import edneyosf.edconv.ffmpeg.h264.H264Preset
 import edneyosf.edconv.ffmpeg.h265.H265Preset
 
 enum class Encoder(
-    val value: String, val text: String, val mediaType: MediaType, val compressions: List<CompressionType>,
-    val defaultCRF: Int? = null, val minCRF: Int? = null, val maxCRF: Int? = null, val defaultVBR: Int? = null,
-    val minVBR: Int? = null, val maxVBR: Int? = null, val defaultPreset: String? = null, val minPreset: Int? = null,
-    val maxPreset: Int? = null, val defaultBitrate: Bitrate? = null
+    val value: String, val text: String, val mediaType: MediaType,
+    val compressions: List<CompressionType>, val defaultCRF: Int? = null, val minCRF: Int? = null,
+    val maxCRF: Int? = null, val defaultVBR: Int? = null, val minVBR: Int? = null,
+    val maxVBR: Int? = null, val defaultPreset: String? = null, val minPreset: Int? = null,
+    val maxPreset: Int? = null, val defaultBitrate: Bitrate? = null,
+    val defaultBitrateMono: Bitrate? = null, val defaultBitrateStereo: Bitrate? = null,
+    val defaultBitrate51: Bitrate? = null, val defaultBitrate71: Bitrate? = null
 ) {
+    OPUS(
+        value = "libopus",
+        text = "Opus",
+        mediaType = MediaType.AUDIO,
+        compressions = listOf(CompressionType.CBR),
+        defaultBitrateMono = Bitrate.K32,
+        defaultBitrateStereo = Bitrate.K160,
+        defaultBitrate51 = Bitrate.K320,
+        defaultBitrate71 = Bitrate.K512
+    ),
     AAC(
         value = "aac",
         text = "AAC",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K192
+        defaultBitrateMono = Bitrate.K64,
+        defaultBitrateStereo = Bitrate.K192,
+        defaultBitrate51 = Bitrate.K448,
+        defaultBitrate71 = Bitrate.K768
     ),
     AAC_FDK(
         value = "libfdk_aac",
@@ -25,27 +41,35 @@ enum class Encoder(
         defaultVBR = 5,
         minVBR = 1,
         maxVBR = 5,
-        defaultBitrate = Bitrate.K192
-    ),
-    OPUS(
-        value = "libopus",
-        text = "Opus",
-        mediaType = MediaType.AUDIO,
-        compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K160
-    ),
-    AC3(
-        value = "ac3",
-        text = "AC3", mediaType = MediaType.AUDIO,
-        compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K640
+        defaultBitrateMono = Bitrate.K64,
+        defaultBitrateStereo = Bitrate.K192,
+        defaultBitrate51 = Bitrate.K448,
+        defaultBitrate71 = Bitrate.K768
     ),
     EAC3(
         value = "eac3",
         text = "E-AC3",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrate = Bitrate.K448
+        defaultBitrateMono = Bitrate.K64,
+        defaultBitrateStereo = Bitrate.K192,
+        defaultBitrate51 = Bitrate.K448,
+        defaultBitrate71 = Bitrate.K768
+    ),
+    AC3(
+        value = "ac3",
+        text = "AC3", mediaType = MediaType.AUDIO,
+        compressions = listOf(CompressionType.CBR),
+        defaultBitrateMono = Bitrate.K96,
+        defaultBitrateStereo = Bitrate.K224,
+        defaultBitrate51 = Bitrate.K640
+    ),
+    MP3(
+        value = "libmp3lame",
+        text = "MP3", mediaType = MediaType.AUDIO,
+        compressions = listOf(CompressionType.CBR),
+        defaultBitrateMono = Bitrate.K128,
+        defaultBitrateStereo = Bitrate.K256
     ),
     FLAC(
         value = "flac",
@@ -53,26 +77,25 @@ enum class Encoder(
         mediaType = MediaType.AUDIO,
         compressions = emptyList()
     ),
-
-    H264(
-        value = "libx264",
-        text = "x264",
+    AV1(
+        value = "libsvtav1",
+        text = "SVT-AV1",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 23,
+        defaultCRF = 22,
         minCRF = 0,
-        maxCRF = 51,
-        defaultPreset = H264Preset.SLOW.value,
+        maxCRF = 63,
+        defaultPreset = AV1Preset.P4.value,
         minPreset = 0,
-        maxPreset = 9,
-        defaultBitrate = Bitrate.M6
+        maxPreset = 13,
+        defaultBitrate = Bitrate.M3
     ),
     H265(
         value = "libx265",
         text = "x265",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 28,
+        defaultCRF = 21,
         minCRF = 0,
         maxCRF = 51,
         defaultPreset = H265Preset.SLOW.value,
@@ -80,18 +103,18 @@ enum class Encoder(
         maxPreset = 9,
         defaultBitrate = Bitrate.M3_5
     ),
-    AV1(
-        value = "libsvtav1",
-        text = "SVT-AV1",
+    H264(
+        value = "libx264",
+        text = "x264",
         mediaType = MediaType.VIDEO,
         compressions = listOf(CompressionType.CRF, CompressionType.CBR),
-        defaultCRF = 35,
+        defaultCRF = 19,
         minCRF = 0,
-        maxCRF = 63,
-        defaultPreset = AV1Preset.P8.value,
+        maxCRF = 51,
+        defaultPreset = H264Preset.SLOW.value,
         minPreset = 0,
-        maxPreset = 13,
-        defaultBitrate = Bitrate.M3
+        maxPreset = 9,
+        defaultBitrate = Bitrate.M6
     );
 
     fun getVideoProfile(pixelFormat: PixelFormat?) = when(this) {
@@ -111,6 +134,7 @@ enum class Encoder(
         AAC, AAC_FDK -> "m4a"
         OPUS -> "opus"
         AC3 -> "ac3"
+        MP3 -> "mp3"
         EAC3 -> "eac3"
         FLAC -> "flac"
         H264, H265 -> "mp4"
@@ -131,12 +155,20 @@ enum class Encoder(
         else -> null
     }
 
+    fun fromAudioChannel(channels: Channels) = when (channels) {
+        Channels.MONO -> defaultBitrateMono
+        Channels.STEREO -> defaultBitrateStereo
+        Channels.SURROUND_51 -> defaultBitrate51
+        Channels.SURROUND_71 -> defaultBitrate71
+    }
+
     companion object {
         fun getAll() = entries.toList()
 
         fun fromCodecName(name: String) = when(name.lowercase()) {
             "aac" -> AAC_FDK
             "opus" -> OPUS
+            "mp3" -> MP3
             "ac3" -> AC3
             "eac3" -> EAC3
             "flac" -> FLAC
