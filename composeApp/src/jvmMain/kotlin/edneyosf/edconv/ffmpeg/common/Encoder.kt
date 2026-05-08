@@ -18,7 +18,7 @@ enum class Encoder(
         text = "Opus",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrateMono = Bitrate.K32,
+        defaultBitrateMono = Bitrate.K64,
         defaultBitrateStereo = Bitrate.K160,
         defaultBitrate51 = Bitrate.K320,
         defaultBitrate71 = Bitrate.K512
@@ -28,7 +28,7 @@ enum class Encoder(
         text = "AAC",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrateMono = Bitrate.K64,
+        defaultBitrateMono = Bitrate.K96,
         defaultBitrateStereo = Bitrate.K192,
         defaultBitrate51 = Bitrate.K448,
         defaultBitrate71 = Bitrate.K768
@@ -41,7 +41,7 @@ enum class Encoder(
         defaultVBR = 5,
         minVBR = 1,
         maxVBR = 5,
-        defaultBitrateMono = Bitrate.K64,
+        defaultBitrateMono = Bitrate.K96,
         defaultBitrateStereo = Bitrate.K192,
         defaultBitrate51 = Bitrate.K448,
         defaultBitrate71 = Bitrate.K768
@@ -51,7 +51,7 @@ enum class Encoder(
         text = "E-AC3",
         mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrateMono = Bitrate.K64,
+        defaultBitrateMono = Bitrate.K96,
         defaultBitrateStereo = Bitrate.K192,
         defaultBitrate51 = Bitrate.K448,
         defaultBitrate71 = Bitrate.K768
@@ -60,7 +60,7 @@ enum class Encoder(
         value = "ac3",
         text = "AC3", mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrateMono = Bitrate.K96,
+        defaultBitrateMono = Bitrate.K128,
         defaultBitrateStereo = Bitrate.K224,
         defaultBitrate51 = Bitrate.K640
     ),
@@ -68,7 +68,7 @@ enum class Encoder(
         value = "libmp3lame",
         text = "MP3", mediaType = MediaType.AUDIO,
         compressions = listOf(CompressionType.CBR),
-        defaultBitrateMono = Bitrate.K96,
+        defaultBitrateMono = Bitrate.K128,
         defaultBitrateStereo = Bitrate.K256
     ),
     FLAC(
