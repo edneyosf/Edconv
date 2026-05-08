@@ -39,6 +39,26 @@
     </screenshots>
 
     <releases>
+        <release date="2026-05-08" version="1.5.3">
+            <description>
+                <p>**What's new**</p>
+                <ul>
+                    <li>Added MP3 encoder</li>
+                    <li>Updated default bitrates for mono and multi-channel audio</li>
+                    <li>Automatically update media attributes when changing input or streams</li>
+                </ul>
+
+                <p>**Improvements**</p>
+                <ul>
+                    <li>Bitrate extraction</li>
+                </ul>
+
+                <p>**Fixes**</p>
+                <ul>
+                    <li>UI labels when the queue is empty</li>
+                </ul>
+            </description>
+        </release>
         <release date="2026-04-26" version="1.5.2">
             <description>
                 <p>**What's new**</p>
