@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -112,12 +113,16 @@ private fun List<MediaQueue>.Content(shutdown: Boolean, event: QueueEvent) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    val pendingText = if (plural) strings[PENDING_JOBS] else strings[PENDING_JOB]
+                    if (pendingSize > 0) {
+                        val pendingText = if (plural) strings[PENDING_JOBS] else strings[PENDING_JOB]
 
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = "$pendingSize $pendingText"
-                    )
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = "$pendingSize $pendingText"
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                     Text(
                         text = strings[SHUTDOWN],
                         style = TextStyle(

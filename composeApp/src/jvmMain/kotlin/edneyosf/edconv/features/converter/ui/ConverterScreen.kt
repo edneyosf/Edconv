@@ -297,10 +297,13 @@ private fun ConverterState.Content(command: String, event: ConverterEvent) {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(space = dimens.xl)
                                 ) {
-                                    ChannelsInput(
-                                        value = channels,
-                                        onValueChange = event::setChannels
-                                    )
+                                    encoderAudio?.let {
+                                        ChannelsInput(
+                                            encoder = it,
+                                            value = channels,
+                                            onValueChange = event::setChannels
+                                        )
+                                    }
                                     SampleRateInput(
                                         value = sampleRate,
                                         onValueChange = event::setSampleRate
@@ -754,7 +757,7 @@ private fun ConverterState.CRFInput(onClick: () -> Unit, onValueChange: (Int) ->
 }
 
 @Composable
-private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
+private fun ChannelsInput(encoder: Encoder, value: Channels?, onValueChange: (Channels) -> Unit) {
     var expanded by remember { mutableStateOf(value = false) }
 
     Selector(
@@ -764,7 +767,7 @@ private fun ChannelsInput(value: Channels?, onValueChange: (Channels) -> Unit) {
         expanded = expanded,
         onExpanded = { expanded = it }
     ) {
-        Channels.getAll().forEach { item ->
+        Channels.getFromEncoder(encoder).forEach { item ->
             DropdownMenuItem(
                 text = { Text(text = item.text) },
                 onClick = {

@@ -48,6 +48,7 @@ import java.time.Instant
 import java.util.UUID
 
 private const val SHUTDOWN_DELAY = 10_000L
+private const val DELAY_BETWEEN_ITEM_QUEUE = 2_000L
 
 class ConverterViewModel(private val config: EdConfig, private val process: EdProcess) : ViewModel(), ConverterEvent {
 
@@ -70,9 +71,9 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
             onStdout = ::onStdout,
             onProgress = ::onProgress
         )
+        observeInput()
         observeEncoders()
         observeIndexes()
-        observeInput()
         observeQueue()
     }
 
@@ -91,14 +92,13 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     private fun observeEncoders() {
         viewModelScope.launch {
-            _state.map { it.encoderAudio to it.encoderVideo }
+            state.map { it.encoderVideo }
                 .distinctUntilChanged()
-                .collectLatest { (audio, video) ->
+                .collectLatest { video ->
                     _state.updateAndSync {
                         val newState = copy(
-                            bitrateAudio = audio?.defaultBitrate,
-                            bitrateControlAudio = audio?.defaultVBR,
-                            compressionTypeAudio = audio?.compressions?.firstOrNull(),
+                            channels = channels,
+                            bitrateAudio = bitrateAudio ,
                             bitrateVideo = video?.defaultBitrate,
                             bitrateControlVideo = video?.defaultCRF,
                             presetVideo = video?.defaultPreset,
@@ -107,10 +107,38 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                         val encoder = type?.currentEncoder(
                             indexVideo = indexVideo,
                             encoderVideo = video,
+                            encoderAudio = state.value.encoderAudio
+                        )
+
+                        if(!inputs.isNullOrEmpty())
+                            newState.copy(output = encoder?.toOutput(inputMedia = inputs.first()))
+                        else
+                            newState
+                    }
+                }
+        }
+        viewModelScope.launch {
+            state.map { it.encoderAudio }
+                .distinctUntilChanged()
+                .collectLatest { audio ->
+                    val channelsList = audio?.let { Channels.getFromEncoder(it) } ?: emptyList()
+
+                    _state.updateAndSync {
+                        val channels = channels?.takeIf { channelsList.contains(it) } ?: Channels.STEREO
+
+                        val newState = copy(
+                            channels = channels,
+                            bitrateAudio = audio?.fromAudioChannel(channels) ,
+                            bitrateControlAudio = audio?.defaultVBR,
+                            compressionTypeAudio = audio?.compressions?.firstOrNull()
+                        )
+                        val encoder = type?.currentEncoder(
+                            indexVideo = indexVideo,
+                            encoderVideo = state.value.encoderVideo,
                             encoderAudio = audio
                         )
 
-                        if(inputs != null && inputs.isNotEmpty())
+                        if(!inputs.isNullOrEmpty())
                             newState.copy(output = encoder?.toOutput(inputMedia = inputs.first()))
                         else
                             newState
@@ -150,19 +178,27 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
                 val newResolution = resolution
                     ?: Resolution.fromValues(width = video?.width, height = video?.height)
+                    ?: Resolution.P1080
 
                 val newPixelFormat = pixelFormat
                     ?: PixelFormat.fromValue(value = video?.bitDepth)
                     ?: PixelFormat.fromValue(value = video?.pixFmt)
+                    ?: PixelFormat.BIT_8
 
                 val newChannels = channels
                     ?: Channels.fromValue(value = audio?.channels)
+                    ?: Channels.STEREO
 
                 val newSampleRate = sampleRate
                     ?: SampleRate.fromValue(value = audio?.sampleRate)
+                    ?: SampleRate.HZ_48000
 
-                val newEncoderAudio = encoderAudio ?: Encoder.OPUS
-                val newEncoderVideo = encoderVideo ?: Encoder.AV1
+                val newEncoderVideo = encoderVideo
+                    ?: video?.codecName?.let { Encoder.fromCodecName(name = it) ?: Encoder.AV1 }
+                    ?: Encoder.AV1
+                val newEncoderAudio = encoderAudio
+                    ?: audio?.codecName?.let { Encoder.fromCodecName(name = it) ?: Encoder.OPUS }
+                    ?: Encoder.OPUS
                 val newEncoder = type?.currentEncoder(
                     indexVideo = indexVideo,
                     encoderVideo = newEncoderVideo,
@@ -405,6 +441,7 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
                     notifyMain { updateCurrentStatus(status = QueueStatus.STARTED) }
                     logsCache.clear()
                     startLogMonitor()
+                    delay(timeMillis = DELAY_BETWEEN_ITEM_QUEUE)
 
                     val error = converter.run(
                         ffmpeg = config.ffmpegPath,
@@ -523,6 +560,30 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setOutputFile(fileName: String) = _state.update { copy(output = output?.copy(second = fileName)) }
 
+    override fun setIndexVideo(value: Int?) {
+        val video = value?.let {
+            _state.value.inputs
+                ?.firstOrNull()
+                ?.videos
+                ?.getOrNull(index = it)
+        }
+        val resolution = video?.let {
+            Resolution.fromValues(width = it.width, height = it.height)
+        } ?: Resolution.P1080
+        val pixelFormat = video?.let {
+            PixelFormat.fromValue(value = it.bitDepth) ?: PixelFormat.fromValue(value = it.pixFmt)
+        } ?: PixelFormat.BIT_8
+
+        _state.updateAndSync {
+            copy(
+                indexVideo = value,
+                titleVideo = video?.title,
+                resolution = resolution,
+                pixelFormat = pixelFormat
+            )
+        }
+    }
+
     override fun setIndexAudio(value: Int?) {
         val audio = value?.let {
             _state.value.inputs
@@ -535,12 +596,12 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
             copy(
                 indexAudio = value,
                 titleAudio = audio?.title,
-                languageAudio = audio?.language
+                languageAudio = audio?.language,
+                channels = Channels.fromValue(audio?.channels) ?: Channels.STEREO,
+                sampleRate = SampleRate.fromValue(audio?.sampleRate) ?: SampleRate.HZ_48000
             )
         }
     }
-
-    override fun setIndexVideo(value: Int?) { _state.updateAndSync { copy(indexVideo = value) } }
 
     override fun setEncoderAudio(encoder: Encoder?) = _state.updateAndSync { copy(encoderAudio = encoder) }
 
@@ -550,7 +611,16 @@ class ConverterViewModel(private val config: EdConfig, private val process: EdPr
 
     override fun setCompressionTypeVideo(type: CompressionType?) = _state.updateAndSync { copy(compressionTypeVideo = type) }
 
-    override fun setChannels(channels: Channels?) = _state.updateAndSync { copy(channels = channels) }
+    override fun setChannels(channels: Channels?) {
+        val bitrate = channels?.let { state.value.encoderAudio?.fromAudioChannel(channels = it) }
+
+        _state.updateAndSync {
+            copy(
+                channels = channels,
+                bitrateAudio = bitrate
+            )
+        }
+    }
 
     override fun setBitrateControlAudio(value: Int?) { _state.updateAndSync { copy(bitrateControlAudio = value) } }
 

@@ -133,10 +133,12 @@ private fun List<InputMedia>.Content(onRemoveItem: (InputMedia) -> Unit) {
                             Spacer(modifier = Modifier.height(height = dimens.md))
                             videos.forEachIndexed { index, it ->
                                 ItemMediaInfo(label = strings[INDEX], value = index.toString())
-                                ItemMediaInfo(label = strings[CODEC], value = it.codec)
+                                ItemMediaInfo(label = strings[CODEC], value = it.codecName)
+                                ItemMediaInfo(label = strings[CODEC_LONG], value = it.codecLongName)
                                 ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
                                 ItemMediaInfo(label = strings[PROFILE], value = it.profile)
+                                ItemMediaInfo(label = strings[BITRATE], value = it.bitRateText)
                                 ItemMediaInfo(label = strings[WIDTH], value = it.width.toString())
                                 ItemMediaInfo(
                                     label = strings[HEIGHT],
@@ -164,7 +166,8 @@ private fun List<InputMedia>.Content(onRemoveItem: (InputMedia) -> Unit) {
                             Spacer(modifier = Modifier.height(height = dimens.md))
                             audios.forEachIndexed { index, it ->
                                 ItemMediaInfo(label = strings[INDEX], value = index.toString())
-                                ItemMediaInfo(label = strings[CODEC], value = it.codec)
+                                ItemMediaInfo(label = strings[CODEC], value = it.codecName)
+                                ItemMediaInfo(label = strings[CODEC_LONG], value = it.codecLongName)
                                 ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
                                 ItemMediaInfo(label = strings[PROFILE], value = it.profile)
@@ -189,7 +192,8 @@ private fun List<InputMedia>.Content(onRemoveItem: (InputMedia) -> Unit) {
                             Spacer(modifier = Modifier.height(height = dimens.md))
                             subtitles.forEachIndexed { index, it ->
                                 ItemMediaInfo(label = strings[INDEX], value = index.toString())
-                                ItemMediaInfo(label = strings[CODEC], value = it.codec)
+                                ItemMediaInfo(label = strings[CODEC], value = it.codecName)
+                                ItemMediaInfo(label = strings[CODEC_LONG], value = it.codecLongName)
                                 ItemMediaInfo(label = strings[STREAM_TITLE], value = it.title)
                                 ItemMediaInfo(label = strings[LANGUAGE], value = it.language)
                                 Spacer(modifier = Modifier.height(height = dimens.sm))
@@ -245,7 +249,8 @@ private fun Boolean.toText() = if(this) strings[YES] else strings[NO]
 private fun DefaultPreview() {
     val videoStreams = List(size = 1) {
         Video(
-            codec = "Sample",
+            codecName = "Sample",
+            codecLongName = "Sample",
             title = "Sample",
             language = "Sample",
             profile = "Sample",
@@ -262,7 +267,8 @@ private fun DefaultPreview() {
     }
     val audioStreams = List(size = 1) {
         Audio(
-            codec = "Sample",
+            codecName = "Sample",
+            codecLongName = "Sample",
             title = "Sample",
             language = "Sample",
             profile = "Sample",
@@ -273,7 +279,8 @@ private fun DefaultPreview() {
     }
     val subtitlesStreams = List(size = 1) {
         Subtitle(
-            codec = "Sample",
+            codecName = "Sample",
+            codecLongName = "Sample",
             title = "Sample",
             language = "Sample"
         )
