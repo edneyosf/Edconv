@@ -18,10 +18,10 @@ import edneyosf.edconv.app.AppConfigs.MIN_WINDOW_HEIGHT
 import edneyosf.edconv.app.AppConfigs.MIN_WINDOW_WIDTH
 import edneyosf.edconv.app.extensions.getAvailableLanguage
 import edneyosf.edconv.core.process.EdProcess
-import edneyosf.edconv.features.common.CommonStrings.Keys.CANCEL_BUTTON
-import edneyosf.edconv.features.common.CommonStrings.Keys.CONFIRMATION_BUTTON
-import edneyosf.edconv.features.common.commonStrings
-import edneyosf.edconv.features.home.ui.HomeScreen
+import edneyosf.edconv.feature.common.CommonStrings.Keys.CANCEL_BUTTON
+import edneyosf.edconv.feature.common.CommonStrings.Keys.CONFIRMATION_BUTTON
+import edneyosf.edconv.feature.common.commonStrings
+import edneyosf.edconv.feature.home.HomeScreen
 import edneyosf.edconv.ui.components.dialogs.SimpleDialog
 import edneyosf.edconv.ui.compositions.languageComp
 import edneyosf.edconv.ui.compositions.strings

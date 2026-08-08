@@ -1,0 +1,31 @@
+package edneyosf.edconv.feature.home.mappers
+
+import edneyosf.edconv.core.extensions.toDurationString
+import edneyosf.edconv.core.extensions.toReadableBitrate
+import edneyosf.edconv.core.extensions.toReadableSize
+import edneyosf.edconv.feature.common.models.InputMedia
+import edneyosf.edconv.ffmpeg.data.InputMediaData
+import java.util.UUID
+
+@Throws(IllegalStateException::class)
+fun InputMediaData.toInputMedia(): InputMedia {
+    val safeDuration = requireNotNull(value = duration) {
+        "Cannot map InputMediaData to InputMedia: duration must not be null"
+    }
+
+    return InputMedia(
+        id = UUID.randomUUID().toString(),
+        path = path,
+        type = type,
+        size = size,
+        sizeText = size.toReadableSize(),
+        formatName = formatName,
+        duration = safeDuration,
+        durationText = safeDuration.toDurationString(),
+        bitRate = bitRate,
+        bitRateText = bitRate?.toReadableBitrate(),
+        videos = videoStreams.toVideoList(),
+        audios = audioStreams.toAudioList(),
+        subtitles = subtitleStreams.toSubtitleList()
+    )
+}

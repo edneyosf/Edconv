@@ -1,7 +1,7 @@
 package edneyosf.edconv.core.process
 
 import edneyosf.edconv.core.common.Error
-import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.feature.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType
 import java.io.File
 

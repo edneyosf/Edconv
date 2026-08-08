@@ -1,6 +1,6 @@
 package edneyosf.edconv.core.process
 
-import edneyosf.edconv.features.common.models.InputMedia
+import edneyosf.edconv.feature.common.models.InputMedia
 import edneyosf.edconv.ffmpeg.common.MediaType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
