@@ -14,6 +14,6 @@ inline fun <T> MutableState<T>.update(block: T.() -> T) { value = value.block() 
 @Deprecated("Use reduce instead", ReplaceWith("value = value.block()"))
 inline fun <T> MutableStateFlow<T>.update(block: T.() -> T) { value = value.block() }
 
-fun <State> MutableStateFlow<State>.mutate(mutation: Mutation<State>) {
-    update { currentState -> mutation.reduce(currentState) }
+inline fun <State> MutableStateFlow<State>.mutate(block: () -> Mutation<State>) {
+    update { block().reduce(state = it) }
 }
