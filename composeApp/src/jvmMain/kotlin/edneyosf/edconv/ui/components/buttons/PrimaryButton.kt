@@ -16,6 +16,7 @@ import edneyosf.edconv.ui.previews.LightPreview
 
 @Composable
 fun PrimaryButton(
+    modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     text: String,
     enabled: Boolean = true,
@@ -23,7 +24,7 @@ fun PrimaryButton(
     onClick: () -> Unit
 ) {
     Button(
-        modifier = Modifier.heightIn(dimens.xxl),
+        modifier = modifier.heightIn(dimens.xxl),
         shape = MaterialTheme.shapes.small,
         contentPadding = PaddingValues(horizontal = dimens.sm),
         enabled = enabled && !loading,
