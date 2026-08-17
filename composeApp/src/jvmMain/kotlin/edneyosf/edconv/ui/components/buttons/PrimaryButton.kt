@@ -2,6 +2,7 @@ package edneyosf.edconv.ui.components.buttons
 
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.*
@@ -11,8 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import edneyosf.edconv.ui.compositions.dimens
-import edneyosf.edconv.ui.previews.DarkPreview
-import edneyosf.edconv.ui.previews.LightPreview
+import edneyosf.edconv.ui.theme.AppTheme
 
 @Composable
 fun PrimaryButton(
@@ -54,24 +54,35 @@ fun PrimaryButton(
 }
 
 @Composable
-private fun DefaultPreview() {
-    Column(verticalArrangement = Arrangement.spacedBy(dimens.xs)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(dimens.xs)) {
-            PrimaryButton(text = "Sample", onClick = {})
-            PrimaryButton(icon = Icons.Rounded.CheckCircle, text = "Sample", onClick = {})
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(dimens.xs)) {
-            PrimaryButton(text = "Sample", enabled = false, onClick = {})
-            PrimaryButton(icon = Icons.Rounded.CheckCircle, text = "Sample", enabled = false, onClick = {})
-            PrimaryButton(icon = Icons.Rounded.CheckCircle, text = "Sample", loading = true, onClick = {})
+private fun DefaultPreview(darkTheme: Boolean) {
+    AppTheme(darkTheme = darkTheme) {
+        Surface {
+            Column(
+                Modifier.padding(all = dimens.md),
+                verticalArrangement = Arrangement.spacedBy(dimens.xs)
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.xs)) {
+                    PrimaryButton(text = "Sample", onClick = {})
+                    PrimaryButton(icon = Icons.Rounded.CheckCircle, text = "Sample", onClick = {})
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.xs)) {
+                    PrimaryButton(text = "Sample", enabled = false, onClick = {})
+                    PrimaryButton(icon = Icons.Rounded.CheckCircle, text = "Sample", enabled = false, onClick = {})
+                    PrimaryButton(icon = Icons.Rounded.CheckCircle, text = "Sample", loading = true, onClick = {})
+                }
+            }
         }
     }
 }
 
 @Preview
 @Composable
-private fun Light() = LightPreview { DefaultPreview() }
+private fun LightPreview() {
+    DefaultPreview(darkTheme = false)
+}
 
 @Preview
 @Composable
-private fun Dark() = DarkPreview { DefaultPreview() }
+private fun DarkPreview() {
+    DefaultPreview(darkTheme = true)
+}
