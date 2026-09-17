@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class Config(
     var ffmpegPath: String = "",
     var ffprobePath: String = "",
-    var vmafModelPath: String = ""
+    var vmafModelPath: String = "",
+    var darkTheme: Boolean = true
 )

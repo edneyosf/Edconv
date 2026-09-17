@@ -11,4 +11,8 @@ class EdConfig : ConfigManager(fileName = FILE_NAME) {
     var ffprobePath
         get() = config.ffprobePath
         set(value) = save { ffprobePath = value }
+
+    var darkTheme
+        get() = config.darkTheme
+        set(value) = save { darkTheme = value }
 }

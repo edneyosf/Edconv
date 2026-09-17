@@ -29,6 +29,7 @@ import edneyosf.edconv.ui.compositions.stringsComp
 import edneyosf.edconv.ui.theme.AppTheme
 import edneyosf.edconv.app.ClosingDialogStrings.Keys.TITLE_CLOSING_DIALOG
 import edneyosf.edconv.app.ClosingDialogStrings.Keys.DESCRIPTION_CLOSING_DIALOG
+import edneyosf.edconv.core.config.EdConfig
 import edneyosf.edconv.ui.compositions.fileKitDialogSettingsComp
 import edneyosf.edconv.ui.previews.EnglishDarkPreview
 import edneyosf.edconv.ui.previews.EnglishLightPreview
@@ -42,6 +43,7 @@ import java.awt.Dimension
 
 @Composable
 fun ApplicationScope.App() {
+    val config: EdConfig = koinInject()
     val process: EdProcess = koinInject()
     val language = Locale.current.getAvailableLanguage()
     var showClosingDialog by mutableStateOf(value = false)
@@ -55,12 +57,12 @@ fun ApplicationScope.App() {
         icon = painterResource(resource = Res.drawable.icon)
     ) {
         window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
-        setWindowTheme(window)
+        setWindowTheme(window, darkTheme = config.darkTheme)
         CompositionLocalProvider(
             languageComp provides language,
             fileKitDialogSettingsComp provides FileKitDialogSettings(parentWindow = window)
         ) {
-            AppTheme {
+            AppTheme(darkTheme = config.darkTheme) {
                 ClosingDialog(
                     show = showClosingDialog,
                     onDismiss = { showClosingDialog = false },
