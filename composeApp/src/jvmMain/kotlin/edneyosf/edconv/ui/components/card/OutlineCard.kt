@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import edneyosf.edconv.ui.compositions.dimens
 import edneyosf.edconv.ui.previews.DarkPreview
 import edneyosf.edconv.ui.previews.LightPreview
-import edneyosf.edconv.ui.theme.onSurfaceDark
 
 @Composable
 fun OutlineCard(
@@ -27,7 +26,7 @@ fun OutlineCard(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         border = BorderStroke(
             width = 1.dp,
-            color = onSurfaceDark.copy(alpha = 0.10f)
+            color = MaterialTheme.colorScheme.outline
         )
     ) {
         Column(
