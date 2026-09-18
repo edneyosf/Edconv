@@ -47,6 +47,7 @@ fun ApplicationScope.App() {
     val process: EdProcess = koinInject()
     val language = Locale.current.getAvailableLanguage()
     var showClosingDialog by mutableStateOf(value = false)
+    val darkTheme = config.darkTheme
 
     Window(
         title = AppConfigs.NAME,
@@ -57,12 +58,12 @@ fun ApplicationScope.App() {
         icon = painterResource(resource = Res.drawable.icon)
     ) {
         window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
-        setWindowTheme(window, darkTheme = config.darkTheme)
+        setWindowTheme(window, darkTheme)
         CompositionLocalProvider(
             languageComp provides language,
             fileKitDialogSettingsComp provides FileKitDialogSettings(parentWindow = window)
         ) {
-            AppTheme(darkTheme = config.darkTheme) {
+            AppTheme(darkTheme = darkTheme) {
                 ClosingDialog(
                     show = showClosingDialog,
                     onDismiss = { showClosingDialog = false },
