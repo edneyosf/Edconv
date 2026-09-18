@@ -1,5 +1,7 @@
 package edneyosf.edconv.core.config
 
+import androidx.compose.runtime.mutableStateOf
+
 private const val FILE_NAME = "config.json"
 
 class EdConfig : ConfigManager(fileName = FILE_NAME) {
@@ -12,7 +14,14 @@ class EdConfig : ConfigManager(fileName = FILE_NAME) {
         get() = config.ffprobePath
         set(value) = save { ffprobePath = value }
 
-    var darkTheme
-        get() = config.darkTheme
-        set(value) = save { darkTheme = value }
+    private var darkThemeState = mutableStateOf(value = true)
+    var darkTheme: Boolean
+        get() {
+            darkThemeState.value = config.darkTheme
+            return darkThemeState.value
+        }
+        set(value) {
+            darkThemeState.value = value
+            save { config.darkTheme = value }
+        }
 }
